@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Abrir {{ caixa.identificador }} - Caixa Digital{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'caixa:list' %}">Caixas</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'caixa:detail' caixa.pk %}">{{ caixa.identificador }}</a></li>
+        <li class="breadcrumb-item active">Abrir</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Abrir {{ caixa.identificador }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Info do Caixa -->
+                <div class="alert alert-light mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Caixa:</strong> {{ caixa.identificador }}
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Tipo:</strong> {{ caixa.get_tipo_display }}
+                        </div>
+                    </div>
+                </div>
+            
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_saldo_abertura" class="form-label">Saldo Inicial <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                {{ form.saldo_abertura }}
+                            </div>
+                            {% if form.saldo_abertura.errors %}
+                            <div class="invalid-feedback d-block">{{ form.saldo_abertura.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-text">Saldo em dinheiro no momento da abertura</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_fundo_troco" class="form-label">Fundo de Troco</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                {{ form.fundo_troco }}
+                            </div>
+                            <div class="form-text">Valor separado para troco (opcional)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="id_observacao" class="form-label">Observações</label>
+                        {{ form.observacao }}
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Atenção:</strong> A abertura será registrada com data/hora atual e vinculada ao seu usuário.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'caixa:detail' caixa.pk %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-lg me-1"></i>Abrir Caixa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

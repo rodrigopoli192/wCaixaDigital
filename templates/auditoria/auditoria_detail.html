@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Registro de Auditoria - Caixa Digital{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'auditoria:list' %}">Auditoria</a></li>
+        <li class="breadcrumb-item active">Registro #{{ registro.id }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-shield-check me-2"></i>Registro de Auditoria
+        {% if registro.hash_valido %}
+        <span class="badge bg-success">Íntegro</span>
+        {% else %}
+        <span class="badge bg-danger">Hash Inválido</span>
+        {% endif %}
+    </h2>
+</div>
+
+<div class="row g-4">
+    <!-- Informações Gerais -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-info-circle me-2"></i>Informações do Registro
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-4">Data/Hora</dt>
+                    <dd class="col-8">{{ registro.data_hora|date:"d/m/Y H:i:s" }}</dd>
+                    
+                    <dt class="col-4">Ação</dt>
+                    <dd class="col-8">
+                        {% if registro.acao == 'CREATE' %}
+                        <span class="badge bg-success">Criação</span>
+                        {% elif registro.acao == 'UPDATE' %}
+                        <span class="badge bg-warning text-dark">Alteração</span>
+                        {% elif registro.acao == 'DELETE' %}
+                        <span class="badge bg-danger">Exclusão</span>
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-4">Modelo</dt>
+                    <dd class="col-8"><code>{{ registro.modelo }}</code></dd>
+                    
+                    <dt class="col-4">ID do Objeto</dt>
+                    <dd class="col-8">{{ registro.objeto_id }}</dd>
+                    
+                    <dt class="col-4">Usuário</dt>
+                    <dd class="col-8">{{ registro.usuario.get_full_name|default:registro.usuario }}</dd>
+                    
+                    <dt class="col-4">IP</dt>
+                    <dd class="col-8"><code>{{ registro.ip_address }}</code></dd>
+                    
+                    <dt class="col-4">User Agent</dt>
+                    <dd class="col-8"><small class="text-muted">{{ registro.user_agent|truncatechars:50 }}</small></dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hash Chain -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-link-45deg me-2"></i>Cadeia de Hash
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-4">Hash Atual</dt>
+                    <dd class="col-8">
+                        <code class="small" style="word-break: break-all;">{{ registro.hash_registro }}</code>
+                    </dd>
+                    
+                    <dt class="col-4">Hash Anterior</dt>
+                    <dd class="col-8">
+                        {% if registro.hash_anterior %}
+                        <code class="small" style="word-break: break-all;">{{ registro.hash_anterior }}</code>
+                        {% else %}
+                        <span class="text-muted">Primeiro registro</span>
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-4">Verificação</dt>
+                    <dd class="col-8">
+                        {% if registro.hash_valido %}
+                        <i class="bi bi-check-circle text-success me-1"></i>Hash verificado com sucesso
+                        {% else %}
+                        <i class="bi bi-x-circle text-danger me-1"></i>Hash não confere - possível adulteração
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dados do Objeto -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-code-square me-2"></i>Dados do Objeto
+            </div>
+            <div class="card-body">
+                <pre class="bg-light p-3 rounded mb-0" style="max-height: 400px; overflow: auto;"><code>{{ registro.dados_json }}</code></pre>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alterações (se UPDATE) -->
+    {% if registro.acao == 'UPDATE' and registro.alteracoes %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-arrow-left-right me-2"></i>Alterações Realizadas
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Campo</th>
+                            <th>Valor Anterior</th>
+                            <th>Novo Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for campo, valores in registro.alteracoes.items %}
+                        <tr>
+                            <td><code>{{ campo }}</code></td>
+                            <td class="text-danger">{{ valores.antigo }}</td>
+                            <td class="text-success">{{ valores.novo }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Navegação -->
+<div class="d-flex justify-content-between mt-4">
+    <a href="{% url 'auditoria:list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Voltar
+    </a>
+    <div>
+        {% if registro_anterior %}
+        <a href="{% url 'auditoria:detail' registro_anterior.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-chevron-left"></i> Anterior
+        </a>
+        {% endif %}
+        {% if registro_proximo %}
+        <a href="{% url 'auditoria:detail' registro_proximo.pk %}" class="btn btn-outline-primary">
+            Próximo <i class="bi bi-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

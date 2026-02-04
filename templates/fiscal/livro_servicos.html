@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Livros Fiscais - Caixa Digital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-book me-2"></i>Livro de Serviços Prestados
+    </h2>
+    <div>
+        <a href="{% url 'fiscal:relatorio_iss' %}" class="btn btn-outline-info">
+            <i class="bi bi-bar-chart me-1"></i>Relatório ISS
+        </a>
+        <a href="{% url 'fiscal:export' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-download me-1"></i>Exportar
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Competência</label>
+                <input type="month" name="competencia" class="form-control" value="{{ request.GET.competencia }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="ABERTO" {% if request.GET.status == 'ABERTO' %}selected{% endif %}>Aberto</option>
+                    <option value="FECHADO" {% if request.GET.status == 'FECHADO' %}selected{% endif %}>Fechado</option>
+                    <option value="TRANSMITIDO" {% if request.GET.status == 'TRANSMITIDO' %}selected{% endif %}>Transmitido</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Ano</label>
+                <select name="ano" class="form-select">
+                    <option value="">Todos</option>
+                    {% for ano in anos_disponiveis %}
+                    <option value="{{ ano }}" {% if request.GET.ano == ano|stringformat:"s" %}selected{% endif %}>{{ ano }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-search me-1"></i>Filtrar
+                </button>
+                <a href="{% url 'fiscal:livros' %}" class="btn btn-outline-secondary">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Resumo do Período -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary bg-opacity-10 border-primary">
+            <div class="card-body text-center py-3">
+                <p class="text-primary mb-1 small">Total Serviços</p>
+                <h4 class="text-primary mb-0">R$ {{ totais.servicos|floatformat:2|default:"0,00" }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success bg-opacity-10 border-success">
+            <div class="card-body text-center py-3">
+                <p class="text-success mb-1 small">Base Cálculo</p>
+                <h4 class="text-success mb-0">R$ {{ totais.base_calculo|floatformat:2|default:"0,00" }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning bg-opacity-10 border-warning">
+            <div class="card-body text-center py-3">
+                <p class="text-warning mb-1 small">ISS Próprio</p>
+                <h4 class="text-warning mb-0">R$ {{ totais.iss_proprio|floatformat:2|default:"0,00" }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info bg-opacity-10 border-info">
+            <div class="card-body text-center py-3">
+                <p class="text-info mb-1 small">ISS Retido</p>
+                <h4 class="text-info mb-0">R$ {{ totais.iss_retido|floatformat:2|default:"0,00" }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela -->
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Competência</th>
+                    <th>NFS-e</th>
+                    <th>Tomador</th>
+                    <th>Serviço</th>
+                    <th class="text-end">Valor</th>
+                    <th class="text-end">Base Cálculo</th>
+                    <th class="text-end">ISS</th>
+                    <th>Retido</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for registro in registros %}
+                <tr>
+                    <td>{{ registro.competencia|date:"m/Y" }}</td>
+                    <td>
+                        <a href="{% url 'nfse:detail' registro.nota_fiscal.pk %}">
+                            {{ registro.nota_fiscal.numero_nfse|default:registro.nota_fiscal.numero_rps }}
+                        </a>
+                    </td>
+                    <td>{{ registro.nota_fiscal.cliente.razao_social|truncatechars:25 }}</td>
+                    <td><code>{{ registro.codigo_servico }}</code></td>
+                    <td class="text-end">R$ {{ registro.valor_servico|floatformat:2 }}</td>
+                    <td class="text-end">R$ {{ registro.base_calculo|floatformat:2 }}</td>
+                    <td class="text-end">R$ {{ registro.valor_iss|floatformat:2 }}</td>
+                    <td class="text-center">
+                        {% if registro.iss_retido %}
+                        <i class="bi bi-check-circle text-success"></i>
+                        {% else %}
+                        <i class="bi bi-dash text-muted"></i>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                        Nenhum registro fiscal encontrado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Paginação -->
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+        </li>
+        {% endif %}
+        <li class="page-item disabled">
+            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,10 @@
+# Include base requirements
+-r base.txt
+
+# Production server
+gunicorn>=22.0
+uvicorn[standard]>=0.30
+
+# Security
+django-csp>=3.8
+django-permissions-policy>=4.21

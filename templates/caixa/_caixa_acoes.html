@@ -1,0 +1,17 @@
+<div class="btn-group btn-group-sm" role="group">
+    {% if record.esta_aberto %}
+        <a href="{% url 'caixa:detail' record.pk %}" class="btn btn-outline-primary" title="Ver Detalhes">
+            <i class="bi bi-eye"></i>
+        </a>
+        <a href="{% url 'caixa:fechar' record.pk %}" class="btn btn-outline-danger" title="Fechar Caixa">
+            <i class="bi bi-x-circle"></i>
+        </a>
+    {% else %}
+        <a href="{% url 'caixa:detail' record.pk %}" class="btn btn-outline-primary" title="Ver Detalhes">
+            <i class="bi bi-eye"></i>
+        </a>
+        <a href="{% url 'caixa:abrir' record.pk %}" class="btn btn-outline-success" title="Abrir Caixa">
+            <i class="bi bi-play-circle"></i>
+        </a>
+    {% endif %}
+</div>

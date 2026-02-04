@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Novo Movimento - Caixa Digital{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'caixa:list' %}">Caixas</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'caixa:detail' abertura.caixa.pk %}">{{ abertura.caixa.identificador }}</a></li>
+        <li class="breadcrumb-item active">Novo Movimento</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-plus-circle me-2"></i>Novo Movimento
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_tipo" class="form-label">Tipo de Movimento</label>
+                            {{ form.tipo }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_forma_pagamento" class="form-label">Forma de Pagamento</label>
+                            {{ form.forma_pagamento }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_valor" class="form-label">Valor</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            {{ form.valor }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_descricao" class="form-label">Descrição</label>
+                        {{ form.descricao }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_cliente" class="form-label">Cliente (opcional)</label>
+                        {{ form.cliente }}
+                        <div class="form-text">Vincular a um tomador de serviço</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="id_observacoes" class="form-label">Observações</label>
+                        {{ form.observacoes }}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'caixa:detail' abertura.caixa.pk %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Registrar Movimento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

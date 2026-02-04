@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Fechamentos Pendentes - Caixa Digital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-exclamation-triangle me-2 text-warning"></i>Fechamentos Pendentes
+    </h2>
+</div>
+
+{% if fechamentos %}
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Caixa</th>
+                    <th>Operador</th>
+                    <th>Data Fechamento</th>
+                    <th class="text-end">Saldo Sistema</th>
+                    <th class="text-end">Saldo Informado</th>
+                    <th class="text-end">Diferença</th>
+                    <th class="text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in fechamentos %}
+                <tr>
+                    <td>
+                        <a href="{% url 'caixa:detail' f.abertura.caixa.pk %}">
+                            {{ f.abertura.caixa.identificador }}
+                        </a>
+                    </td>
+                    <td>{{ f.abertura.operador.get_full_name }}</td>
+                    <td>{{ f.data_fechamento|date:"d/m/Y H:i" }}</td>
+                    <td class="text-end">R$ {{ f.saldo_sistema|floatformat:2 }}</td>
+                    <td class="text-end">R$ {{ f.saldo_informado|floatformat:2 }}</td>
+                    <td class="text-end fw-bold {% if f.diferenca != 0 %}text-danger{% endif %}">
+                        R$ {{ f.diferenca|floatformat:2 }}
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-success" 
+                                data-bs-toggle="modal" data-bs-target="#aprovarModal{{ f.pk }}">
+                            <i class="bi bi-check-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger"
+                                data-bs-toggle="modal" data-bs-target="#rejeitarModal{{ f.pk }}">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-info"
+                                data-bs-toggle="modal" data-bs-target="#detalhesModal{{ f.pk }}">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <!-- Modal Aprovar -->
+                <div class="modal fade" id="aprovarModal{{ f.pk }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-success text-white">
+                                <h5 class="modal-title">Aprovar Fechamento</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="post" action="{% url 'caixa:aprovar_fechamento' f.pk %}">
+                                {% csrf_token %}
+                                <div class="modal-body">
+                                    <p>Confirma a aprovação do fechamento do caixa <strong>{{ f.abertura.caixa.identificador }}</strong>?</p>
+                                    {% if f.diferenca != 0 %}
+                                    <div class="alert alert-warning">
+                                        <strong>Atenção:</strong> Há uma diferença de R$ {{ f.diferenca|floatformat:2 }}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Justificativa da Aprovação</label>
+                                        <textarea name="justificativa" class="form-control" rows="3" required></textarea>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" name="acao" value="aprovar" class="btn btn-success">Aprovar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Rejeitar -->
+                <div class="modal fade" id="rejeitarModal{{ f.pk }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title">Rejeitar Fechamento</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form method="post" action="{% url 'caixa:aprovar_fechamento' f.pk %}">
+                                {% csrf_token %}
+                                <div class="modal-body">
+                                    <p>Rejeitar o fechamento do caixa <strong>{{ f.abertura.caixa.identificador }}</strong>?</p>
+                                    <div class="mb-3">
+                                        <label class="form-label">Motivo da Rejeição</label>
+                                        <textarea name="justificativa" class="form-control" rows="3" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" name="acao" value="rejeitar" class="btn btn-danger">Rejeitar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Detalhes -->
+                <div class="modal fade" id="detalhesModal{{ f.pk }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Detalhes do Fechamento</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Caixa</dt>
+                                    <dd class="col-sm-8">{{ f.abertura.caixa.identificador }}</dd>
+                                    
+                                    <dt class="col-sm-4">Operador</dt>
+                                    <dd class="col-sm-8">{{ f.abertura.operador.get_full_name }}</dd>
+                                    
+                                    <dt class="col-sm-4">Data Fechamento</dt>
+                                    <dd class="col-sm-8">{{ f.data_fechamento|date:"d/m/Y H:i" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Dinheiro</dt>
+                                    <dd class="col-sm-8">R$ {{ f.valor_dinheiro|floatformat:2 }}</dd>
+                                    
+                                    <dt class="col-sm-4">Cartão Débito</dt>
+                                    <dd class="col-sm-8">R$ {{ f.valor_cartao_debito|floatformat:2 }}</dd>
+                                    
+                                    <dt class="col-sm-4">Cartão Crédito</dt>
+                                    <dd class="col-sm-8">R$ {{ f.valor_cartao_credito|floatformat:2 }}</dd>
+                                    
+                                    <dt class="col-sm-4">PIX</dt>
+                                    <dd class="col-sm-8">R$ {{ f.valor_pix|floatformat:2 }}</dd>
+                                    
+                                    {% if f.justificativa_diferenca %}
+                                    <dt class="col-sm-4">Justificativa</dt>
+                                    <dd class="col-sm-8">{{ f.justificativa_diferenca }}</dd>
+                                    {% endif %}
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-check-circle text-success fs-1"></i>
+        <p class="text-muted mt-3 mb-0">Nenhum fechamento pendente de aprovação!</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

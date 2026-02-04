@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}{{ cliente.razao_social }} - Caixa Digital{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'clientes:list' %}">Clientes</a></li>
+        <li class="breadcrumb-item active">{{ cliente.razao_social|truncatechars:30 }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-person me-2"></i>{{ cliente.razao_social }}
+        {% if cliente.ativo %}
+        <span class="badge bg-success">Ativo</span>
+        {% else %}
+        <span class="badge bg-secondary">Inativo</span>
+        {% endif %}
+    </h2>
+    <div>
+        <a href="{% url 'clientes:update' cliente.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i>Editar
+        </a>
+        <a href="{% url 'nfse:create' %}?cliente={{ cliente.pk }}" class="btn btn-success">
+            <i class="bi bi-receipt me-1"></i>Emitir NFS-e
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Dados Cadastrais -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-person-badge me-2"></i>Dados Cadastrais
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-4">Tipo</dt>
+                    <dd class="col-8">
+                        {% if cliente.tipo_pessoa == 'PF' %}
+                        <span class="badge bg-info">Pessoa Física</span>
+                        {% elif cliente.tipo_pessoa == 'PJ' %}
+                        <span class="badge bg-primary">Pessoa Jurídica</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Estrangeiro</span>
+                        {% endif %}
+                    </dd>
+                    
+                    <dt class="col-4">{{ cliente.tipo_pessoa == 'PF' and 'CPF' or 'CNPJ' }}</dt>
+                    <dd class="col-8">{{ cliente.documento_formatado }}</dd>
+                    
+                    <dt class="col-4">Razão Social</dt>
+                    <dd class="col-8">{{ cliente.razao_social }}</dd>
+                    
+                    {% if cliente.nome_fantasia %}
+                    <dt class="col-4">Nome Fantasia</dt>
+                    <dd class="col-8">{{ cliente.nome_fantasia }}</dd>
+                    {% endif %}
+                    
+                    {% if cliente.inscricao_municipal %}
+                    <dt class="col-4">Insc. Municipal</dt>
+                    <dd class="col-8">{{ cliente.inscricao_municipal }}</dd>
+                    {% endif %}
+                    
+                    {% if cliente.inscricao_estadual %}
+                    <dt class="col-4">Insc. Estadual</dt>
+                    <dd class="col-8">{{ cliente.inscricao_estadual }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contato e Endereço -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-geo-alt me-2"></i>Contato e Endereço
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    {% if cliente.email %}
+                    <dt class="col-4">E-mail</dt>
+                    <dd class="col-8">
+                        <a href="mailto:{{ cliente.email }}">{{ cliente.email }}</a>
+                    </dd>
+                    {% endif %}
+                    
+                    {% if cliente.telefone %}
+                    <dt class="col-4">Telefone</dt>
+                    <dd class="col-8">{{ cliente.telefone }}</dd>
+                    {% endif %}
+                    
+                    {% if cliente.endereco_completo %}
+                    <dt class="col-4">Endereço</dt>
+                    <dd class="col-8">{{ cliente.endereco_completo }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LGPD -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-shield-check me-2"></i>LGPD / Consentimento
+            </div>
+            <div class="card-body">
+                {% if cliente.consentimento_lgpd %}
+                <div class="alert alert-success mb-0">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Consentimento LGPD registrado em {{ cliente.data_consentimento|date:"d/m/Y H:i" }}
+                </div>
+                {% else %}
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Cliente ainda não forneceu consentimento LGPD.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notas Fiscais do Cliente -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-receipt me-2"></i>Notas Fiscais</span>
+        <a href="{% url 'nfse:list' %}?cliente={{ cliente.pk }}" class="btn btn-sm btn-outline-primary">
+            Ver todas
+        </a>
+    </div>
+    <div class="card-body">
+        {% if notas_recentes %}
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Número</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th class="text-end">Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for nota in notas_recentes %}
+                <tr>
+                    <td>
+                        <a href="{% url 'nfse:detail' nota.pk %}">
+                            {{ nota.numero_nfse|default:nota.numero_rps }}
+                        </a>
+                    </td>
+                    <td>{{ nota.data_emissao|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if nota.status == 'AUTORIZADA' %}
+                        <span class="badge bg-success">Autorizada</span>
+                        {% elif nota.status == 'RASCUNHO' %}
+                        <span class="badge bg-secondary">Rascunho</span>
+                        {% elif nota.status == 'CANCELADA' %}
+                        <span class="badge bg-danger">Cancelada</span>
+                        {% else %}
+                        <span class="badge bg-info">{{ nota.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">R$ {{ nota.valor_servicos|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted text-center mb-0">Nenhuma nota fiscal emitida para este cliente.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

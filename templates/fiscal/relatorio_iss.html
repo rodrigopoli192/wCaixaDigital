@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório ISS - Caixa Digital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-bar-chart me-2"></i>Relatório de ISS
+    </h2>
+    <a href="{% url 'fiscal:livros' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Voltar
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Período Inicial</label>
+                <input type="month" name="periodo_inicio" class="form-control" value="{{ request.GET.periodo_inicio }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Período Final</label>
+                <input type="month" name="periodo_fim" class="form-control" value="{{ request.GET.periodo_fim }}">
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search me-1"></i>Gerar Relatório
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if dados %}
+<!-- Resumo Geral -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <p class="text-muted mb-1">Notas Emitidas</p>
+                <h3>{{ resumo.total_notas }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <p class="text-muted mb-1">Total Serviços</p>
+                <h3>R$ {{ resumo.total_servicos|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center bg-warning bg-opacity-10">
+            <div class="card-body">
+                <p class="text-warning mb-1">ISS a Recolher</p>
+                <h3 class="text-warning">R$ {{ resumo.iss_recolher|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center bg-info bg-opacity-10">
+            <div class="card-body">
+                <p class="text-info mb-1">ISS Retido</p>
+                <h3 class="text-info">R$ {{ resumo.iss_retido|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ISS por Alíquota -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-percent me-2"></i>ISS por Alíquota
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Alíquota</th>
+                    <th class="text-end">Qtd Notas</th>
+                    <th class="text-end">Base Cálculo</th>
+                    <th class="text-end">ISS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in dados.por_aliquota %}
+                <tr>
+                    <td>{{ item.aliquota|floatformat:2 }}%</td>
+                    <td class="text-end">{{ item.quantidade }}</td>
+                    <td class="text-end">R$ {{ item.base_calculo|floatformat:2 }}</td>
+                    <td class="text-end">R$ {{ item.iss|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ISS por Mês -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-calendar3 me-2"></i>ISS por Competência
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Competência</th>
+                    <th class="text-end">Qtd Notas</th>
+                    <th class="text-end">Valor Serviços</th>
+                    <th class="text-end">ISS Próprio</th>
+                    <th class="text-end">ISS Retido</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in dados.por_mes %}
+                <tr>
+                    <td>{{ item.competencia|date:"m/Y" }}</td>
+                    <td class="text-end">{{ item.quantidade }}</td>
+                    <td class="text-end">R$ {{ item.servicos|floatformat:2 }}</td>
+                    <td class="text-end text-warning">R$ {{ item.iss_proprio|floatformat:2 }}</td>
+                    <td class="text-end text-info">R$ {{ item.iss_retido|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot class="table-light fw-bold">
+                <tr>
+                    <td>TOTAL</td>
+                    <td class="text-end">{{ resumo.total_notas }}</td>
+                    <td class="text-end">R$ {{ resumo.total_servicos|floatformat:2 }}</td>
+                    <td class="text-end text-warning">R$ {{ resumo.iss_recolher|floatformat:2 }}</td>
+                    <td class="text-end text-info">R$ {{ resumo.iss_retido|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-bar-chart fs-1 text-muted"></i>
+        <p class="text-muted mt-3">Selecione o período para gerar o relatório de ISS.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

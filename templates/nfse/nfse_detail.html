@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}NFS-e {{ nota.numero_nfse|default:nota.numero_rps }} - Caixa Digital{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'nfse:list' %}">NFS-e</a></li>
+        <li class="breadcrumb-item active">{{ nota.numero_nfse|default:nota.numero_rps }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-receipt me-2"></i>
+        {% if nota.numero_nfse %}NFS-e {{ nota.numero_nfse }}{% else %}RPS {{ nota.numero_rps }}{% endif %}
+        {% if nota.status == 'AUTORIZADA' %}
+        <span class="badge bg-success">Autorizada</span>
+        {% elif nota.status == 'RASCUNHO' %}
+        <span class="badge bg-secondary">Rascunho</span>
+        {% elif nota.status == 'CANCELADA' %}
+        <span class="badge bg-danger">Cancelada</span>
+        {% else %}
+        <span class="badge bg-info">{{ nota.get_status_display }}</span>
+        {% endif %}
+    </h2>
+    <div>
+        {% if nota.status == 'RASCUNHO' %}
+        <a href="{% url 'nfse:update' nota.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i>Editar
+        </a>
+        <form method="post" action="{% url 'nfse:enviar' nota.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-send me-1"></i>Enviar para Prefeitura
+            </button>
+        </form>
+        {% elif nota.status == 'AUTORIZADA' and nota.pode_cancelar %}
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelarModal">
+            <i class="bi bi-x-circle me-1"></i>Cancelar Nota
+        </button>
+        {% endif %}
+        {% if nota.xml_nfse or nota.xml_rps %}
+        <a href="{% url 'nfse:xml' nota.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-file-code me-1"></i>Download XML
+        </a>
+        {% endif %}
+        {% if nota.pdf_url %}
+        <a href="{{ nota.pdf_url }}" target="_blank" class="btn btn-outline-info">
+            <i class="bi bi-file-pdf me-1"></i>PDF
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Dados da Nota -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-file-text me-2"></i>Dados da Nota
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-5">Número RPS</dt>
+                    <dd class="col-7">{{ nota.numero_rps }} / {{ nota.serie_rps }}</dd>
+                    
+                    {% if nota.numero_nfse %}
+                    <dt class="col-5">Número NFS-e</dt>
+                    <dd class="col-7">{{ nota.numero_nfse }}</dd>
+                    {% endif %}
+                    
+                    {% if nota.codigo_verificacao %}
+                    <dt class="col-5">Cód. Verificação</dt>
+                    <dd class="col-7"><code>{{ nota.codigo_verificacao }}</code></dd>
+                    {% endif %}
+                    
+                    <dt class="col-5">Data Emissão</dt>
+                    <dd class="col-7">{{ nota.data_emissao|date:"d/m/Y" }}</dd>
+                    
+                    <dt class="col-5">Competência</dt>
+                    <dd class="col-7">{{ nota.competencia|date:"m/Y" }}</dd>
+                    
+                    <dt class="col-5">Local Prestação</dt>
+                    <dd class="col-7">{{ nota.local_prestacao_ibge }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tomador -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-person me-2"></i>Tomador do Serviço
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-5">Nome/Razão</dt>
+                    <dd class="col-7">
+                        <a href="{% url 'clientes:detail' nota.cliente.pk %}">{{ nota.cliente.razao_social }}</a>
+                    </dd>
+                    
+                    <dt class="col-5">CPF/CNPJ</dt>
+                    <dd class="col-7">{{ nota.cliente.documento_formatado }}</dd>
+                    
+                    {% if nota.cliente.email %}
+                    <dt class="col-5">E-mail</dt>
+                    <dd class="col-7">{{ nota.cliente.email }}</dd>
+                    {% endif %}
+                    
+                    {% if nota.cliente.endereco_completo %}
+                    <dt class="col-5">Endereço</dt>
+                    <dd class="col-7">{{ nota.cliente.endereco_completo }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Serviço -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-briefcase me-2"></i>Serviço Prestado
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <strong>Código LC 116:</strong> {{ nota.servico.codigo_lc116 }}
+                    </div>
+                    <div class="col-md-9">
+                        <strong>Descrição:</strong> {{ nota.servico.descricao }}
+                    </div>
+                </div>
+                <div class="border rounded p-3 bg-light">
+                    <strong>Discriminação:</strong><br>
+                    {{ nota.discriminacao|linebreaks }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Valores -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-currency-dollar me-2"></i>Valores
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-2">
+                        <p class="text-muted mb-1 small">Valor Serviços</p>
+                        <h5>R$ {{ nota.valor_servicos|floatformat:2 }}</h5>
+                    </div>
+                    <div class="col-md-2">
+                        <p class="text-muted mb-1 small">(-) Deduções</p>
+                        <h5 class="text-danger">R$ {{ nota.valor_deducoes|floatformat:2 }}</h5>
+                    </div>
+                    <div class="col-md-2">
+                        <p class="text-muted mb-1 small">Base Cálculo</p>
+                        <h5>R$ {{ nota.base_calculo|floatformat:2 }}</h5>
+                    </div>
+                    <div class="col-md-2">
+                        <p class="text-muted mb-1 small">ISS ({{ nota.aliquota_iss|floatformat:2 }}%)</p>
+                        <h5>R$ {{ nota.valor_iss|floatformat:2 }}</h5>
+                    </div>
+                    <div class="col-md-2">
+                        <p class="text-muted mb-1 small">ISS Retido</p>
+                        <h5>{% if nota.iss_retido %}Sim{% else %}Não{% endif %}</h5>
+                    </div>
+                    <div class="col-md-2">
+                        <p class="text-muted mb-1 small">Valor Líquido</p>
+                        <h4 class="text-success fw-bold">R$ {{ nota.valor_liquido|floatformat:2 }}</h4>
+                    </div>
+                </div>
+                
+                {% if nota.valor_pis or nota.valor_cofins or nota.valor_inss %}
+                <hr>
+                <div class="row text-center">
+                    <div class="col"><small class="text-muted">PIS: R$ {{ nota.valor_pis|floatformat:2 }}</small></div>
+                    <div class="col"><small class="text-muted">COFINS: R$ {{ nota.valor_cofins|floatformat:2 }}</small></div>
+                    <div class="col"><small class="text-muted">INSS: R$ {{ nota.valor_inss|floatformat:2 }}</small></div>
+                    <div class="col"><small class="text-muted">IR: R$ {{ nota.valor_ir|floatformat:2 }}</small></div>
+                    <div class="col"><small class="text-muted">CSLL: R$ {{ nota.valor_csll|floatformat:2 }}</small></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Eventos -->
+{% if eventos %}
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="bi bi-clock-history me-2"></i>Histórico de Eventos
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Evento</th>
+                    <th>Protocolo</th>
+                    <th>Mensagem</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for evento in eventos %}
+                <tr>
+                    <td>{{ evento.data_hora|date:"d/m/Y H:i:s" }}</td>
+                    <td>{{ evento.get_tipo_display }}</td>
+                    <td>{{ evento.protocolo|default:"-" }}</td>
+                    <td>{{ evento.mensagem|truncatechars:50 }}</td>
+                    <td>
+                        {% if evento.sucesso %}
+                        <span class="badge bg-success">OK</span>
+                        {% else %}
+                        <span class="badge bg-danger">Erro</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Modal Cancelamento -->
+{% if nota.pode_cancelar %}
+<div class="modal fade" id="cancelarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Cancelar NFS-e</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'nfse:cancelar' nota.pk %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Esta ação não pode ser desfeita!
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Motivo do Cancelamento</label>
+                        <textarea name="motivo" class="form-control" rows="3" required
+                                  placeholder="Descreva o motivo do cancelamento..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+                    <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

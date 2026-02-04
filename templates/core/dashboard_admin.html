@@ -1,0 +1,228 @@
+{% extends "base_dark.html" %}
+{% load static %}
+
+{% block content %}
+<div class="p-8 max-w-7xl mx-auto w-full space-y-6">
+    <!-- Header Section -->
+    <div class="flex items-end justify-between">
+        <div>
+            <h3 class="text-2xl font-bold tracking-tight">Resumo de Operações Diárias</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Dados atualizados em tempo real: {{ hoje|date:"d \d\e F, Y" }}</p>
+        </div>
+        <div class="flex gap-2">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
+                <span class="size-1.5 rounded-full bg-success mr-2 animate-pulse"></span>
+                Sistemas Online
+            </span>
+        </div>
+    </div>
+
+    <!-- KPIs Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Vendas -->
+        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+            <div class="flex justify-between items-start">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total de Vendas</p>
+                <span class="material-symbols-outlined text-primary">payments</span>
+            </div>
+            <p class="text-3xl font-bold mt-2">R$ {{ vendas_hoje|floatformat:2 }}</p>
+            <div class="flex items-center gap-1 mt-3 text-success">
+                <span class="material-symbols-outlined text-sm">trending_up</span>
+                <span class="text-sm font-semibold">+12.5%</span>
+                <span class="text-xs text-slate-400 font-normal ml-1">vs ontem</span>
+            </div>
+        </div>
+
+        <!-- NFS-e Pendentes -->
+        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+            <div class="flex justify-between items-start">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">NFS-e Pendentes</p>
+                <span class="material-symbols-outlined text-warning">pending_actions</span>
+            </div>
+            <p class="text-3xl font-bold mt-2">{{ nfses_pendentes }} Notas</p>
+            <div class="flex items-center gap-1 mt-3 text-warning">
+                <span class="material-symbols-outlined text-sm">priority_high</span>
+                <span class="text-sm font-semibold">Aguardando</span>
+                <span class="text-xs text-slate-400 font-normal ml-1">Processamento Sefaz</span>
+            </div>
+        </div>
+
+        <!-- Retenções -->
+        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+            <div class="flex justify-between items-start">
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Retenções de Impostos</p>
+                <span class="material-symbols-outlined text-slate-400">account_balance</span>
+            </div>
+            <p class="text-3xl font-bold mt-2">R$ {{ retencoes_mes|floatformat:2 }}</p>
+            <div class="flex items-center gap-1 mt-3 text-success">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                <span class="text-sm font-semibold">+5.2%</span>
+                <span class="text-xs text-slate-400 font-normal ml-1">Alíquota média estável</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex flex-col gap-6">
+        <!-- Movimentações de Caixa -->
+        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm flex flex-col w-full">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h4 class="font-bold text-lg">Últimas Movimentações de Caixa</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Atividades recentes em todos os terminais</p>
+                </div>
+                <a href="{% url 'caixa:list' %}" class="text-primary text-xs font-bold hover:underline">Ver todas</a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <th class="px-4 py-3">Caixa/Operador</th>
+                            <th class="px-4 py-3">Tipo</th>
+                            <th class="px-4 py-3">Data/Hora</th>
+                            <th class="px-4 py-3 text-right">Valor (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                        {% for mov in ultimas_movimentacoes %}
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                            <td class="px-4 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-8 rounded bg-slate-100 dark:bg-background-dark flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-sm text-slate-500">laptop_mac</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold">{{ mov.abertura.caixa.identificador }}</p>
+                                        <p class="text-[10px] text-slate-500">{{ mov.abertura.operador.first_name|default:mov.abertura.operador.email }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4">
+                                {% if mov.tipo == 'ENTRADA' %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Venda</span>
+                                {% elif mov.tipo == 'SAIDA' %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">Sangria</span>
+                                {% else %}
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">{{ mov.get_tipo_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-4 text-sm text-slate-500">{{ mov.data_hora|date:"d/m - H:i" }}</td>
+                            <td class="px-4 py-4 text-sm font-bold text-right {% if mov.tipo == 'SAIDA' %}text-danger{% else %}{% if mov.tipo == 'SUPRIMENTO' %}text-primary{% endif %}{% endif %}">
+                                {% if mov.tipo == 'SAIDA' %}- {% endif %}R$ {{ mov.valor|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-4 py-8 text-center text-sm text-slate-500">Nenhuma movimentação recente.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- NFS-e Emitidas -->
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden w-full">
+            <div class="p-6 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
+                <h4 class="font-bold text-lg">Últimas NFS-e Emitidas</h4>
+                <a href="{% url 'nfse:list' %}" class="text-primary text-sm font-bold flex items-center gap-1">
+                    Ver todas <span class="material-symbols-outlined text-sm">chevron_right</span>
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <th class="px-6 py-4">Número / Série</th>
+                            <th class="px-6 py-4">Cliente / CNPJ</th>
+                            <th class="px-6 py-4">Data Emissão</th>
+                            <th class="px-6 py-4">Valor Total</th>
+                            <th class="px-6 py-4">Status Compliance</th>
+                            <th class="px-6 py-4 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                        {% for nfse in ultimas_nfses %}
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                            <td class="px-6 py-4">
+                                <span class="text-sm font-bold">{{ nfse.numero_nfse|default:nfse.numero_rps }}</span>
+                                <p class="text-[10px] text-slate-500 uppercase">Série {{ nfse.serie_rps }}</p>
+                            </td>
+                            <td class="px-6 py-4 text-sm font-medium">
+                                {{ nfse.cliente.razao_social|truncatechars:30 }}
+                                <p class="text-[10px] text-slate-500">{{ nfse.cliente.cpf_cnpj }}</p>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-slate-500">{{ nfse.data_emissao|date:"d/m/Y" }} {{ nfse.created_at|date:"H:i" }}</td>
+                            <td class="px-6 py-4 text-sm font-bold">R$ {{ nfse.valor_total|floatformat:2 }}</td>
+                            <td class="px-6 py-4">
+                                {% if nfse.status == 'AUTORIZADA' %}
+                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Autorizada</span>
+                                {% elif nfse.status == 'PROCESSANDO' or nfse.status == 'ENVIANDO' %}
+                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">Processando</span>
+                                {% elif nfse.status == 'REJEITADA' or nfse.status == 'CANCELADA' %}
+                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">{{ nfse.get_status_display }}</span>
+                                {% else %}
+                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">{{ nfse.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <button class="material-symbols-outlined text-slate-400 hover:text-primary">more_vert</button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-8 text-center text-sm text-slate-500">Nenhuma NFS-e emitida recentemente.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Alertas de Compliance -->
+        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm flex flex-col w-full">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-warning">warning</span>
+                    <h4 class="font-bold text-lg">Alertas de Compliance</h4>
+                </div>
+                <button class="text-primary text-xs font-bold hover:underline">Ver todo o Histórico</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {% for alerta in alertas %}
+                <div class="p-4 rounded-lg border-l-4 space-y-1
+                    {% if alerta.tipo == 'warning' %}border-warning bg-warning/5{% endif %}
+                    {% if alerta.tipo == 'danger' %}border-danger bg-danger/5{% endif %}
+                    {% if alerta.tipo == 'info' %}border-primary bg-primary/5{% endif %}">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase
+                            {% if alerta.tipo == 'warning' %}text-warning{% endif %}
+                            {% if alerta.tipo == 'danger' %}text-danger{% endif %}
+                            {% if alerta.tipo == 'info' %}text-primary{% endif %}">
+                            {{ alerta.titulo }}
+                        </span>
+                        <span class="text-[10px] text-slate-400">Hoje</span>
+                    </div>
+                    <p class="text-sm font-medium">{{ alerta.mensagem }}</p>
+                    <button class="text-xs font-bold underline mt-1
+                        {% if alerta.tipo == 'warning' %}text-warning{% endif %}
+                        {% if alerta.tipo == 'danger' %}text-danger{% endif %}
+                        {% if alerta.tipo == 'info' %}text-primary{% endif %}">
+                        Verificar
+                    </button>
+                </div>
+                {% empty %}
+                <div class="p-4 rounded-lg border-l-4 border-success bg-success/5 space-y-1 col-span-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-success uppercase">Sistema OK</span>
+                        <span class="material-symbols-outlined text-sm text-success">check_circle</span>
+                    </div>
+                    <p class="text-sm font-medium text-slate-300">Nenhum alerta de compliance pendente.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

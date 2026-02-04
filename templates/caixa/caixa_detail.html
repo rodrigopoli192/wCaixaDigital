@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Caixa {{ caixa.identificador }} - Caixa Digital{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'caixa:list' %}">Caixas</a></li>
+        <li class="breadcrumb-item active">{{ caixa.identificador }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-wallet2 me-2"></i>{{ caixa.identificador }}
+        {% if caixa.status == 'ABERTO' %}
+        <span class="badge bg-success">Aberto</span>
+        {% else %}
+        <span class="badge bg-secondary">Fechado</span>
+        {% endif %}
+    </h2>
+    <div>
+        {% if caixa.status == 'FECHADO' %}
+        <a href="{% url 'caixa:abrir' caixa.pk %}" class="btn btn-success">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Abrir
+        </a>
+        {% elif abertura_atual %}
+        <a href="{% url 'caixa:novo_movimento' abertura_atual.pk %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Novo Movimento
+        </a>
+        <a href="{% url 'caixa:fechar' caixa.pk %}" class="btn btn-warning">
+            <i class="bi bi-box-arrow-right me-1"></i>Fechar
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Info Card -->
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-info-circle me-2"></i>Informações
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-5">Tipo</dt>
+                    <dd class="col-7">{{ caixa.get_tipo_display }}</dd>
+                    
+                    <dt class="col-5">Status</dt>
+                    <dd class="col-7">{{ caixa.get_status_display }}</dd>
+                    
+                    <dt class="col-5">Saldo Atual</dt>
+                    <dd class="col-7 fw-bold text-primary">R$ {{ caixa.saldo_atual|floatformat:2 }}</dd>
+                    
+                    {% if caixa.operador_atual %}
+                    <dt class="col-5">Operador</dt>
+                    <dd class="col-7">{{ caixa.operador_atual.get_full_name }}</dd>
+                    {% endif %}
+                    
+                    <dt class="col-5">Criado em</dt>
+                    <dd class="col-7">{{ caixa.created_at|date:"d/m/Y H:i" }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Abertura Atual -->
+    <div class="col-lg-8">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-clock-history me-2"></i>Abertura Atual</span>
+                {% if abertura_atual %}
+                <a href="{% url 'caixa:lista_movimentos' abertura_atual.pk %}" class="btn btn-sm btn-outline-primary">
+                    Ver Movimentos
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if abertura_atual %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Aberto em:</strong> {{ abertura_atual.data_hora|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Saldo Inicial:</strong> R$ {{ abertura_atual.saldo_abertura|floatformat:2 }}</p>
+                        <p><strong>Fundo de Troco:</strong> R$ {{ abertura_atual.fundo_troco|floatformat:2 }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Total Entradas:</strong> <span class="text-success">R$ {{ abertura_atual.saldo_movimentos|floatformat:2 }}</span></p>
+                        <p><strong>Saldo Atual:</strong> <span class="fw-bold text-primary">R$ {{ abertura_atual.saldo_movimentos|floatformat:2 }}</span></p>
+                    </div>
+                </div>
+                {% if abertura_atual.observacao %}
+                <div class="alert alert-light mt-3 mb-0">
+                    <strong>Observações:</strong> {{ abertura_atual.observacao }}
+                </div>
+                {% endif %}
+                {% else %}
+                <p class="text-muted text-center mb-0">Caixa fechado. Nenhuma abertura ativa.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimos Movimentos -->
+{% if ultimos_movimentos %}
+<div class="card mt-4">
+    <div class="card-header">
+        <i class="bi bi-arrow-left-right me-2"></i>Últimos Movimentos
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Tipo</th>
+                    <th>Descrição</th>
+                    <th>Forma Pagto</th>
+                    <th class="text-end">Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mov in ultimos_movimentos %}
+                <tr>
+                    <td>{{ mov.data_movimento|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        {% if mov.tipo == 'ENTRADA' %}
+                        <span class="badge bg-success">Entrada</span>
+                        {% elif mov.tipo == 'SAIDA' %}
+                        <span class="badge bg-danger">Saída</span>
+                        {% elif mov.tipo == 'SANGRIA' %}
+                        <span class="badge bg-warning text-dark">Sangria</span>
+                        {% else %}
+                        <span class="badge bg-info">{{ mov.get_tipo_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ mov.descricao|truncatechars:50 }}</td>
+                    <td>{{ mov.forma_pagamento.nome }}</td>
+                    <td class="text-end fw-bold {% if mov.tipo == 'SAIDA' or mov.tipo == 'SANGRIA' %}text-danger{% else %}text-success{% endif %}">
+                        R$ {{ mov.valor|floatformat:2 }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

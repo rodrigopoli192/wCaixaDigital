@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Cliente - Caixa Digital{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'clientes:list' %}">Clientes</a></li>
+        <li class="breadcrumb-item active">{% if object %}Editar{% else %}Novo Cliente{% endif %}</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-person-{% if object %}gear{% else %}plus{% endif %} me-2"></i>
+                    {% if object %}Editar Cliente{% else %}Novo Cliente{% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Identificação -->
+                    <fieldset class="mb-4">
+                        <legend class="h6 text-muted border-bottom pb-2">
+                            <i class="bi bi-person-badge me-2"></i>Identificação
+                        </legend>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="id_tipo_pessoa" class="form-label">Tipo de Pessoa</label>
+                                {{ form.tipo_pessoa }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="id_cpf_cnpj" class="form-label">CPF/CNPJ</label>
+                                {{ form.cpf_cnpj }}
+                                {% if form.cpf_cnpj.errors %}
+                                <div class="invalid-feedback d-block">{{ form.cpf_cnpj.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-5 mb-3">
+                                <label for="id_inscricao_municipal" class="form-label">Inscrição Municipal</label>
+                                {{ form.inscricao_municipal }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_razao_social" class="form-label">Razão Social / Nome</label>
+                                {{ form.razao_social }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_nome_fantasia" class="form-label">Nome Fantasia</label>
+                                {{ form.nome_fantasia }}
+                            </div>
+                        </div>
+                    </fieldset>
+                    
+                    <!-- Contato -->
+                    <fieldset class="mb-4">
+                        <legend class="h6 text-muted border-bottom pb-2">
+                            <i class="bi bi-telephone me-2"></i>Contato
+                        </legend>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_email" class="form-label">E-mail</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_telefone" class="form-label">Telefone</label>
+                                {{ form.telefone }}
+                            </div>
+                        </div>
+                    </fieldset>
+                    
+                    <!-- Endereço -->
+                    <fieldset class="mb-4">
+                        <legend class="h6 text-muted border-bottom pb-2">
+                            <i class="bi bi-geo-alt me-2"></i>Endereço
+                        </legend>
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="id_logradouro" class="form-label">Logradouro</label>
+                                {{ form.logradouro }}
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="id_numero" class="form-label">Número</label>
+                                {{ form.numero }}
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="id_complemento" class="form-label">Complemento</label>
+                                {{ form.complemento }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="id_bairro" class="form-label">Bairro</label>
+                                {{ form.bairro }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="id_cidade" class="form-label">Cidade</label>
+                                {{ form.cidade }}
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="id_uf" class="form-label">UF</label>
+                                {{ form.uf }}
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label for="id_cep" class="form-label">CEP</label>
+                                {{ form.cep }}
+                            </div>
+                        </div>
+                    </fieldset>
+                    
+                    <!-- Status -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.consentimento_lgpd }}
+                                <label class="form-check-label" for="id_consentimento_lgpd">
+                                    Cliente autorizou uso dos dados (LGPD)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.ativo }}
+                                <label class="form-check-label" for="id_ativo">
+                                    Cliente ativo
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'clientes:list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Salvar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

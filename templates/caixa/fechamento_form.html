@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Fechar Caixa - Caixa Digital{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'caixa:list' %}">Caixas</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'caixa:detail' abertura.caixa.pk %}">{{ abertura.caixa.identificador }}</a></li>
+        <li class="breadcrumb-item active">Fechar</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Resumo do Caixa -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Resumo do Caixa</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <p class="text-muted mb-1">Saldo Inicial</p>
+                        <h4>R$ {{ abertura.saldo_inicial|floatformat:2 }}</h4>
+                    </div>
+                    <div class="col-md-3">
+                        <p class="text-muted mb-1">Total Entradas</p>
+                        <h4 class="text-success">+ R$ {{ abertura.total_entradas|floatformat:2 }}</h4>
+                    </div>
+                    <div class="col-md-3">
+                        <p class="text-muted mb-1">Total Saídas</p>
+                        <h4 class="text-danger">- R$ {{ abertura.total_saidas|floatformat:2 }}</h4>
+                    </div>
+                    <div class="col-md-3">
+                        <p class="text-muted mb-1">Saldo Sistema</p>
+                        <h4 class="text-primary fw-bold">R$ {{ abertura.saldo_calculado|floatformat:2 }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formulário -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">
+                    <i class="bi bi-box-arrow-right me-2"></i>Fechar Caixa - {{ abertura.caixa.identificador }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_valor_dinheiro" class="form-label">Valor em Dinheiro</label>
+                            {{ form.valor_dinheiro }}
+                            <div class="form-text">Contagem física do dinheiro</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_valor_cartao_debito" class="form-label">Cartão Débito</label>
+                            {{ form.valor_cartao_debito }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_valor_cartao_credito" class="form-label">Cartão Crédito</label>
+                            {{ form.valor_cartao_credito }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_valor_pix" class="form-label">PIX</label>
+                            {{ form.valor_pix }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_valor_outros" class="form-label">Outros</label>
+                            {{ form.valor_outros }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_saldo_informado" class="form-label">Total Informado</label>
+                            <input type="text" id="total_informado" class="form-control fw-bold" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_justificativa_diferenca" class="form-label">Justificativa (se houver diferença)</label>
+                        {{ form.justificativa_diferenca }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="id_observacoes" class="form-label">Observações</label>
+                        {{ form.observacoes }}
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Atenção:</strong> O fechamento será enviado para aprovação caso haja diferença entre o saldo do sistema e o informado.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'caixa:detail' abertura.caixa.pk %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-check-lg me-1"></i>Fechar Caixa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const campos = ['id_valor_dinheiro', 'id_valor_cartao_debito', 'id_valor_cartao_credito', 'id_valor_pix', 'id_valor_outros'];
+    
+    function calcularTotal() {
+        let total = 0;
+        campos.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.value) {
+                total += parseFloat(el.value.replace(',', '.')) || 0;
+            }
+        });
+        document.getElementById('total_informado').value = 'R$ ' + total.toFixed(2).replace('.', ',');
+    }
+    
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', calcularTotal);
+    });
+    
+    calcularTotal();
+});
+</script>
+{% endblock %}

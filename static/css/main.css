@@ -1,0 +1,140 @@
+:root {
+    --primary-color: #3b82f6;
+    --primary-dark: #2563eb;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --info-color: #06b6d4;
+}
+
+/* Navbar enhancements */
+.navbar-brand {
+    letter-spacing: -0.5px;
+}
+
+/* Card hover effects */
+.card {
+    transition: box-shadow 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+}
+
+/* Table improvements */
+.table {
+    margin-bottom: 0;
+}
+
+.table > thead {
+    background-color: #f8fafc;
+}
+
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    border-bottom-width: 1px;
+}
+
+/* Status badges */
+.badge-status-aberto {
+    background-color: var(--success-color);
+}
+
+.badge-status-fechado {
+    background-color: #94a3b8;
+}
+
+.badge-status-pendente {
+    background-color: var(--warning-color);
+}
+
+.badge-status-autorizada {
+    background-color: var(--success-color);
+}
+
+.badge-status-rejeitada {
+    background-color: var(--danger-color);
+}
+
+/* Form improvements */
+.form-label {
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+
+/* Quick action buttons */
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading states */
+.htmx-request .htmx-indicator {
+    display: inline-block;
+}
+
+.htmx-indicator {
+    display: none;
+}
+
+/* Alert improvements */
+.alert {
+    border-radius: 0.5rem;
+    border: none;
+}
+
+/* KPI cards in dashboard */
+.card .card-footer a {
+    text-decoration: none;
+}
+
+.card .card-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Min height helper */
+.min-vh-75 {
+    min-height: 75vh;
+}
+
+/* Currency formatting */
+.currency::before {
+    content: 'R$ ';
+}
+
+/* Print styles */
+@media print {
+    .navbar,
+    .btn,
+    footer {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+    }
+}

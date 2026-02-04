@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Auditoria - Caixa Digital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-shield-check me-2"></i>Trilha de Auditoria
+    </h2>
+    <div>
+        <a href="{% url 'auditoria:verificar' %}" class="btn btn-outline-success">
+            <i class="bi bi-check-circle me-1"></i>Verificar Integridade
+        </a>
+        <a href="{% url 'auditoria:export' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-download me-1"></i>Exportar
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label">Ação</label>
+                <select name="acao" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="CREATE" {% if request.GET.acao == 'CREATE' %}selected{% endif %}>Criação</option>
+                    <option value="UPDATE" {% if request.GET.acao == 'UPDATE' %}selected{% endif %}>Alteração</option>
+                    <option value="DELETE" {% if request.GET.acao == 'DELETE' %}selected{% endif %}>Exclusão</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Modelo</label>
+                <select name="modelo" class="form-select">
+                    <option value="">Todos</option>
+                    {% for modelo in modelos_disponiveis %}
+                    <option value="{{ modelo }}" {% if request.GET.modelo == modelo %}selected{% endif %}>{{ modelo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Usuário</label>
+                <input type="text" name="usuario" class="form-control" 
+                       value="{{ request.GET.usuario }}" placeholder="Nome ou e-mail">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Data</label>
+                <input type="date" name="data" class="form-control" value="{{ request.GET.data }}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-search"></i>
+                </button>
+                <a href="{% url 'auditoria:list' %}" class="btn btn-outline-secondary">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabela -->
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Ação</th>
+                    <th>Modelo</th>
+                    <th>Objeto</th>
+                    <th>Usuário</th>
+                    <th>IP</th>
+                    <th class="text-center">Íntegro</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for registro in registros %}
+                <tr>
+                    <td class="text-nowrap">{{ registro.data_hora|date:"d/m/Y H:i:s" }}</td>
+                    <td>
+                        {% if registro.acao == 'CREATE' %}
+                        <span class="badge bg-success">Criação</span>
+                        {% elif registro.acao == 'UPDATE' %}
+                        <span class="badge bg-warning text-dark">Alteração</span>
+                        {% elif registro.acao == 'DELETE' %}
+                        <span class="badge bg-danger">Exclusão</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ registro.acao }}</span>
+                        {% endif %}
+                    </td>
+                    <td><code>{{ registro.modelo }}</code></td>
+                    <td>{{ registro.objeto_id }}</td>
+                    <td>{{ registro.usuario.get_full_name|default:registro.usuario }}</td>
+                    <td><small class="text-muted">{{ registro.ip_address }}</small></td>
+                    <td class="text-center">
+                        {% if registro.hash_valido %}
+                        <i class="bi bi-check-circle text-success"></i>
+                        {% else %}
+                        <i class="bi bi-exclamation-circle text-danger"></i>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'auditoria:detail' registro.pk %}" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                        Nenhum registro de auditoria encontrado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Paginação -->
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+        </li>
+        {% endif %}
+        <li class="page-item disabled">
+            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

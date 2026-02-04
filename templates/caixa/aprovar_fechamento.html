@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Aprovar Fechamento - Caixa Digital{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'caixa:list' %}">Caixas</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'caixa:fechamentos_pendentes' %}">Fechamentos Pendentes</a></li>
+        <li class="breadcrumb-item active">Aprovar</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-check-circle me-2"></i>Aprovar Fechamento de Caixa
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Informações do Fechamento -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Caixa</h6>
+                        <p class="fw-bold">{{ object.abertura.caixa.identificador }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Operador</h6>
+                        <p>{{ object.operador.get_full_name|default:object.operador.email }}</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Fechado em</h6>
+                        <p>{{ object.data_hora|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Status</h6>
+                        <span class="badge bg-warning">{{ object.get_status_display }}</span>
+                    </div>
+                </div>
+                
+                <!-- Valores -->
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <h6 class="text-muted">Saldo Sistema</h6>
+                                <p class="h5 mb-0">R$ {{ object.saldo_sistema|floatformat:2 }}</p>
+                            </div>
+                            <div class="col-4">
+                                <h6 class="text-muted">Saldo Informado</h6>
+                                <p class="h5 mb-0">R$ {{ object.saldo_informado|floatformat:2 }}</p>
+                            </div>
+                            <div class="col-4">
+                                <h6 class="text-muted">Diferença</h6>
+                                <p class="h5 mb-0 {% if object.diferenca > 0 %}text-success{% elif object.diferenca < 0 %}text-danger{% endif %}">
+                                    R$ {{ object.diferenca|floatformat:2 }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if object.justificativa_diferenca %}
+                <div class="alert alert-info mb-4">
+                    <strong>Justificativa do Operador:</strong><br>
+                    {{ object.justificativa_diferenca }}
+                </div>
+                {% endif %}
+                
+                <!-- Formulário de Aprovação -->
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="observacao_aprovador" class="form-label">Observação do Aprovador</label>
+                        <textarea name="observacao_aprovador" id="observacao_aprovador" 
+                                  class="form-control" rows="3"
+                                  placeholder="Opcional para aprovação, obrigatório para rejeição"></textarea>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" name="action" value="aprovar" class="btn btn-success">
+                            <i class="bi bi-check-lg me-1"></i>Aprovar
+                        </button>
+                        <button type="submit" name="action" value="rejeitar" class="btn btn-danger">
+                            <i class="bi bi-x-lg me-1"></i>Rejeitar
+                        </button>
+                        <a href="{% url 'caixa:fechamentos_pendentes' %}" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

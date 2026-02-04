@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar - wCaixaDigital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF8C00;
+            --bg-dark: #0d0d0d;
+            --bg-card: rgba(26, 26, 26, 0.7);
+            --bg-input: #252525;
+            --accent-orange: #FF8C00;
+            --accent-orange-hover: #e67e00;
+            --text-primary: #ffffff;
+            --text-secondary: #a3a3a3;
+            --text-muted: #737373;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --gradient-orange: linear-gradient(135deg, #FF8C00 0%, #e67e00 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0d0d0d;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(33, 100%, 10%, 1) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, hsla(33, 100%, 5%, 1) 0, transparent 50%);
+            min-height: 100vh;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Orange glow effect at bottom */
+        body::before {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 300px;
+            background: radial-gradient(ellipse 80% 50% at 50% 100%, rgba(249, 115, 22, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, var(--accent-orange) 20%, var(--accent-orange) 80%, transparent 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Header */
+        .login-header {
+            background: rgba(10, 10, 10, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-orange);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .logo-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .header-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .header-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .header-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .user-icon {
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--accent-orange);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-orange);
+        }
+
+        /* Main Content */
+        .login-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-card {
+            background: rgba(26, 26, 26, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .login-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(249, 115, 22, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .login-icon i {
+            font-size: 1.75rem;
+            color: var(--accent-orange);
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Form */
+        .form-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+
+        .forgot-link {
+            color: var(--accent-orange);
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+            color: var(--accent-orange);
+        }
+
+        .input-group {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .input-group:focus-within {
+            border-color: var(--accent-orange);
+        }
+
+        .input-icon {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 1rem;
+        }
+
+        .form-control {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            padding: 0.75rem 0;
+            font-size: 0.95rem;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-control:focus {
+            background: transparent;
+            box-shadow: none;
+            color: var(--text-primary);
+        }
+
+        .password-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+        }
+
+        .password-toggle:hover {
+            color: var(--text-secondary);
+        }
+
+        /* MFA Notice */
+        .mfa-notice {
+            background: rgba(249, 115, 22, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+            border-radius: 8px;
+            padding: 0.875rem 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .mfa-icon {
+            color: var(--accent-orange);
+            font-size: 1.1rem;
+            margin-top: 0.1rem;
+        }
+
+        .mfa-text {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .mfa-text strong {
+            color: var(--text-primary);
+        }
+
+        /* Buttons */
+        .btn-login {
+            background: var(--gradient-orange);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.875rem;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1rem;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .btn-login:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            color: white;
+        }
+
+        .divider-text {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin: 1.5rem 0 1rem;
+        }
+
+        .btn-request {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-weight: 500;
+            padding: 0.75rem;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .btn-request:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        /* Security Badges */
+        .security-badges {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .badge-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-item i {
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        .login-footer {
+            background: linear-gradient(180deg, transparent 0%, rgba(249, 115, 22, 0.15) 100%);
+            border-top: 2px solid var(--accent-orange);
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .footer-compliance {
+            color: var(--accent-orange);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-compliance i {
+            margin-right: 0.5rem;
+        }
+
+        .footer-copyright {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* Error Alert */
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 576px) {
+            .login-header {
+                padding: 1rem;
+            }
+
+            .header-links span {
+                display: none;
+            }
+
+            .login-card {
+                padding: 1.5rem;
+            }
+
+            .security-badges {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="login-header">
+        <a href="/" class="logo">
+            <div class="logo-icon">
+                <i class="bi bi-diamond-fill"></i>
+            </div>
+            <span class="logo-text">wCaixaDigital</span>
+        </a>
+        <div class="header-links">
+            <a href="#">Suporte</a>
+            <a href="#">Documentação</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="login-main">
+        <div class="login-card">
+            <div class="login-icon">
+                <i class="bi bi-lock-fill"></i>
+            </div>
+
+            <h1 class="login-title">Acesse sua conta</h1>
+            <p class="login-subtitle">Gestão financeira com conformidade fiscal</p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert-error">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    {{ form.non_field_errors.0 }}
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <div class="form-label-row">
+                        <label class="form-label">E-mail ou Usuário</label>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="bi bi-person"></i></span>
+                        <input type="email" 
+                               class="form-control" 
+                               id="username" 
+                               name="username" 
+                               placeholder="exemplo@empresa.com.br"
+                               required 
+                               autofocus>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="form-label-row">
+                        <label class="form-label">Senha</label>
+                        <a href="#" class="forgot-link">Esqueceu a senha?</a>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="bi bi-lock"></i></span>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password" 
+                               placeholder="••••••••"
+                               required>
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <i class="bi bi-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mfa-notice">
+                    <i class="bi bi-shield-check mfa-icon"></i>
+                    <div class="mfa-text">
+                        <strong>MFA Ativo:</strong> Após o login, uma verificação adicional via dispositivo seguro pode ser solicitada.
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-login">
+                    Acessar Sistema
+                </button>
+
+                <p class="divider-text">Ainda não tem acesso?</p>
+
+                <a href="#" class="btn btn-request">
+                    Solicitar acesso à Auditoria
+                </a>
+
+                <div class="security-badges">
+                    <div class="badge-item">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>Criptografia AES-256</span>
+                    </div>
+                    <div class="badge-item">
+                        <i class="bi bi-cloud-check"></i>
+                        <span>Nuvem Governamental</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="login-footer">
+        <div class="footer-compliance">
+            <i class="bi bi-patch-check-fill"></i>
+            Conformidade LGPD e Auditoria Ativa
+        </div>
+        <div class="footer-copyright">
+            © 2024 wCaixaDigital. TODOS OS DIREITOS RESERVADOS.
+        </div>
+    </footer>
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
+    </script>
+</body>
+</html>

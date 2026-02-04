@@ -1,0 +1,23 @@
+# Include base requirements
+-r base.txt
+
+# Development tools
+pytest>=8.2
+pytest-django>=4.8
+pytest-cov>=5.0
+pytest-asyncio>=0.23
+factory-boy>=3.3
+faker>=26.0
+
+# Code quality
+black>=24.4
+ruff>=0.5
+mypy>=1.10
+django-stubs>=5.0
+djangorestframework-stubs>=3.15
+pre-commit>=3.7
+
+# Debugging
+ipython>=8.26
+django-debug-toolbar>=4.4
+django-extensions>=3.2

@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Notas Fiscais - Caixa Digital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-receipt me-2"></i>NFS-e - Notas Fiscais de Serviço
+    </h2>
+    <a href="{% url 'nfse:create' %}" class="btn btn-success">
+        <i class="bi bi-plus-lg me-1"></i>Nova NFS-e
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label">Número</label>
+                <input type="text" name="numero" class="form-control" 
+                       value="{{ request.GET.numero }}" placeholder="RPS ou NFS-e">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Cliente</label>
+                <input type="text" name="cliente" class="form-control" 
+                       value="{{ request.GET.cliente }}" placeholder="Nome ou documento">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="RASCUNHO" {% if request.GET.status == 'RASCUNHO' %}selected{% endif %}>Rascunho</option>
+                    <option value="AUTORIZADA" {% if request.GET.status == 'AUTORIZADA' %}selected{% endif %}>Autorizada</option>
+                    <option value="CANCELADA" {% if request.GET.status == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Data Início</label>
+                <input type="date" name="data_inicio" class="form-control" value="{{ request.GET.data_inicio }}">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-search me-1"></i>Filtrar
+                </button>
+                <a href="{% url 'nfse:list' %}" class="btn btn-outline-secondary">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Estatísticas Rápidas -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-success bg-opacity-10 border-success">
+            <div class="card-body text-center py-2">
+                <span class="text-success">Autorizadas: <strong>{{ stats.autorizadas|default:"0" }}</strong></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning bg-opacity-10 border-warning">
+            <div class="card-body text-center py-2">
+                <span class="text-warning">Rascunhos: <strong>{{ stats.rascunhos|default:"0" }}</strong></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-danger bg-opacity-10 border-danger">
+            <div class="card-body text-center py-2">
+                <span class="text-danger">Canceladas: <strong>{{ stats.canceladas|default:"0" }}</strong></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabela -->
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>RPS</th>
+                    <th>NFS-e</th>
+                    <th>Data</th>
+                    <th>Cliente</th>
+                    <th>Status</th>
+                    <th class="text-end">Valor</th>
+                    <th class="text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for nota in notas %}
+                <tr>
+                    <td>{{ nota.numero_rps }}</td>
+                    <td>{{ nota.numero_nfse|default:"-" }}</td>
+                    <td>{{ nota.data_emissao|date:"d/m/Y" }}</td>
+                    <td>{{ nota.cliente.razao_social|truncatechars:30 }}</td>
+                    <td>
+                        {% if nota.status == 'AUTORIZADA' %}
+                        <span class="badge bg-success">Autorizada</span>
+                        {% elif nota.status == 'RASCUNHO' %}
+                        <span class="badge bg-secondary">Rascunho</span>
+                        {% elif nota.status == 'ENVIANDO' %}
+                        <span class="badge bg-info">Enviando</span>
+                        {% elif nota.status == 'CANCELADA' %}
+                        <span class="badge bg-danger">Cancelada</span>
+                        {% elif nota.status == 'REJEITADA' %}
+                        <span class="badge bg-warning text-dark">Rejeitada</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ nota.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">R$ {{ nota.valor_servicos|floatformat:2 }}</td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'nfse:detail' nota.pk %}" class="btn btn-outline-info" title="Visualizar">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if nota.status == 'RASCUNHO' %}
+                            <a href="{% url 'nfse:update' nota.pk %}" class="btn btn-outline-primary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% endif %}
+                            {% if nota.xml_nfse or nota.xml_rps %}
+                            <a href="{% url 'nfse:xml' nota.pk %}" class="btn btn-outline-secondary" title="XML">
+                                <i class="bi bi-file-code"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                        Nenhuma nota fiscal encontrada.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Paginação -->
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+        </li>
+        {% endif %}
+        <li class="page-item disabled">
+            <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

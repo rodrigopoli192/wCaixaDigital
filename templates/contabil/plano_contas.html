@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Plano de Contas - Caixa Digital{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-diagram-3 me-2"></i>Plano de Contas
+    </h2>
+    <a href="{% url 'contabil:conta_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>Nova Conta
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Código</label>
+                <input type="text" name="codigo" class="form-control" 
+                       value="{{ request.GET.codigo }}" placeholder="Ex: 1.1.01">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Nome</label>
+                <input type="text" name="nome" class="form-control" 
+                       value="{{ request.GET.nome }}" placeholder="Buscar por nome...">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Natureza</label>
+                <select name="natureza" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="D" {% if request.GET.natureza == 'D' %}selected{% endif %}>Devedora</option>
+                    <option value="C" {% if request.GET.natureza == 'C' %}selected{% endif %}>Credora</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-search me-1"></i>Filtrar
+                </button>
+                <a href="{% url 'contabil:contas' %}" class="btn btn-outline-secondary">Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabela Hierárquica -->
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Natureza</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for conta in contas %}
+                <tr>
+                    <td>
+                        <code>{{ conta.codigo }}</code>
+                    </td>
+                    <td style="padding-left: {{ conta.nivel|add:'0'|add:'0' }}px;">
+                        {% if conta.permite_lancamento %}
+                        <i class="bi bi-file-text text-muted me-1"></i>
+                        {% else %}
+                        <i class="bi bi-folder text-warning me-1"></i>
+                        {% endif %}
+                        {{ conta.nome }}
+                    </td>
+                    <td>
+                        {% if conta.tipo == 'ATIVO' %}
+                        <span class="badge bg-primary">Ativo</span>
+                        {% elif conta.tipo == 'PASSIVO' %}
+                        <span class="badge bg-info">Passivo</span>
+                        {% elif conta.tipo == 'RECEITA' %}
+                        <span class="badge bg-success">Receita</span>
+                        {% elif conta.tipo == 'DESPESA' %}
+                        <span class="badge bg-danger">Despesa</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ conta.tipo }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if conta.natureza == 'D' %}
+                        <span class="text-danger"><i class="bi bi-arrow-up-right"></i> Devedora</span>
+                        {% else %}
+                        <span class="text-success"><i class="bi bi-arrow-down-left"></i> Credora</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if conta.ativa %}
+                        <span class="badge bg-success">Ativa</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inativa</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'contabil:conta_update' conta.pk %}" class="btn btn-outline-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        Nenhuma conta cadastrada.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

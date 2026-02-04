@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Lançamento {{ lancamento.numero }} - Caixa Digital{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'contabil:lancamentos' %}">Lançamentos</a></li>
+        <li class="breadcrumb-item active">{{ lancamento.numero }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">
+        <i class="bi bi-journal-text me-2"></i>Lançamento {{ lancamento.numero }}
+        {% if lancamento.status == 'PENDENTE' %}
+        <span class="badge bg-warning text-dark">Pendente</span>
+        {% elif lancamento.status == 'CONFERIDO' %}
+        <span class="badge bg-success">Conferido</span>
+        {% elif lancamento.status == 'ESTORNADO' %}
+        <span class="badge bg-danger">Estornado</span>
+        {% endif %}
+    </h2>
+    <div>
+        {% if lancamento.status == 'PENDENTE' %}
+        <a href="{% url 'contabil:lancamento_update' lancamento.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i>Editar
+        </a>
+        <form method="post" action="{% url 'contabil:lancamento_conferir' lancamento.pk %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-lg me-1"></i>Conferir
+            </button>
+        </form>
+        {% elif lancamento.status == 'CONFERIDO' %}
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#estornarModal">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Estornar
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Cabeçalho -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-info-circle me-2"></i>Informações do Lançamento
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-4">Número</dt>
+                    <dd class="col-8"><code>{{ lancamento.numero }}</code></dd>
+                    
+                    <dt class="col-4">Data</dt>
+                    <dd class="col-8">{{ lancamento.data|date:"d/m/Y" }}</dd>
+                    
+                    <dt class="col-4">Competência</dt>
+                    <dd class="col-8">{{ lancamento.competencia|date:"m/Y" }}</dd>
+                    
+                    <dt class="col-4">Tipo</dt>
+                    <dd class="col-8">{{ lancamento.get_tipo_display }}</dd>
+                    
+                    {% if lancamento.centro_custo %}
+                    <dt class="col-4">Centro Custo</dt>
+                    <dd class="col-8">{{ lancamento.centro_custo.nome }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Totais -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-calculator me-2"></i>Totais
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <p class="text-muted mb-1">Total Débito</p>
+                        <h4 class="text-danger">R$ {{ lancamento.total_debito|floatformat:2 }}</h4>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="text-muted mb-1">Total Crédito</p>
+                        <h4 class="text-success">R$ {{ lancamento.total_credito|floatformat:2 }}</h4>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="text-muted mb-1">Diferença</p>
+                        <h4 class="{% if lancamento.balanceado %}text-success{% else %}text-danger{% endif %}">
+                            {% if lancamento.balanceado %}
+                            <i class="bi bi-check-circle"></i> OK
+                            {% else %}
+                            R$ {{ lancamento.diferenca|floatformat:2 }}
+                            {% endif %}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Histórico -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-file-text me-2"></i>Histórico
+            </div>
+            <div class="card-body">
+                {{ lancamento.historico }}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Partidas -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-list-columns me-2"></i>Partidas do Lançamento
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Conta</th>
+                            <th>Nome da Conta</th>
+                            <th class="text-end">Débito</th>
+                            <th class="text-end">Crédito</th>
+                            <th>Histórico</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for partida in lancamento.partidas.all %}
+                        <tr>
+                            <td><code>{{ partida.conta.codigo }}</code></td>
+                            <td>{{ partida.conta.nome }}</td>
+                            <td class="text-end">
+                                {% if partida.tipo == 'D' %}
+                                <span class="text-danger">R$ {{ partida.valor|floatformat:2 }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                {% if partida.tipo == 'C' %}
+                                <span class="text-success">R$ {{ partida.valor|floatformat:2 }}</span>
+                                {% endif %}
+                            </td>
+                            <td><small>{{ partida.historico_complementar }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr class="fw-bold">
+                            <td colspan="2">TOTAL</td>
+                            <td class="text-end text-danger">R$ {{ lancamento.total_debito|floatformat:2 }}</td>
+                            <td class="text-end text-success">R$ {{ lancamento.total_credito|floatformat:2 }}</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Estornar -->
+{% if lancamento.status == 'CONFERIDO' %}
+<div class="modal fade" id="estornarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Estornar Lançamento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'contabil:lancamento_estornar' lancamento.pk %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Um novo lançamento inverso será criado automaticamente.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Motivo do Estorno</label>
+                        <textarea name="motivo" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Estornar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
