@@ -1,0 +1,134 @@
+{% load widget_tweaks %}
+
+<div id="modal-cliente-wrapper" class="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" x-data="{ show_address: false }">
+    <!-- Backdrop com blur -->
+    <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity opacity-100"></div>
+
+    <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        <!-- Modal Panel -->
+        <div class="relative transform overflow-hidden rounded-2xl bg-[#101622] text-left shadow-2xl ring-1 ring-white/10 transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-[#2d3544]">
+            
+            <!-- Header -->
+            <div class="px-6 py-5 border-b border-[#2d3544] flex justify-between items-center bg-[#101622]">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 rounded-lg bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                        <span class="material-symbols-outlined text-orange-500 text-xl">person_add</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white tracking-tight" id="modal-title">Novo Cliente</h3>
+                        <p class="text-xs text-slate-500">Cadastro rápido de tomador de serviço</p>
+                    </div>
+                </div>
+                <!-- Botão Fechar -->
+                <button type="button" @click="document.getElementById('modal-stack').innerHTML = ''" class="text-slate-500 hover:text-white transition-colors p-1 hover:bg-white/5 rounded-lg">
+                    <span class="material-symbols-outlined text-xl">close</span>
+                </button>
+            </div>
+
+            <!-- Form -->
+            <form hx-post="{% url 'clientes:create' %}" hx-swap="outerHTML" hx-target="#modal-cliente-wrapper">
+                {% csrf_token %}
+                <div class="px-6 py-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                    
+                    {% if form.non_field_errors %}
+                    <div class="p-4 text-sm text-red-400 bg-red-950/30 border border-red-500/20 rounded-xl flex gap-3 items-start">
+                        <span class="material-symbols-outlined text-red-500 text-lg mt-0.5">error</span>
+                        <div>{{ form.non_field_errors }}</div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Identificação -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-1.5 md:col-span-2">
+                            <label class="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wide">Nome / Razão Social</label>
+                            {% render_field form.razao_social class="w-full bg-[#1c222d] border border-[#2d3544] rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="Nome completo do cliente" %}
+                             {% if form.razao_social.errors %}
+                                <p class="text-xs text-red-500 mt-1 ml-1">{{ form.razao_social.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="space-y-1.5">
+                             <label class="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wide">Tipo de Pessoa</label>
+                            <div class="relative">
+                                {% render_field form.tipo_pessoa class="w-full appearance-none bg-[#1c222d] border border-[#2d3544] rounded-xl px-4 py-3 text-sm text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">arrow_drop_down</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wide">CPF / CNPJ</label>
+                            {% render_field form.cpf_cnpj class="w-full bg-[#1c222d] border border-[#2d3544] rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="Somente números" %}
+                             {% if form.cpf_cnpj.errors %}
+                                <p class="text-xs text-red-500 mt-1 ml-1">{{ form.cpf_cnpj.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Contato -->
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wide">E-mail</label>
+                            {% render_field form.email class="w-full bg-[#1c222d] border border-[#2d3544] rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-400 ml-1 uppercase tracking-wide">Telefone</label>
+                            {% render_field form.telefone class="w-full bg-[#1c222d] border border-[#2d3544] rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+                     </div>
+
+                    <!-- Endereço Toggle -->
+                    <div>
+                        <button type="button" @click="show_address = !show_address" class="flex items-center gap-2 text-sm text-orange-500 hover:text-orange-400 font-bold transition-colors">
+                            <span class="material-symbols-outlined transition-transform duration-300" :class="show_address ? 'rotate-180' : ''">expand_more</span>
+                            <span>Preencher Endereço Completo</span>
+                        </button>
+
+                        <div x-show="show_address" x-collapse class="mt-4 grid grid-cols-1 md:grid-cols-6 gap-4 p-5 rounded-xl bg-[#1a1a20] border border-[#2d3544]">
+                             <div class="md:col-span-2 space-y-1">
+                                <label class="text-[10px] text-slate-500 uppercase font-bold">CEP</label>
+                                {% render_field form.cep class="w-full bg-[#1c222d] border border-[#2d3544] rounded-lg px-3 py-2 text-sm text-white focus:border-orange-500 outline-none" %}
+                            </div>
+                            <div class="md:col-span-4 space-y-1">
+                                <label class="text-[10px] text-slate-500 uppercase font-bold">Logradouro</label>
+                                {% render_field form.logradouro class="w-full bg-[#1c222d] border border-[#2d3544] rounded-lg px-3 py-2 text-sm text-white focus:border-orange-500 outline-none" %}
+                            </div>
+                            <div class="md:col-span-2 space-y-1">
+                                <label class="text-[10px] text-slate-500 uppercase font-bold">Número</label>
+                                {% render_field form.numero class="w-full bg-[#1c222d] border border-[#2d3544] rounded-lg px-3 py-2 text-sm text-white focus:border-orange-500 outline-none" %}
+                            </div>
+                             <div class="md:col-span-2 space-y-1">
+                                <label class="text-[10px] text-slate-500 uppercase font-bold">Bairro</label>
+                                {% render_field form.bairro class="w-full bg-[#1c222d] border border-[#2d3544] rounded-lg px-3 py-2 text-sm text-white focus:border-orange-500 outline-none" %}
+                            </div>
+                             <div class="md:col-span-2 space-y-1">
+                                <label class="text-[10px] text-slate-500 uppercase font-bold">Cidade/UF</label>
+                                <div class="flex gap-2">
+                                     {% render_field form.cidade class="w-2/3 bg-[#1c222d] border border-[#2d3544] rounded-lg px-3 py-2 text-sm text-white focus:border-orange-500 outline-none" %}
+                                     {% render_field form.uf class="w-1/3 bg-[#1c222d] border border-[#2d3544] rounded-lg px-3 py-2 text-sm text-white focus:border-orange-500 outline-none uppercase" %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LGPD e Ativo -->
+                    <div class="flex items-center gap-3 py-2">
+                        {% render_field form.consentimento_lgpd class="rounded text-orange-500 focus:ring-orange-500 bg-[#1c222d] border-slate-600" %}
+                        <label for="{{ form.consentimento_lgpd.id_for_label }}" class="text-sm text-slate-400 cursor-pointer select-none">Cliente consente com o uso dos dados para emissão de NFS-e</label>
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="px-6 py-5 border-t border-[#2d3544] bg-[#101622] flex justify-end gap-3 rounded-b-2xl">
+                    <button type="button" @click="document.getElementById('modal-stack').innerHTML = ''" class="px-5 py-2.5 text-sm font-bold text-slate-400 hover:text-white transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="inline-flex justify-center items-center px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all hover:-translate-y-0.5">
+                        <span class="material-symbols-outlined text-lg mr-2">save</span>
+                        Salvar e Selecionar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

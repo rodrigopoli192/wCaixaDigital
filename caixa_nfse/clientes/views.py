@@ -42,9 +42,34 @@ class ClienteCreateView(LoginRequiredMixin, CreateView):
     template_name = "clientes/cliente_form.html"
     success_url = reverse_lazy("clientes:list")
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["tenant"] = self.request.user.tenant
+        return kwargs
+
+    def get_template_names(self):
+        if self.request.headers.get("HX-Request"):
+            return ["clientes/partials/modal_form.html"]
+        return [self.template_name]
+
     def form_valid(self, form):
         form.instance.tenant = self.request.user.tenant
         form.instance.created_by = self.request.user
+
+        if self.request.headers.get("HX-Request"):
+            import json
+
+            from django.http import HttpResponse
+
+            self.object = form.save()
+            data = {
+                "id": str(self.object.pk),
+                "label": str(self.object.razao_social or self.object),
+            }
+            response = HttpResponse(status=204)
+            response["HX-Trigger"] = json.dumps({"clientCreated": data})
+            return response
+
         messages.success(self.request, "Cliente cadastrado com sucesso!")
         return super().form_valid(form)
 

@@ -85,6 +85,11 @@
                 <span class="material-symbols-outlined">description</span>
                 <span class="text-sm">NFS-e</span>
             </a>
+
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'clientes' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'clientes:list' %}">
+                <span class="material-symbols-outlined">groups</span>
+                <span class="text-sm">Gestão de Clientes</span>
+            </a>
             
             <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'contabil' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'contabil:lancamentos' %}">
                 <span class="material-symbols-outlined">calculate</span>

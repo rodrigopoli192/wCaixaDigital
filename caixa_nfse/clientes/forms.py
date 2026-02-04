@@ -29,7 +29,8 @@ class ClienteForm(forms.ModelForm):
             "ativo",
         ]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, tenant=None, **kwargs):
+        self.tenant = tenant
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -72,3 +73,27 @@ class ClienteForm(forms.ModelForm):
             ),
             Submit("submit", "Salvar", css_class="btn-primary"),
         )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cpf_cnpj = cleaned_data.get("cpf_cnpj")
+
+        if cpf_cnpj and self.tenant:
+            import hashlib
+            import re
+
+            # Gera hash para verificação (lógica igual ao model)
+            doc_limpo = re.sub(r"[^0-9]", "", cpf_cnpj)
+            doc_hash = hashlib.sha256(doc_limpo.encode()).hexdigest()
+
+            # Verifica duplicidade
+            qs = Cliente.objects.filter(tenant=self.tenant, cpf_cnpj_hash=doc_hash)
+
+            # Se for edição, exclui o próprio registro da checagem
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+
+            if qs.exists():
+                self.add_error("cpf_cnpj", "Já existe um cliente cadastrado com este CPF/CNPJ.")
+
+        return cleaned_data

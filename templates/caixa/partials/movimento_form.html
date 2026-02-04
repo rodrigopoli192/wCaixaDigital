@@ -1,6 +1,6 @@
 {% load widget_tweaks %}
 
-<div id="novo-movimento-container" class="bg-[#101014] text-slate-200">
+<div id="novo-movimento-container" class="bg-[#101622] text-slate-200">
     <!-- Header -->
     <div class="flex justify-between items-center px-6 py-5 border-b border-white/5">
         <h3 class="text-lg font-bold text-white tracking-tight">Novo Movimento</h3>
@@ -66,9 +66,9 @@
                         {% render_field form.cliente class="w-full appearance-none bg-[#202024] border border-white/10 rounded-lg pl-4 pr-10 py-3 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
                         <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-lg">search</span>
                     </div>
-                    <a href="{% url 'clientes:create' %}" target="_blank" class="flex items-center justify-center px-4 bg-[#202024] border border-slate-700/50 rounded-lg hover:bg-slate-700 hover:border-slate-600 transition-all text-slate-400 hover:text-orange-500 group" title="Cadastrar Novo Cliente">
+                    <button type="button" hx-get="{% url 'clientes:create' %}" hx-target="#modal-stack" hx-swap="innerHTML" class="flex items-center justify-center px-4 bg-[#202024] border border-slate-700/50 rounded-lg hover:bg-slate-700 hover:border-slate-600 transition-all text-slate-400 hover:text-orange-500 group" title="Cadastrar Novo Cliente">
                         <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">person_add</span>
-                    </a>
+                    </button>
                 </div>
                 <p class="text-[11px] text-slate-500 px-1 italic">Vincular a um tomador de serviço para fins de compliance fiscal.</p>
             </div>
@@ -106,6 +106,23 @@
         </div>
     </form>
 </div>
+
+<div id="modal-stack"></div>
+
 <script>
-    // Inicializa selects se precisar de algum plugin, mas por hora nativo estilizado.
+    document.body.addEventListener("clientCreated", function(evt){
+        const data = evt.detail; // {id: "...", label: "..."}
+        if(!data) return;
+
+        const select = document.getElementById("id_cliente");
+        
+        if(select) {
+            const option = new Option(data.label, data.id, true, true);
+            select.add(option);
+            select.dispatchEvent(new Event('change'));
+        }
+        
+        const modalStack = document.getElementById('modal-stack');
+        if(modalStack) modalStack.innerHTML = ''; 
+    });
 </script>

@@ -1,150 +1,189 @@
-{% extends "base.html" %}
-{% load crispy_forms_tags %}
+{% extends "base_dark.html" %}
+{% load widget_tweaks %}
 
-{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Cliente - Caixa Digital{% endblock %}
+{% block title %}{% if object %}Editar{% else %}Novo{% endif %} Cliente - wCaixaDigital{% endblock %}
+{% block page_title %}Gestão de Clientes{% endblock %}
 
 {% block content %}
-<nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'clientes:list' %}">Clientes</a></li>
-        <li class="breadcrumb-item active">{% if object %}Editar{% else %}Novo Cliente{% endif %}</li>
-    </ol>
-</nav>
+<div class="max-w-4xl mx-auto space-y-6">
+    
+    <!-- Breadcrumb e Ações -->
+    <div class="flex items-center justify-between">
+        <a href="{% url 'clientes:list' %}" class="flex items-center gap-2 text-slate-500 hover:text-white transition-colors group">
+            <span class="material-symbols-outlined group-hover:-translate-x-1 transition-transform">arrow_back</span>
+            <span class="font-medium">Voltar para Listagem</span>
+        </a>
+    </div>
 
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="bi bi-person-{% if object %}gear{% else %}plus{% endif %} me-2"></i>
-                    {% if object %}Editar Cliente{% else %}Novo Cliente{% endif %}
-                </h5>
+    <!-- Main Card -->
+    <div class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-xl shadow-sm overflow-hidden">
+        
+        <!-- Header -->
+        <div class="px-8 py-6 border-b border-slate-200 dark:border-border-dark flex items-center justify-between bg-slate-50 dark:bg-surface-dark">
+            <div class="flex items-center gap-4">
+                <div class="size-12 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 shadow-inner">
+                    <span class="material-symbols-outlined text-orange-500 text-2xl">
+                        {% if object %}person_edit{% else %}person_add{% endif %}
+                    </span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800 dark:text-white">
+                        {% if object %}Editar Cliente{% else %}Novo Cliente{% endif %}
+                    </h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Preencha os dados do tomador de serviço</p>
+                </div>
             </div>
-            <div class="card-body">
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    
-                    <!-- Identificação -->
-                    <fieldset class="mb-4">
-                        <legend class="h6 text-muted border-bottom pb-2">
-                            <i class="bi bi-person-badge me-2"></i>Identificação
-                        </legend>
-                        <div class="row">
-                            <div class="col-md-3 mb-3">
-                                <label for="id_tipo_pessoa" class="form-label">Tipo de Pessoa</label>
-                                {{ form.tipo_pessoa }}
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="id_cpf_cnpj" class="form-label">CPF/CNPJ</label>
-                                {{ form.cpf_cnpj }}
-                                {% if form.cpf_cnpj.errors %}
-                                <div class="invalid-feedback d-block">{{ form.cpf_cnpj.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-5 mb-3">
-                                <label for="id_inscricao_municipal" class="form-label">Inscrição Municipal</label>
-                                {{ form.inscricao_municipal }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_razao_social" class="form-label">Razão Social / Nome</label>
-                                {{ form.razao_social }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="id_nome_fantasia" class="form-label">Nome Fantasia</label>
-                                {{ form.nome_fantasia }}
-                            </div>
-                        </div>
-                    </fieldset>
-                    
-                    <!-- Contato -->
-                    <fieldset class="mb-4">
-                        <legend class="h6 text-muted border-bottom pb-2">
-                            <i class="bi bi-telephone me-2"></i>Contato
-                        </legend>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_email" class="form-label">E-mail</label>
-                                {{ form.email }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="id_telefone" class="form-label">Telefone</label>
-                                {{ form.telefone }}
-                            </div>
-                        </div>
-                    </fieldset>
-                    
-                    <!-- Endereço -->
-                    <fieldset class="mb-4">
-                        <legend class="h6 text-muted border-bottom pb-2">
-                            <i class="bi bi-geo-alt me-2"></i>Endereço
-                        </legend>
-                        <div class="row">
-                            <div class="col-md-8 mb-3">
-                                <label for="id_logradouro" class="form-label">Logradouro</label>
-                                {{ form.logradouro }}
-                            </div>
-                            <div class="col-md-2 mb-3">
-                                <label for="id_numero" class="form-label">Número</label>
-                                {{ form.numero }}
-                            </div>
-                            <div class="col-md-2 mb-3">
-                                <label for="id_complemento" class="form-label">Complemento</label>
-                                {{ form.complemento }}
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="id_bairro" class="form-label">Bairro</label>
-                                {{ form.bairro }}
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="id_cidade" class="form-label">Cidade</label>
-                                {{ form.cidade }}
-                            </div>
-                            <div class="col-md-2 mb-3">
-                                <label for="id_uf" class="form-label">UF</label>
-                                {{ form.uf }}
-                            </div>
-                            <div class="col-md-2 mb-3">
-                                <label for="id_cep" class="form-label">CEP</label>
-                                {{ form.cep }}
-                            </div>
-                        </div>
-                    </fieldset>
-                    
-                    <!-- Status -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="form-check">
-                                {{ form.consentimento_lgpd }}
-                                <label class="form-check-label" for="id_consentimento_lgpd">
-                                    Cliente autorizou uso dos dados (LGPD)
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-check">
-                                {{ form.ativo }}
-                                <label class="form-check-label" for="id_ativo">
-                                    Cliente ativo
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between">
-                        <a href="{% url 'clientes:list' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i>Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-lg me-1"></i>Salvar
-                        </button>
-                    </div>
-                </form>
-            </div>
+            
+            {% if object %}
+            <span class="px-3 py-1 rounded-full text-xs font-bold border {% if object.ativo %}bg-emerald-500/10 text-emerald-500 border-emerald-500/20{% else %}bg-red-500/10 text-red-500 border-red-500/20{% endif %}">
+                {% if object.ativo %}ATIVO{% else %}INATIVO{% endif %}
+            </span>
+            {% endif %}
         </div>
+
+        <form method="post" class="divide-y divide-slate-200 dark:divide-border-dark">
+            {% csrf_token %}
+            
+            <!-- Identificação -->
+            <div class="p-8 space-y-8">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">badge</span> Identificação
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <!-- Tipo -->
+                        <div class="md:col-span-3 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Tipo de Pessoa</label>
+                            <div class="relative">
+                                {% render_field form.tipo_pessoa class="w-full appearance-none bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">arrow_drop_down</span>
+                            </div>
+                        </div>
+
+                        <!-- CPF/CNPJ -->
+                        <div class="md:col-span-4 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">CPF/CNPJ</label>
+                            {% render_field form.cpf_cnpj class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="Apenas números" %}
+                            {% if form.cpf_cnpj.errors %}
+                                <p class="text-xs text-red-500 mt-1 ml-1">{{ form.cpf_cnpj.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Inscrição Municipal -->
+                        <div class="md:col-span-5 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Inscrição Municipal</label>
+                            {% render_field form.inscricao_municipal class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+
+                        <!-- Razão Social -->
+                        <div class="md:col-span-6 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Razão Social / Nome Completo</label>
+                            {% render_field form.razao_social class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+
+                        <!-- Nome Fantasia -->
+                        <div class="md:col-span-6 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Nome Fantasia</label>
+                            {% render_field form.nome_fantasia class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contato -->
+                <div>
+                     <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">call</span> Contato
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">E-mail</label>
+                            {% render_field form.email class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Telefone</label>
+                            {% render_field form.telefone class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Endereço -->
+                <div>
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">pin_drop</span> Endereço
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">CEP</label>
+                            {% render_field form.cep class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+                        <div class="md:col-span-8 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Logradouro</label>
+                            {% render_field form.logradouro class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Número</label>
+                            {% render_field form.numero class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+
+                         <div class="md:col-span-3 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Bairro</label>
+                            {% render_field form.bairro class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+                        <div class="md:col-span-3 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Complemento</label>
+                            {% render_field form.complemento class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+                        <div class="md:col-span-4 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Cidade</label>
+                            {% render_field form.cidade class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">UF</label>
+                            {% render_field form.uf class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-800 dark:text-white placeholder-slate-400 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configurações -->
+                <div>
+                     <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">tune</span> Configurações
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 dark:bg-background-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark">
+                         <label class="flex items-center gap-3 cursor-pointer group">
+                             <div class="relative">
+                                {% render_field form.consentimento_lgpd class="peer sr-only" %}
+                                <div class="w-10 h-6 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-orange-500 transition-colors peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-orange-500"></div>
+                                <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
+                            </div>
+                            <span class="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-800 dark:group-hover:text-white transition-colors">Termo de Consentimento LGPD Assinado</span>
+                        </label>
+
+                         <label class="flex items-center gap-3 cursor-pointer group">
+                             <div class="relative">
+                                {% render_field form.ativo class="peer sr-only" %}
+                                <div class="w-10 h-6 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-emerald-500 transition-colors peer-focus:ring-2 peer-focus:ring-offset-2 peer-focus:ring-emerald-500"></div>
+                                <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
+                            </div>
+                            <span class="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-800 dark:group-hover:text-white transition-colors">Cliente Ativo</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-8 py-6 bg-slate-50 dark:bg-surface-dark flex items-center justify-end gap-3 sticky bottom-0 z-10 border-t border-slate-200 dark:border-border-dark">
+                <a href="{% url 'clientes:list' %}" class="px-6 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors">
+                    Cancelar
+                </a>
+                <button type="submit" class="inline-flex justify-center items-center px-8 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all hover:-translate-y-0.5">
+                    <span class="material-symbols-outlined text-lg mr-2">save</span>
+                    Salvar Cliente
+                </button>
+            </div>
+        </form>
+
     </div>
 </div>
 {% endblock %}
