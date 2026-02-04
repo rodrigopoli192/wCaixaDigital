@@ -86,10 +86,18 @@
                     {% endif %}
                 </div>
 
-                <!-- Painel Diferença -->
-                <div class="p-4 rounded-xl bg-slate-100 dark:bg-background-dark border border-slate-200 dark:border-border-dark flex justify-between items-center transition-colors" id="diff-panel">
-                    <span class="text-xs text-slate-500 font-bold uppercase">Diferença</span>
-                    <span id="display-diferenca" class="font-mono font-bold text-lg text-slate-400">R$ 0,00</span>
+                <!-- Painel Diferença / Status -->
+                <div id="diff-panel" class="relative group overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-6 transition-all duration-300">
+                    <div class="flex flex-col items-center justify-center gap-1 relative z-10">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1" id="diff-label">STATUS</span>
+                        
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-3xl text-slate-300 dark:text-slate-600 transition-colors duration-300" id="diff-icon">pending</span>
+                            <span id="display-diferenca" class="font-mono text-3xl font-bold text-slate-300 dark:text-slate-600 transition-colors duration-300">R$ 0,00</span>
+                        </div>
+                        
+                        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 mt-1 h-4 transition-all duration-300" id="diff-message">Aguardando valor...</span>
+                    </div>
                 </div>
 
                 <!-- Justificativa -->
@@ -131,23 +139,50 @@
         const diffDisplay = document.getElementById('display-diferenca');
         const justContainer = document.getElementById('justificativa-container');
         const diffPanel = document.getElementById('diff-panel');
+        const diffIcon = document.getElementById('diff-icon');
+        const diffLabel = document.getElementById('diff-label');
+        const diffMessage = document.getElementById('diff-message');
         const saldoInput = document.querySelector('.valor-input');
 
         function calcular() {
             let valStr = saldoInput.value.replace('.', '').replace(',', '.');
             let informado = parseFloat(valStr) || 0;
             
+            // Se input vazio, estado neutro
+            if (!saldoInput.value) {
+                diffDisplay.textContent = 'R$ 0,00';
+                diffDisplay.className = 'font-mono text-3xl font-bold text-slate-300 dark:text-slate-600 transition-colors duration-300';
+                diffPanel.className = 'relative group overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 p-6 transition-all duration-300';
+                diffIcon.textContent = 'pending';
+                diffIcon.className = 'material-symbols-outlined text-3xl text-slate-300 dark:text-slate-600 transition-colors duration-300';
+                diffMessage.textContent = 'Aguardando valor...';
+                diffLabel.textContent = 'STATUS';
+                justContainer.classList.add('hidden');
+                return;
+            }
+
             const diff = informado - sistemaTotal;
-            diffDisplay.textContent = 'R$ ' + diff.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            diffDisplay.textContent = (diff > 0 ? '+ ' : '') + 'R$ ' + diff.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             if (Math.abs(diff) < 0.01) {
-                diffDisplay.className = 'font-mono font-bold text-lg text-success';
-                diffDisplay.innerHTML = 'OK <span class="text-xs font-normal opacity-75">(Sem Diferença)</span>';
-                diffPanel.className = 'p-4 rounded-xl bg-success/10 border border-success/20 flex justify-between items-center transition-colors';
+                // Success State
+                diffDisplay.className = 'font-mono text-3xl font-bold text-success transition-colors duration-300';
+                diffPanel.className = 'relative group overflow-hidden rounded-2xl border-2 border-success/50 bg-success/5 p-6 transition-all duration-300';
+                diffIcon.textContent = 'check_circle';
+                diffIcon.className = 'material-symbols-outlined text-3xl text-success transition-colors duration-300';
+                diffMessage.textContent = 'Caixa Batido!';
+                diffMessage.className = 'text-xs font-bold text-success mt-1 h-4 transition-all duration-300';
+                diffLabel.textContent = 'DIFERENÇA';
                 justContainer.classList.add('hidden');
             } else {
-                diffDisplay.className = 'font-mono font-bold text-lg text-danger';
-                diffPanel.className = 'p-4 rounded-xl bg-danger/10 border border-danger/20 flex justify-between items-center transition-colors';
+                // Error State
+                diffDisplay.className = 'font-mono text-3xl font-bold text-danger transition-colors duration-300';
+                diffPanel.className = 'relative group overflow-hidden rounded-2xl border-2 border-danger/50 bg-danger/5 p-6 transition-all duration-300';
+                diffIcon.textContent = 'error';
+                diffIcon.className = 'material-symbols-outlined text-3xl text-danger transition-colors duration-300';
+                diffMessage.textContent = diff > 0 ? 'Sobra de Caixa' : 'Quebra de Caixa';
+                diffMessage.className = 'text-xs font-bold text-danger mt-1 h-4 transition-all duration-300';
+                diffLabel.textContent = 'DIFERENÇA';
                 justContainer.classList.remove('hidden');
             }
         }
