@@ -1,101 +1,133 @@
 {% load widget_tweaks %}
 
-<form hx-post="{% url 'caixa:novo_movimento' abertura.pk %}" hx-swap="outerHTML" class="space-y-6">
-    {% csrf_token %}
-
-    <div class="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-border-dark pb-4">
-        <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">Novo Movimento</h3>
-        <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+<div id="novo-movimento-container" class="bg-[#101622] text-slate-200 h-full flex flex-col">
+    <!-- Header -->
+    <div class="flex justify-between items-start px-8 py-6 border-b border-slate-800/50">
+        <div class="flex items-center gap-4">
+            <div class="size-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                <span class="material-symbols-outlined text-orange-500">add_card</span>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-white tracking-tight">Novo Movimento</h3>
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mt-0.5">Operação de Caixa & Registro Financeiro</p>
+            </div>
+        </div>
+        <button type="button" @click="open = false" class="text-slate-500 hover:text-white transition-colors">
             <span class="material-symbols-outlined">close</span>
         </button>
     </div>
-    
-    {% if form.non_field_errors %}
-    <div class="p-4 mb-4 text-sm text-danger rounded-lg bg-danger/10 border border-danger/20" role="alert">
-        {{ form.non_field_errors }}
-    </div>
-    {% endif %}
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="space-y-1">
-            <label for="{{ form.tipo.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Tipo de Movimento
-            </label>
-            {% render_field form.tipo class="w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-primary focus:ring-primary shadow-sm" %}
-            {% if form.tipo.errors %}
-                <p class="text-sm text-danger mt-1">{{ form.tipo.errors.0 }}</p>
-            {% endif %}
-        </div>
-
-        <div class="space-y-1">
-            <label for="{{ form.forma_pagamento.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Forma de Pagamento
-            </label>
-            {% render_field form.forma_pagamento class="w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-primary focus:ring-primary shadow-sm" %}
-            {% if form.forma_pagamento.errors %}
-                <p class="text-sm text-danger mt-1">{{ form.forma_pagamento.errors.0 }}</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="space-y-1">
-        <label for="{{ form.valor.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Valor
-        </label>
-        <div class="relative mt-1 rounded-md shadow-sm">
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                <span class="text-slate-500 sm:text-sm">R$</span>
+    <form hx-post="{% url 'caixa:novo_movimento' abertura.pk %}" hx-target="#modal-content" hx-swap="innerHTML" class="flex flex-col flex-1 overflow-hidden">
+        {% csrf_token %}
+        
+        <div class="flex-1 overflow-y-auto px-8 py-6 space-y-8">
+            
+            {% if form.non_field_errors %}
+            <div class="p-4 text-sm text-red-400 rounded-xl bg-red-950/30 border border-red-500/20 flex items-center gap-3" role="alert">
+                <span class="material-symbols-outlined text-red-500">error</span>
+                <div>{{ form.non_field_errors }}</div>
             </div>
-            {% render_field form.valor class="block w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 pl-10 focus:border-primary focus:ring-primary sm:text-sm" placeholder="0,00" %}
+            {% endif %}
+
+            <!-- Destaque Valor -->
+            <div class="space-y-2">
+                <label for="{{ form.valor.id_for_label }}" class="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+                    Valor da Operação
+                </label>
+                <div class="relative group">
+                    <span class="absolute top-1/2 -translate-y-1/2 left-6 text-2xl font-bold text-slate-600 group-focus-within:text-orange-500 transition-colors">R$</span>
+                    {% render_field form.valor class="block w-full pl-16 pr-6 py-5 rounded-2xl text-4xl font-mono font-bold text-white bg-[#1c222d] border border-slate-700/50 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none placeholder-slate-700 shadow-xl" placeholder="0,00" %}
+                </div>
+                {% if form.valor.errors %}
+                    <p class="text-xs text-red-500 mt-2 ml-1 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[10px]">error</span>
+                        {{ form.valor.errors.0 }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Tipo -->
+                <div class="space-y-2">
+                     <label for="{{ form.tipo.id_for_label }}" class="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+                        Tipo de Movimento
+                    </label>
+                    <div class="relative">
+                        {% render_field form.tipo class="w-full appearance-none rounded-xl bg-[#1c222d] border border-slate-800 text-sm text-slate-300 px-4 py-3.5 focus:border-slate-600 focus:ring-1 focus:ring-slate-600 transition-all outline-none cursor-pointer hover:border-slate-700" %}
+                         <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">expand_more</span>
+                    </div>
+                    {% if form.tipo.errors %}
+                        <p class="text-xs text-red-500 mt-1 ml-1">{{ form.tipo.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Forma Pagamento -->
+                <div class="space-y-2">
+                     <label for="{{ form.forma_pagamento.id_for_label }}" class="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+                        Forma de Pagamento
+                    </label>
+                    <div class="relative">
+                        {% render_field form.forma_pagamento class="w-full appearance-none rounded-xl bg-[#1c222d] border border-slate-800 text-sm text-slate-300 px-4 py-3.5 focus:border-slate-600 focus:ring-1 focus:ring-slate-600 transition-all outline-none cursor-pointer hover:border-slate-700" %}
+                        <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">expand_more</span>
+                    </div>
+                    {% if form.forma_pagamento.errors %}
+                        <p class="text-xs text-red-500 mt-1 ml-1">{{ form.forma_pagamento.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Descrição -->
+            <div class="space-y-2">
+                <label for="{{ form.descricao.id_for_label }}" class="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+                    Descrição do Lançamento
+                </label>
+                {% render_field form.descricao class="w-full rounded-xl bg-[#1c222d] border border-slate-800 text-sm text-slate-300 p-4 focus:border-slate-600 focus:ring-1 focus:ring-slate-600 transition-all outline-none resize-none placeholder-slate-600/50" rows="2" placeholder="Ex: Sangria para pagamento de fornecedor..." %}
+                {% if form.descricao.errors %}
+                    <p class="text-xs text-red-500 mt-1 ml-1">{{ form.descricao.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Cliente (Collapsible Styling) -->
+            <div class="space-y-2 p-4 rounded-xl border border-slate-800/50 bg-[#1c222d]/30">
+                 <label for="{{ form.cliente.id_for_label }}" class="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex justify-between items-center">
+                    <span>Cliente / Tomador <span class="text-slate-600 normal-case">(Opcional)</span></span>
+                    <span class="material-symbols-outlined text-sm">person_search</span>
+                </label>
+                <div class="relative">
+                     {% render_field form.cliente class="w-full appearance-none rounded-lg bg-[#1c222d] border border-slate-800 text-sm text-slate-300 px-4 py-3 focus:border-slate-600 focus:ring-1 focus:ring-slate-600 transition-all outline-none" %}
+                     <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">expand_more</span>
+                </div>
+                 {% if form.cliente.errors %}
+                    <p class="text-xs text-red-500 mt-1 ml-1">{{ form.cliente.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Observações -->
+             <div class="space-y-2">
+                <label for="{{ form.observacoes.id_for_label }}" class="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">
+                    Observações Internas <span class="text-slate-600 normal-case font-normal">(Opcional)</span>
+                </label>
+                {% render_field form.observacoes class="w-full rounded-xl bg-[#1c222d] border border-slate-800 text-sm text-slate-300 p-4 focus:border-slate-600 focus:ring-1 focus:ring-slate-600 transition-all outline-none resize-none placeholder-slate-600/50 min-h-[80px]" rows="2" %}
+            </div>
+
         </div>
-        {% if form.valor.errors %}
-            <p class="text-sm text-danger mt-1">{{ form.valor.errors.0 }}</p>
-        {% endif %}
-    </div>
 
-    <div class="space-y-1">
-        <label for="{{ form.descricao.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Descrição
-        </label>
-        {% render_field form.descricao class="w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-primary focus:ring-primary shadow-sm" rows="2" %}
-        {% if form.descricao.errors %}
-            <p class="text-sm text-danger mt-1">{{ form.descricao.errors.0 }}</p>
-        {% endif %}
-    </div>
+        <!-- Footer -->
+         <div class="px-8 py-5 border-t border-slate-800 bg-[#101622] flex items-center justify-between z-20">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/30 border border-slate-800/50">
+                <span class="material-symbols-outlined text-slate-500 text-sm">receipt_long</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Log de Movimentação</span>
+            </div>
 
-    <div class="space-y-1">
-        <label for="{{ form.cliente.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Cliente <span class="text-slate-400 font-normal">(Opcional)</span>
-        </label>
-        {% render_field form.cliente class="w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-primary focus:ring-primary shadow-sm" %}
-        <p class="text-xs text-slate-500">Vincular a um tomador de serviço</p>
-        {% if form.cliente.errors %}
-            <p class="text-sm text-danger mt-1">{{ form.cliente.errors.0 }}</p>
-        {% endif %}
-    </div>
-
-    <div class="space-y-1">
-        <label for="{{ form.observacoes.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-            Observações
-        </label>
-        {% render_field form.observacoes class="w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-primary focus:ring-primary shadow-sm" rows="2" %}
-         {% if form.observacoes.errors %}
-            <p class="text-sm text-danger mt-1">{{ form.observacoes.errors.0 }}</p>
-        {% endif %}
-    </div>
-
-    <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-border-dark">
-        <button type="button" @click="open = false" class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-background-dark border border-slate-300 dark:border-border-dark rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all">
-            Cancelar
-        </button>
-        <button type="submit" class="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all">
-             {% if is_loading %}
-                <span class="animate-spin -ml-1 mr-3 h-5 w-5 text-white material-symbols-outlined">refresh</span>
-                Salvando...
-             {% else %}
-               <span class="material-symbols-outlined mr-2 text-sm">check_circle</span>
-               Registrar Movimento
-             {% endif %}
-        </button>
-    </div>
-</form>
+            <div class="flex items-center gap-4">
+                <button type="button" @click="open = false" class="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit" class="group relative inline-flex items-center justify-center px-6 py-3 bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 hover:-translate-y-0.5">
+                    <span class="material-symbols-outlined text-lg mr-2 group-hover:rotate-90 transition-transform">add</span>
+                    Confirmar Lançamento
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

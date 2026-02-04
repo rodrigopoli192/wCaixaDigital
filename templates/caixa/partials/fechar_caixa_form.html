@@ -17,7 +17,7 @@
         </button>
     </div>
 
-    <form hx-post="{% url 'caixa:fechar' caixa.pk %}" hx-swap="outerHTML" class="flex flex-col flex-1 overflow-hidden">
+    <form hx-post="{% url 'caixa:fechar' caixa.pk %}" hx-target="#fechar-caixa-container" hx-swap="outerHTML" class="flex flex-col flex-1 overflow-hidden">
         {% csrf_token %}
         
         <div class="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
