@@ -1,149 +1,244 @@
-{% extends "base.html" %}
+{% extends "base_dark.html" %}
+{% load static %}
 
-{% block title %}Caixa {{ caixa.identificador }} - Caixa Digital{% endblock %}
+{% block title %}Caixa {{ caixa.identificador }} - wCaixaDigital{% endblock %}
 
 {% block content %}
-<nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'caixa:list' %}">Caixas</a></li>
-        <li class="breadcrumb-item active">{{ caixa.identificador }}</li>
-    </ol>
-</nav>
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">
-        <i class="bi bi-wallet2 me-2"></i>{{ caixa.identificador }}
-        {% if caixa.status == 'ABERTO' %}
-        <span class="badge bg-success">Aberto</span>
-        {% else %}
-        <span class="badge bg-secondary">Fechado</span>
-        {% endif %}
-    </h2>
-    <div>
-        {% if caixa.status == 'FECHADO' %}
-        <a href="{% url 'caixa:abrir' caixa.pk %}" class="btn btn-success">
-            <i class="bi bi-box-arrow-in-right me-1"></i>Abrir
-        </a>
-        {% elif abertura_atual %}
-        <a href="{% url 'caixa:novo_movimento' abertura_atual.pk %}" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i>Novo Movimento
-        </a>
-        <a href="{% url 'caixa:fechar' caixa.pk %}" class="btn btn-warning">
-            <i class="bi bi-box-arrow-right me-1"></i>Fechar
-        </a>
-        {% endif %}
-    </div>
-</div>
-
-<div class="row g-4">
-    <!-- Info Card -->
-    <div class="col-lg-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <i class="bi bi-info-circle me-2"></i>Informações
+<div class="p-6 w-full space-y-6">
+    <!-- Breadcrumb & Header -->
+    <div class="flex flex-col gap-4 md:flex-row md:items-end justify-between">
+        <div class="space-y-1">
+            <nav class="flex text-sm text-slate-500 dark:text-slate-400 mb-1">
+                <a href="{% url 'caixa:list' %}" class="hover:text-primary transition-colors">Caixas</a>
+                <span class="mx-2">/</span>
+                <span class="text-slate-700 dark:text-slate-200 font-medium">{{ caixa.identificador }}</span>
+            </nav>
+            <div class="flex items-center gap-3">
+                <h3 class="text-3xl font-bold tracking-tight">{{ caixa.identificador }}</h3>
+                {% if caixa.status == 'ABERTO' %}
+                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-success/10 text-success border border-success/20 flex items-center gap-2">
+                    <span class="size-2 rounded-full bg-success animate-pulse"></span>
+                    Aberto
+                </span>
+                {% elif caixa.status == 'FECHADO' %}
+                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">
+                    Fechado
+                </span>
+                {% elif caixa.status == 'BLOQUEADO' %}
+                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-danger/10 text-danger border border-danger/20">
+                    Bloqueado
+                </span>
+                {% endif %}
             </div>
-            <div class="card-body">
-                <dl class="row mb-0">
-                    <dt class="col-5">Tipo</dt>
-                    <dd class="col-7">{{ caixa.get_tipo_display }}</dd>
-                    
-                    <dt class="col-5">Status</dt>
-                    <dd class="col-7">{{ caixa.get_status_display }}</dd>
-                    
-                    <dt class="col-5">Saldo Atual</dt>
-                    <dd class="col-7 fw-bold text-primary">R$ {{ caixa.saldo_atual|floatformat:2 }}</dd>
-                    
-                    {% if caixa.operador_atual %}
-                    <dt class="col-5">Operador</dt>
-                    <dd class="col-7">{{ caixa.operador_atual.get_full_name }}</dd>
+            <p class="text-slate-500 dark:text-slate-400 text-sm">{{ caixa.get_tipo_display }} • Criado em {{ caixa.created_at|date:"d/m/Y" }}</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-wrap gap-2">
+            {% if caixa.status == 'FECHADO' %}
+            <a href="{% url 'caixa:abrir' caixa.pk %}" class="bg-success hover:bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-success/20">
+                <span class="material-symbols-outlined text-sm">login</span>
+                Abrir Caixa
+            </a>
+            {% elif abertura_atual %}
+            <a href="{% url 'caixa:novo_movimento' abertura_atual.pk %}" class="bg-primary hover:bg-orange-600 text-white rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined text-sm">add_circle</span>
+                Novo Movimento
+            </a>
+            <a href="{% url 'caixa:fechar' caixa.pk %}" class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-background-dark/50 rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm text-danger">logout</span>
+                Fechar Caixa
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Info Card -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm h-full">
+                <h4 class="font-bold text-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-slate-400">info</span>
+                    Informações
+                </h4>
+                
+                <div class="space-y-4">
+                    <div class="p-4 rounded-lg bg-slate-50 dark:bg-background-dark/50 border border-slate-100 dark:border-border-dark">
+                        <span class="text-xs font-bold uppercase text-slate-400 block mb-1">Saldo Atual</span>
+                        <div class="text-2xl font-bold text-primary">R$ {{ caixa.saldo_atual|floatformat:2 }}</div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-border-dark">
+                            <span class="text-sm text-slate-500">Operador Atual</span>
+                            <span class="text-sm font-medium">
+                                {% if caixa.operador_atual %}
+                                <div class="flex items-center gap-2">
+                                    <span class="size-6 rounded-full bg-primary/20 text-primary text-[10px] flex items-center justify-center font-bold">
+                                        {{ caixa.operador_atual.first_name|slice:":1"|default:"U" }}
+                                    </span>
+                                    {{ caixa.operador_atual.get_full_name|default:caixa.operador_atual.username }}
+                                </div>
+                                {% else %}
+                                <span class="italic text-slate-400">---</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-border-dark">
+                            <span class="text-sm text-slate-500">Tipo</span>
+                            <span class="text-sm font-medium">{{ caixa.get_tipo_display }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-border-dark">
+                            <span class="text-sm text-slate-500">Tenant</span>
+                            <span class="text-sm font-medium text-slate-400">{{ caixa.tenant.nome_fantasia|default:"Principal" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Abertura Atual -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm h-full flex flex-col">
+                <div class="flex items-center justify-between mb-6">
+                    <h4 class="font-bold text-lg flex items-center gap-2">
+                        <span class="material-symbols-outlined text-success">restart_alt</span>
+                        Abertura Atual
+                    </h4>
+                    {% if abertura_atual %}
+                    <a href="{% url 'caixa:lista_movimentos' abertura_atual.pk %}" class="text-sm text-primary hover:underline font-medium">
+                        Ver Movimentos →
+                    </a>
                     {% endif %}
-                    
-                    <dt class="col-5">Criado em</dt>
-                    <dd class="col-7">{{ caixa.created_at|date:"d/m/Y H:i" }}</dd>
-                </dl>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Abertura Atual -->
-    <div class="col-lg-8">
-        <div class="card h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-clock-history me-2"></i>Abertura Atual</span>
-                {% if abertura_atual %}
-                <a href="{% url 'caixa:lista_movimentos' abertura_atual.pk %}" class="btn btn-sm btn-outline-primary">
-                    Ver Movimentos
-                </a>
-                {% endif %}
-            </div>
-            <div class="card-body">
-                {% if abertura_atual %}
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Aberto em:</strong> {{ abertura_atual.data_hora|date:"d/m/Y H:i" }}</p>
-                        <p><strong>Saldo Inicial:</strong> R$ {{ abertura_atual.saldo_abertura|floatformat:2 }}</p>
-                        <p><strong>Fundo de Troco:</strong> R$ {{ abertura_atual.fundo_troco|floatformat:2 }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Total Entradas:</strong> <span class="text-success">R$ {{ abertura_atual.saldo_movimentos|floatformat:2 }}</span></p>
-                        <p><strong>Saldo Atual:</strong> <span class="fw-bold text-primary">R$ {{ abertura_atual.saldo_movimentos|floatformat:2 }}</span></p>
-                    </div>
                 </div>
-                {% if abertura_atual.observacao %}
-                <div class="alert alert-light mt-3 mb-0">
-                    <strong>Observações:</strong> {{ abertura_atual.observacao }}
-                </div>
-                {% endif %}
-                {% else %}
-                <p class="text-muted text-center mb-0">Caixa fechado. Nenhuma abertura ativa.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Últimos Movimentos -->
-{% if ultimos_movimentos %}
-<div class="card mt-4">
-    <div class="card-header">
-        <i class="bi bi-arrow-left-right me-2"></i>Últimos Movimentos
+                {% if abertura_atual %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <div class="p-4 rounded-lg bg-slate-50 dark:bg-background-dark/50 space-y-1">
+                            <span class="text-xs text-slate-500 uppercase font-bold">Iniciado em</span>
+                            <div class="text-sm font-mono text-slate-700 dark:text-slate-200">
+                                {{ abertura_atual.data_hora|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-lg bg-slate-50 dark:bg-background-dark/50 space-y-1">
+                            <span class="text-xs text-slate-500 uppercase font-bold">Saldo de Abertura</span>
+                            <div class="text-sm font-mono font-bold text-slate-700 dark:text-slate-200">
+                                R$ {{ abertura_atual.saldo_abertura|floatformat:2 }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-auto">
+                        <div class="p-4 rounded-xl border border-slate-100 dark:border-border-dark text-center">
+                            <p class="text-xs text-slate-500 mb-1">Entradas</p>
+                            <p class="text-lg font-bold text-success">
+                                <span class="material-symbols-outlined align-middle text-sm">arrow_upward</span>
+                                <!-- Simulado: Idealmente o model AberturaCaixa teria metodo para somar entradas -->
+                                R$ {{ abertura_atual.saldo_movimentos|floatformat:2 }}
+                            </p>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-100 dark:border-border-dark text-center">
+                            <p class="text-xs text-slate-500 mb-1">Saídas</p>
+                            <p class="text-lg font-bold text-danger">
+                                <span class="material-symbols-outlined align-middle text-sm">arrow_downward</span>
+                                R$ 0,00 <!-- Placeholder/TODO -->
+                            </p>
+                        </div>
+                         <div class="p-4 rounded-xl bg-primary/5 border border-primary/10 text-center">
+                            <p class="text-xs text-primary mb-1 font-bold">Saldo Operacional</p>
+                            <p class="text-xl font-bold text-primary">
+                                R$ {{ abertura_atual.saldo_movimentos|floatformat:2 }}
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if abertura_atual.observacao %}
+                    <div class="mt-6 p-3 rounded-lg bg-warning/5 border border-warning/10 text-xs text-warning-dark flex gap-2">
+                        <span class="material-symbols-outlined text-sm">sticky_note_2</span>
+                        <p>{{ abertura_atual.observacao }}</p>
+                    </div>
+                    {% endif %}
+
+                {% else %}
+                    <div class="flex flex-col items-center justify-center flex-1 py-12 text-slate-400">
+                        <div class="size-16 rounded-full bg-slate-50 dark:bg-background-dark flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-3xl">lock_clock</span>
+                        </div>
+                        <p class="font-medium text-slate-600 dark:text-slate-300">Nenhuma abertura ativa</p>
+                        <p class="text-sm">O caixa está fechado no momento.</p>
+                        <a href="{% url 'caixa:abrir' caixa.pk %}" class="mt-4 px-4 py-2 bg-success text-white rounded-lg text-sm font-bold hover:bg-emerald-600 transition-colors">
+                            Realizar Abertura
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead>
-                <tr>
-                    <th>Data/Hora</th>
-                    <th>Tipo</th>
-                    <th>Descrição</th>
-                    <th>Forma Pagto</th>
-                    <th class="text-end">Valor</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for mov in ultimos_movimentos %}
-                <tr>
-                    <td>{{ mov.data_movimento|date:"d/m/Y H:i" }}</td>
-                    <td>
-                        {% if mov.tipo == 'ENTRADA' %}
-                        <span class="badge bg-success">Entrada</span>
-                        {% elif mov.tipo == 'SAIDA' %}
-                        <span class="badge bg-danger">Saída</span>
-                        {% elif mov.tipo == 'SANGRIA' %}
-                        <span class="badge bg-warning text-dark">Sangria</span>
-                        {% else %}
-                        <span class="badge bg-info">{{ mov.get_tipo_display }}</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ mov.descricao|truncatechars:50 }}</td>
-                    <td>{{ mov.forma_pagamento.nome }}</td>
-                    <td class="text-end fw-bold {% if mov.tipo == 'SAIDA' or mov.tipo == 'SANGRIA' %}text-danger{% else %}text-success{% endif %}">
-                        R$ {{ mov.valor|floatformat:2 }}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+    <!-- Histórico de Aberturas -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden w-full">
+        <div class="p-6 border-b border-slate-200 dark:border-border-dark">
+            <h4 class="font-bold text-lg">Histórico Recente</h4>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                        <th class="px-6 py-4">Data Abertura</th>
+                        <th class="px-6 py-4">Data Fechamento</th>
+                        <th class="px-6 py-4">Operador</th>
+                        <th class="px-6 py-4 text-right">Saldo Inicial</th>
+                        <th class="px-6 py-4 text-right">Saldo Final</th>
+                         <th class="px-6 py-4 text-center">Status</th>
+                         <th class="px-6 py-4"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                    {% for abertura in ultimas_aberturas %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                        <td class="px-6 py-4 font-mono text-sm text-slate-600 dark:text-slate-300">
+                            {{ abertura.data_hora|date:"d/m/Y H:i" }}
+                        </td>
+                         <td class="px-6 py-4 font-mono text-sm text-slate-500 dark:text-slate-400">
+                            {{ abertura.fechamento.data_hora|date:"d/m/Y H:i"|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="size-6 rounded-full bg-slate-100 dark:bg-background-dark text-slate-500 text-[10px] flex items-center justify-center font-bold">
+                                    {{ abertura.operador.first_name|slice:":1"|default:"U" }}
+                                </span>
+                                {{ abertura.operador.first_name|default:abertura.operador.username }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm text-slate-600 dark:text-slate-300">
+                            R$ {{ abertura.saldo_abertura|floatformat:2 }}
+                        </td>
+                         <td class="px-6 py-4 text-right text-sm font-bold text-slate-700 dark:text-slate-200">
+                            R$ {{ abertura.saldo_movimentos|floatformat:2 }}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if abertura.fechado %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">Fechado</span>
+                            {% else %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20 animate-pulse">Ativo</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="{% url 'caixa:lista_movimentos' abertura.pk %}" class="p-1 rounded text-slate-400 hover:text-primary transition-colors" title="Ver Movimentos">
+                                <span class="material-symbols-outlined text-lg">receipt_long</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-sm text-slate-500">
+                            Nenhum histórico de abertura registrado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-{% endif %}
 {% endblock %}
