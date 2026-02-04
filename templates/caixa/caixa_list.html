@@ -1,54 +1,191 @@
-{% extends "base.html" %}
-{% load django_tables2 %}
+{% extends "base_dark.html" %}
+{% load static %}
 
-{% block title %}Caixas - Caixa Digital{% endblock %}
+{% block title %}Caixas - wCaixaDigital{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">
-        <i class="bi bi-wallet2 me-2"></i>Caixas
-    </h2>
-</div>
+<div class="p-6 w-full space-y-6">
+    <!-- Header Section -->
+    <div class="flex items-end justify-between">
+        <div>
+            <h3 class="text-2xl font-bold tracking-tight">Gerenciamento de Caixas</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Listagem e controle de terminais</p>
+        </div>
+        
+        <!-- Action Buttons or Summary -->
+         <div class="flex gap-2">
+            <!-- (Optional) Add global actions here -->
+        </div>
+    </div>
 
-<!-- Filters -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label">Identificador</label>
-                <input type="text" name="identificador" class="form-control" 
-                       value="{{ request.GET.identificador }}">
+    <!-- Filters Section -->
+    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <!-- Identificador -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Identificador</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                    <input type="text" name="identificador" value="{{ request.GET.identificador|default:'' }}" 
+                           class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" 
+                           placeholder="Buscar caixa...">
+                </div>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select">
-                    <option value="">Todos</option>
-                    <option value="ABERTO" {% if request.GET.status == 'ABERTO' %}selected{% endif %}>Aberto</option>
-                    <option value="FECHADO" {% if request.GET.status == 'FECHADO' %}selected{% endif %}>Fechado</option>
-                </select>
+
+            <!-- Status -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</label>
+                <div class="relative">
+                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">toggle_on</span>
+                    <select name="status" class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
+                        <option value="">Todos</option>
+                        <option value="ABERTO" {% if request.GET.status == 'ABERTO' %}selected{% endif %}>Aberto</option>
+                        <option value="FECHADO" {% if request.GET.status == 'FECHADO' %}selected{% endif %}>Fechado</option>
+                        <option value="BLOQUEADO" {% if request.GET.status == 'BLOQUEADO' %}selected{% endif %}>Bloqueado</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Tipo</label>
-                <select name="tipo" class="form-select">
-                    <option value="">Todos</option>
-                    <option value="PRINCIPAL" {% if request.GET.tipo == 'PRINCIPAL' %}selected{% endif %}>Principal</option>
-                    <option value="SECUNDARIO" {% if request.GET.tipo == 'SECUNDARIO' %}selected{% endif %}>Secundário</option>
-                </select>
+
+            <!-- Tipo -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tipo</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">category</span>
+                    <select name="tipo" class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
+                        <option value="">Todos</option>
+                        <option value="FISICO" {% if request.GET.tipo == 'FISICO' %}selected{% endif %}>Físico</option>
+                        <option value="VIRTUAL" {% if request.GET.tipo == 'VIRTUAL' %}selected{% endif %}>Virtual</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-outline-primary me-2">
-                    <i class="bi bi-search me-1"></i>Filtrar
+
+            <!-- Actions -->
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-primary hover:bg-orange-600 text-white rounded-lg py-2 text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-sm">filter_list</span>
+                    Filtrar
                 </button>
-                <a href="{% url 'caixa:list' %}" class="btn btn-outline-secondary">Limpar</a>
+                <a href="{% url 'caixa:list' %}" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-background-dark flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </a>
             </div>
         </form>
     </div>
-</div>
 
-<!-- Table -->
-<div class="card">
-    <div class="card-body p-0">
-        {% render_table table %}
+    <!-- Table Section -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden w-full">
+        <div class="p-6 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
+            <h4 class="font-bold text-lg">Caixas Registrados</h4>
+            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">{{ table.page.paginator.count }} registros encontrados</span>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                        <th class="px-6 py-4">Identificador</th>
+                        <th class="px-6 py-4">Tipo</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Operador Atual</th>
+                        <th class="px-6 py-4 text-right">Saldo Atual</th>
+                        <th class="px-6 py-4 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                    {% for row in table.page.object_list|default:table.rows %}
+                    {% with caixa=row.record %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="size-8 rounded bg-slate-100 dark:bg-background-dark flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-sm text-slate-500">
+                                        {% if caixa.tipo == 'VIRTUAL' %}cloud{% else %}point_of_sale{% endif %}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold">{{ caixa.identificador }}</p>
+                                    <p class="text-[10px] text-slate-500">ID: #{{ caixa.id }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm text-slate-600 dark:text-slate-300">{{ caixa.get_tipo_display }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if caixa.status == 'ABERTO' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Aberto</span>
+                            {% elif caixa.status == 'FECHADO' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">Fechado</span>
+                            {% elif caixa.status == 'BLOQUEADO' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">Bloqueado</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if caixa.operador_atual %}
+                            <div class="flex items-center gap-2">
+                                <span class="size-6 rounded-full bg-primary/20 text-primary text-[10px] flex items-center justify-center font-bold">
+                                    {{ caixa.operador_atual.first_name|slice:":1"|default:"U" }}
+                                </span>
+                                <span class="text-sm text-slate-600 dark:text-slate-300">{{ caixa.operador_atual.first_name|default:caixa.operador_atual.username }}</span>
+                            </div>
+                            {% else %}
+                            <span class="text-sm text-slate-400 italic">--</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="font-bold text-slate-700 dark:text-slate-200">R$ {{ caixa.saldo_atual|floatformat:2 }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <a href="{% url 'caixa:detail' caixa.pk %}" class="text-slate-400 hover:text-primary transition-colors" title="Ver Detalhes">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endwith %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-sm text-slate-500">
+                            <div class="flex flex-col items-center gap-2">
+                                <span class="material-symbols-outlined text-4xl text-slate-300">inbox</span>
+                                <p>Nenhum caixa encontrado com os filtros selecionados.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination (if applicable) -->
+        {% if table.page %}
+        <div class="p-4 border-t border-slate-200 dark:border-border-dark flex items-center justify-between">
+            <div class="text-xs text-slate-500">
+                Mostrando {{ table.page.start_index }} a {{ table.page.end_index }} de {{ table.page.paginator.count }} resultados
+            </div>
+            
+            <div class="flex gap-1">
+                {% if table.page.has_previous %}
+                <a href="?page=1{% if request.GET.identificador %}&identificador={{ request.GET.identificador }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                    <span class="material-symbols-outlined text-sm">first_page</span>
+                </a>
+                <a href="?page={{ table.page.previous_page_number }}{% if request.GET.identificador %}&identificador={{ request.GET.identificador }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                    <span class="material-symbols-outlined text-sm">chevron_left</span>
+                </a>
+                {% endif %}
+                
+                <span class="px-3 py-1 bg-primary/10 text-primary rounded text-xs font-bold">{{ table.page.number }}</span>
+                
+                {% if table.page.has_next %}
+                <a href="?page={{ table.page.next_page_number }}{% if request.GET.identificador %}&identificador={{ request.GET.identificador }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                </a>
+                <a href="?page={{ table.page.paginator.num_pages }}{% if request.GET.identificador %}&identificador={{ request.GET.identificador }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                    <span class="material-symbols-outlined text-sm">last_page</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

@@ -1,133 +1,178 @@
-{% extends "base.html" %}
+{% extends "base_dark.html" %}
+{% load static %}
 
-{% block title %}Lançamentos Contábeis - Caixa Digital{% endblock %}
+{% block title %}Contabilidade - wCaixaDigital{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">
-        <i class="bi bi-journal-text me-2"></i>Lançamentos Contábeis
-    </h2>
-    <div>
-        <a href="{% url 'contabil:lancamento_create' %}" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i>Novo Lançamento
-        </a>
-        <a href="{% url 'contabil:export' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-download me-1"></i>Exportar CSV
-        </a>
+<div class="p-6 w-full space-y-6">
+    <!-- Header Section -->
+    <div class="flex items-end justify-between">
+        <div>
+            <h3 class="text-2xl font-bold tracking-tight">Lançamentos Contábeis</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gestão de partidas dobradas e histórico</p>
+        </div>
+        <div class="flex gap-3">
+            {# Funcionalidade em desenvolvimento #}
+            {# <a href="{% url 'contabil:lancamento_create' %}" ... > ... </a> #}
+            <a href="{% url 'contabil:exportar' %}" class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-background-dark/50 rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm">download</span>
+                Exportar CSV
+            </a>
+        </div>
     </div>
-</div>
 
-<!-- Filtros -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-2">
-                <label class="form-label">Número</label>
-                <input type="text" name="numero" class="form-control" 
-                       value="{{ request.GET.numero }}" placeholder="Número">
+    <!-- Filters Section -->
+    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <!-- Número -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Número</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">tag</span>
+                    <input type="text" name="numero" value="{{ request.GET.numero }}" 
+                           class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" 
+                           placeholder="Número">
+                </div>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Data Início</label>
-                <input type="date" name="data_inicio" class="form-control" value="{{ request.GET.data_inicio }}">
+
+            <!-- Status -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">toggle_on</span>
+                    <select name="status" class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
+                        <option value="">Todos</option>
+                        <option value="PENDENTE" {% if request.GET.status == 'PENDENTE' %}selected{% endif %}>Pendente</option>
+                        <option value="CONFERIDO" {% if request.GET.status == 'CONFERIDO' %}selected{% endif %}>Conferido</option>
+                        <option value="ESTORNADO" {% if request.GET.status == 'ESTORNADO' %}selected{% endif %}>Estornado</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Data Fim</label>
-                <input type="date" name="data_fim" class="form-control" value="{{ request.GET.data_fim }}">
+
+            <!-- Data Início -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data Início</label>
+                <div class="relative">
+                    <input type="date" name="data_inicio" value="{{ request.GET.data_inicio }}" 
+                           class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none">
+                </div>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select">
-                    <option value="">Todos</option>
-                    <option value="PENDENTE" {% if request.GET.status == 'PENDENTE' %}selected{% endif %}>Pendente</option>
-                    <option value="CONFERIDO" {% if request.GET.status == 'CONFERIDO' %}selected{% endif %}>Conferido</option>
-                    <option value="ESTORNADO" {% if request.GET.status == 'ESTORNADO' %}selected{% endif %}>Estornado</option>
-                </select>
+
+            <!-- Data Fim -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data Fim</label>
+                <div class="relative">
+                    <input type="date" name="data_fim" value="{{ request.GET.data_fim }}" 
+                           class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none">
+                </div>
             </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-outline-primary me-2">
-                    <i class="bi bi-search"></i>
+
+            <!-- Actions -->
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-primary hover:bg-orange-600 text-white rounded-lg py-2 text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-sm">filter_list</span>
+                    Filtrar
                 </button>
-                <a href="{% url 'contabil:lancamentos' %}" class="btn btn-outline-secondary">Limpar</a>
+                <a href="{% url 'contabil:lancamentos' %}" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-background-dark flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </a>
             </div>
         </form>
     </div>
-</div>
 
-<!-- Tabela -->
-<div class="card">
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead>
-                <tr>
-                    <th>Número</th>
-                    <th>Data</th>
-                    <th>Histórico</th>
-                    <th class="text-end">Débito</th>
-                    <th class="text-end">Crédito</th>
-                    <th>Status</th>
-                    <th class="text-center">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for lanc in lancamentos %}
-                <tr>
-                    <td><code>{{ lanc.numero }}</code></td>
-                    <td>{{ lanc.data|date:"d/m/Y" }}</td>
-                    <td>{{ lanc.historico|truncatechars:40 }}</td>
-                    <td class="text-end text-danger">R$ {{ lanc.total_debito|floatformat:2 }}</td>
-                    <td class="text-end text-success">R$ {{ lanc.total_credito|floatformat:2 }}</td>
-                    <td>
-                        {% if lanc.status == 'PENDENTE' %}
-                        <span class="badge bg-warning text-dark">Pendente</span>
-                        {% elif lanc.status == 'CONFERIDO' %}
-                        <span class="badge bg-success">Conferido</span>
-                        {% elif lanc.status == 'ESTORNADO' %}
-                        <span class="badge bg-danger">Estornado</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-center">
-                        <div class="btn-group btn-group-sm">
-                            <a href="{% url 'contabil:lancamento_detail' lanc.pk %}" class="btn btn-outline-info">
-                                <i class="bi bi-eye"></i>
-                            </a>
+    <!-- Table Section -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden w-full">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                        <th class="px-6 py-4">Número</th>
+                        <th class="px-6 py-4">Data</th>
+                        <th class="px-6 py-4">Histórico</th>
+                        <th class="px-6 py-4 text-right">Débito</th>
+                        <th class="px-6 py-4 text-right">Crédito</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                    {% for lanc in lancamentos %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                        <td class="px-6 py-4 font-mono text-sm text-slate-600 dark:text-slate-300">
+                            {{ lanc.numero }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                            {{ lanc.data|date:"d/m/Y" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm text-slate-700 dark:text-slate-200">{{ lanc.historico|truncatechars:40 }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-sm font-bold text-danger">R$ {{ lanc.total_debito|floatformat:2 }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-sm font-bold text-success">R$ {{ lanc.total_credito|floatformat:2 }}</span>
+                        </td>
+                        <td class="px-6 py-4">
                             {% if lanc.status == 'PENDENTE' %}
-                            <a href="{% url 'contabil:lancamento_update' lanc.pk %}" class="btn btn-outline-primary">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">Pendente</span>
+                            {% elif lanc.status == 'CONFERIDO' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Conferido</span>
+                            {% elif lanc.status == 'ESTORNADO' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">Estornado</span>
                             {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
-                        Nenhum lançamento encontrado.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center justify-center gap-2">
+                                <a href="{% url 'contabil:lancamento_detail' lanc.pk %}" class="p-1 rounded text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors" title="Visualizar">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                </a>
+                                {% if lanc.status == 'PENDENTE' %}
+                                <a href="{% url 'contabil:lancamento_update' lanc.pk %}" class="p-1 rounded text-slate-400 hover:text-warning hover:bg-warning/10 transition-colors" title="Editar">
+                                    <span class="material-symbols-outlined text-lg">edit</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-sm text-slate-500">
+                            <div class="flex flex-col items-center gap-2">
+                                <span class="material-symbols-outlined text-4xl text-slate-300">account_balance</span>
+                                <p>Nenhum lançamento contábil encontrado.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="p-4 border-t border-slate-200 dark:border-border-dark flex items-center justify-between">
+            <div class="text-xs text-slate-500">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </div>
+            
+            <div class="flex gap-1">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.numero %}&numero={{ request.GET.numero }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                    <span class="material-symbols-outlined text-sm">chevron_left</span>
+                </a>
+                {% endif %}
+                
+                <span class="px-3 py-1 bg-primary/10 text-primary rounded text-xs font-bold">{{ page_obj.number }}</span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.numero %}&numero={{ request.GET.numero }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
-
-<!-- Paginação -->
-{% if is_paginated %}
-<nav class="mt-4">
-    <ul class="pagination justify-content-center">
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-        </li>
-        {% endif %}
-        <li class="page-item disabled">
-            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-        </li>
-        {% if page_obj.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
 {% endblock %}

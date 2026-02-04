@@ -1,141 +1,188 @@
-{% extends "base.html" %}
+{% extends "base_dark.html" %}
+{% load static %}
 
-{% block title %}Auditoria - Caixa Digital{% endblock %}
+{% block title %}Auditoria - wCaixaDigital{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">
-        <i class="bi bi-shield-check me-2"></i>Trilha de Auditoria
-    </h2>
-    <div>
-        <a href="{% url 'auditoria:verificar' %}" class="btn btn-outline-success">
-            <i class="bi bi-check-circle me-1"></i>Verificar Integridade
-        </a>
-        <a href="{% url 'auditoria:export' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-download me-1"></i>Exportar
-        </a>
+<div class="p-6 w-full space-y-6">
+    <!-- Header Section -->
+    <div class="flex items-end justify-between">
+        <div>
+            <h3 class="text-2xl font-bold tracking-tight">Trilha de Auditoria</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Registro imutável de operações do sistema</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'auditoria:verificar' %}" class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-background-dark/50 rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm text-success">verified_user</span>
+                Verificar Integridade
+            </a>
+            <a href="{% url 'auditoria:exportar' %}" class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-background-dark/50 rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm">download</span>
+                Exportar
+            </a>
+        </div>
     </div>
-</div>
 
-<!-- Filtros -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-2">
-                <label class="form-label">Ação</label>
-                <select name="acao" class="form-select">
-                    <option value="">Todas</option>
-                    <option value="CREATE" {% if request.GET.acao == 'CREATE' %}selected{% endif %}>Criação</option>
-                    <option value="UPDATE" {% if request.GET.acao == 'UPDATE' %}selected{% endif %}>Alteração</option>
-                    <option value="DELETE" {% if request.GET.acao == 'DELETE' %}selected{% endif %}>Exclusão</option>
-                </select>
+    <!-- Filters Section -->
+    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <!-- Ação -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ação</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">bolt</span>
+                    <select name="acao" class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
+                        <option value="">Todas</option>
+                        <option value="CREATE" {% if request.GET.acao == 'CREATE' %}selected{% endif %}>Criação</option>
+                        <option value="UPDATE" {% if request.GET.acao == 'UPDATE' %}selected{% endif %}>Alteração</option>
+                        <option value="DELETE" {% if request.GET.acao == 'DELETE' %}selected{% endif %}>Exclusão</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Modelo</label>
-                <select name="modelo" class="form-select">
-                    <option value="">Todos</option>
-                    {% for modelo in modelos_disponiveis %}
-                    <option value="{{ modelo }}" {% if request.GET.modelo == modelo %}selected{% endif %}>{{ modelo }}</option>
-                    {% endfor %}
-                </select>
+
+            <!-- Modelo -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Modelo</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">database</span>
+                    <select name="modelo" class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
+                        <option value="">Todos</option>
+                        {% for modelo in modelos_disponiveis %}
+                        <option value="{{ modelo }}" {% if request.GET.modelo == modelo %}selected{% endif %}>{{ modelo }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Usuário</label>
-                <input type="text" name="usuario" class="form-control" 
-                       value="{{ request.GET.usuario }}" placeholder="Nome ou e-mail">
+
+            <!-- Usuário -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Usuário</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person</span>
+                    <input type="text" name="usuario" value="{{ request.GET.usuario }}" 
+                           class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" 
+                           placeholder="Nome/Email">
+                </div>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Data</label>
-                <input type="date" name="data" class="form-control" value="{{ request.GET.data }}">
+
+            <!-- Data -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data</label>
+                <div class="relative">
+                    <input type="date" name="data" value="{{ request.GET.data }}" 
+                           class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none">
+                </div>
             </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-outline-primary me-2">
-                    <i class="bi bi-search"></i>
+
+            <!-- Actions -->
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-primary hover:bg-orange-600 text-white rounded-lg py-2 text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-sm">filter_list</span>
+                    Filtrar
                 </button>
-                <a href="{% url 'auditoria:list' %}" class="btn btn-outline-secondary">Limpar</a>
+                <a href="{% url 'auditoria:list' %}" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-background-dark flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </a>
             </div>
         </form>
     </div>
-</div>
 
-<!-- Tabela -->
-<div class="card">
-    <div class="card-body p-0">
-        <table class="table table-hover table-sm mb-0">
-            <thead>
-                <tr>
-                    <th>Data/Hora</th>
-                    <th>Ação</th>
-                    <th>Modelo</th>
-                    <th>Objeto</th>
-                    <th>Usuário</th>
-                    <th>IP</th>
-                    <th class="text-center">Íntegro</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for registro in registros %}
-                <tr>
-                    <td class="text-nowrap">{{ registro.data_hora|date:"d/m/Y H:i:s" }}</td>
-                    <td>
-                        {% if registro.acao == 'CREATE' %}
-                        <span class="badge bg-success">Criação</span>
-                        {% elif registro.acao == 'UPDATE' %}
-                        <span class="badge bg-warning text-dark">Alteração</span>
-                        {% elif registro.acao == 'DELETE' %}
-                        <span class="badge bg-danger">Exclusão</span>
-                        {% else %}
-                        <span class="badge bg-secondary">{{ registro.acao }}</span>
-                        {% endif %}
-                    </td>
-                    <td><code>{{ registro.modelo }}</code></td>
-                    <td>{{ registro.objeto_id }}</td>
-                    <td>{{ registro.usuario.get_full_name|default:registro.usuario }}</td>
-                    <td><small class="text-muted">{{ registro.ip_address }}</small></td>
-                    <td class="text-center">
-                        {% if registro.hash_valido %}
-                        <i class="bi bi-check-circle text-success"></i>
-                        {% else %}
-                        <i class="bi bi-exclamation-circle text-danger"></i>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'auditoria:detail' registro.pk %}" class="btn btn-sm btn-outline-info">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="8" class="text-center text-muted py-4">
-                        Nenhum registro de auditoria encontrado.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Table Section -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden w-full">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                        <th class="px-6 py-4">Data/Hora</th>
+                        <th class="px-6 py-4">Ação</th>
+                        <th class="px-6 py-4">Modelo</th>
+                        <th class="px-6 py-4">Objeto</th>
+                        <th class="px-6 py-4">Usuário</th>
+                        <th class="px-6 py-4">IP</th>
+                        <th class="px-6 py-4 text-center">Íntegro</th>
+                        <th class="px-6 py-4 text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                    {% for registro in registros %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                        <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            {{ registro.data_hora|date:"d/m/Y H:i:s" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if registro.acao == 'CREATE' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Criação</span>
+                            {% elif registro.acao == 'UPDATE' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">Alteração</span>
+                            {% elif registro.acao == 'DELETE' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">Exclusão</span>
+                            {% else %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">{{ registro.acao }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm font-mono text-slate-600 dark:text-slate-300">
+                            {{ registro.modelo }}
+                        </td>
+                        <td class="px-6 py-4 text-sm font-mono text-slate-500 dark:text-slate-400">
+                            {{ registro.objeto_id }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                            {{ registro.usuario.get_full_name|default:registro.usuario }}
+                        </td>
+                        <td class="px-6 py-4 text-xs text-slate-400 font-mono">
+                            {{ registro.ip_address }}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if registro.hash_valido %}
+                            <span class="material-symbols-outlined text-success text-lg" title="Hash Válido">check_circle</span>
+                            {% else %}
+                            <span class="material-symbols-outlined text-danger text-lg animate-pulse" title="Hash Inválido">error</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <a href="{% url 'auditoria:detail' registro.pk %}" class="p-1 rounded text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors" title="Visualizar Detalhes">
+                                <span class="material-symbols-outlined text-lg">visibility</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="px-6 py-8 text-center text-sm text-slate-500">
+                            <div class="flex flex-col items-center gap-2">
+                                <span class="material-symbols-outlined text-4xl text-slate-300">history</span>
+                                <p>Nenhum registro de auditoria encontrado.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="p-4 border-t border-slate-200 dark:border-border-dark flex items-center justify-between">
+            <div class="text-xs text-slate-500">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </div>
+            
+            <div class="flex gap-1">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.modelo %}&modelo={{ request.GET.modelo }}{% endif %}{% if request.GET.acao %}&acao={{ request.GET.acao }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                    <span class="material-symbols-outlined text-sm">chevron_left</span>
+                </a>
+                {% endif %}
+                
+                <span class="px-3 py-1 bg-primary/10 text-primary rounded text-xs font-bold">{{ page_obj.number }}</span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.modelo %}&modelo={{ request.GET.modelo }}{% endif %}{% if request.GET.acao %}&acao={{ request.GET.acao }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
-
-<!-- Paginação -->
-{% if is_paginated %}
-<nav class="mt-4">
-    <ul class="pagination justify-content-center">
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-        </li>
-        {% endif %}
-        <li class="page-item disabled">
-            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-        </li>
-        {% if page_obj.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
 {% endblock %}

@@ -1,165 +1,217 @@
-{% extends "base.html" %}
+{% extends "base_dark.html" %}
+{% load static %}
 
-{% block title %}Notas Fiscais - Caixa Digital{% endblock %}
+{% block title %}NFS-e - wCaixaDigital{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">
-        <i class="bi bi-receipt me-2"></i>NFS-e - Notas Fiscais de Serviço
-    </h2>
-    <a href="{% url 'nfse:create' %}" class="btn btn-success">
-        <i class="bi bi-plus-lg me-1"></i>Nova NFS-e
-    </a>
-</div>
+<div class="p-6 w-full space-y-6">
+    <!-- Header Section -->
+    <div class="flex items-end justify-between">
+        <div>
+            <h3 class="text-2xl font-bold tracking-tight">Notas Fiscais de Serviço</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gestão de emissão e consulta de notas</p>
+        </div>
+        <a href="{% url 'nfse:create' %}" class="bg-success hover:bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-success/20">
+            <span class="material-symbols-outlined text-sm">add</span>
+            Nova NFS-e
+        </a>
+    </div>
 
-<!-- Filtros -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-2">
-                <label class="form-label">Número</label>
-                <input type="text" name="numero" class="form-control" 
-                       value="{{ request.GET.numero }}" placeholder="RPS ou NFS-e">
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Autorizadas -->
+        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
+            <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-6xl text-success">check_circle</span>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Cliente</label>
-                <input type="text" name="cliente" class="form-control" 
-                       value="{{ request.GET.cliente }}" placeholder="Nome ou documento">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Autorizadas</p>
+            <h4 class="text-2xl font-bold mt-1 text-success">{{ stats.autorizadas|default:"0" }}</h4>
+        </div>
+        
+        <!-- Rascunhos -->
+        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
+            <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-6xl text-warning">edit_document</span>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select">
-                    <option value="">Todos</option>
-                    <option value="RASCUNHO" {% if request.GET.status == 'RASCUNHO' %}selected{% endif %}>Rascunho</option>
-                    <option value="AUTORIZADA" {% if request.GET.status == 'AUTORIZADA' %}selected{% endif %}>Autorizada</option>
-                    <option value="CANCELADA" {% if request.GET.status == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
-                </select>
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Rascunhos</p>
+            <h4 class="text-2xl font-bold mt-1 text-warning">{{ stats.rascunhos|default:"0" }}</h4>
+        </div>
+
+        <!-- Canceladas -->
+        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
+            <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-6xl text-danger">cancel</span>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Data Início</label>
-                <input type="date" name="data_inicio" class="form-control" value="{{ request.GET.data_inicio }}">
+            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Canceladas</p>
+            <h4 class="text-2xl font-bold mt-1 text-danger">{{ stats.canceladas|default:"0" }}</h4>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <!-- Número -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Número</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">tag</span>
+                    <input type="text" name="numero" value="{{ request.GET.numero }}" 
+                           class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" 
+                           placeholder="RPS ou NFS-e">
+                </div>
             </div>
-            <div class="col-md-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-outline-primary me-2">
-                    <i class="bi bi-search me-1"></i>Filtrar
+
+            <!-- Cliente -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Cliente</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person</span>
+                    <input type="text" name="cliente" value="{{ request.GET.cliente }}" 
+                           class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" 
+                           placeholder="Nome/Doc">
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">toggle_on</span>
+                    <select name="status" class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
+                        <option value="">Todos</option>
+                        <option value="RASCUNHO" {% if request.GET.status == 'RASCUNHO' %}selected{% endif %}>Rascunho</option>
+                        <option value="AUTORIZADA" {% if request.GET.status == 'AUTORIZADA' %}selected{% endif %}>Autorizada</option>
+                        <option value="CANCELADA" {% if request.GET.status == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Data Início -->
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data Início</label>
+                <div class="relative">
+                    <input type="date" name="data_inicio" value="{{ request.GET.data_inicio }}" 
+                           class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none">
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-primary hover:bg-orange-600 text-white rounded-lg py-2 text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-sm">filter_list</span>
+                    Filtrar
                 </button>
-                <a href="{% url 'nfse:list' %}" class="btn btn-outline-secondary">Limpar</a>
+                <a href="{% url 'nfse:list' %}" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-background-dark flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </a>
             </div>
         </form>
     </div>
-</div>
 
-<!-- Estatísticas Rápidas -->
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card bg-success bg-opacity-10 border-success">
-            <div class="card-body text-center py-2">
-                <span class="text-success">Autorizadas: <strong>{{ stats.autorizadas|default:"0" }}</strong></span>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card bg-warning bg-opacity-10 border-warning">
-            <div class="card-body text-center py-2">
-                <span class="text-warning">Rascunhos: <strong>{{ stats.rascunhos|default:"0" }}</strong></span>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card bg-danger bg-opacity-10 border-danger">
-            <div class="card-body text-center py-2">
-                <span class="text-danger">Canceladas: <strong>{{ stats.canceladas|default:"0" }}</strong></span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Tabela -->
-<div class="card">
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0">
-            <thead>
-                <tr>
-                    <th>RPS</th>
-                    <th>NFS-e</th>
-                    <th>Data</th>
-                    <th>Cliente</th>
-                    <th>Status</th>
-                    <th class="text-end">Valor</th>
-                    <th class="text-center">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for nota in notas %}
-                <tr>
-                    <td>{{ nota.numero_rps }}</td>
-                    <td>{{ nota.numero_nfse|default:"-" }}</td>
-                    <td>{{ nota.data_emissao|date:"d/m/Y" }}</td>
-                    <td>{{ nota.cliente.razao_social|truncatechars:30 }}</td>
-                    <td>
-                        {% if nota.status == 'AUTORIZADA' %}
-                        <span class="badge bg-success">Autorizada</span>
-                        {% elif nota.status == 'RASCUNHO' %}
-                        <span class="badge bg-secondary">Rascunho</span>
-                        {% elif nota.status == 'ENVIANDO' %}
-                        <span class="badge bg-info">Enviando</span>
-                        {% elif nota.status == 'CANCELADA' %}
-                        <span class="badge bg-danger">Cancelada</span>
-                        {% elif nota.status == 'REJEITADA' %}
-                        <span class="badge bg-warning text-dark">Rejeitada</span>
-                        {% else %}
-                        <span class="badge bg-secondary">{{ nota.get_status_display }}</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-end">R$ {{ nota.valor_servicos|floatformat:2 }}</td>
-                    <td class="text-center">
-                        <div class="btn-group btn-group-sm">
-                            <a href="{% url 'nfse:detail' nota.pk %}" class="btn btn-outline-info" title="Visualizar">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            {% if nota.status == 'RASCUNHO' %}
-                            <a href="{% url 'nfse:update' nota.pk %}" class="btn btn-outline-primary" title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+    <!-- Table Section -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden w-full">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                        <th class="px-6 py-4">RPS</th>
+                        <th class="px-6 py-4">NFS-e</th>
+                        <th class="px-6 py-4">Data</th>
+                        <th class="px-6 py-4">Cliente</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Valor Serv.</th>
+                        <th class="px-6 py-4 text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                    {% for nota in notas %}
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                        <td class="px-6 py-4 font-mono text-sm text-slate-600 dark:text-slate-300">
+                            {{ nota.numero_rps }}
+                        </td>
+                        <td class="px-6 py-4 font-mono text-sm font-bold text-slate-700 dark:text-slate-200">
+                            {{ nota.numero_nfse|default:"-" }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
+                            {{ nota.data_emissao|date:"d/m/Y" }}
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ nota.cliente.razao_social|truncatechars:30 }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if nota.status == 'AUTORIZADA' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Autorizada</span>
+                            {% elif nota.status == 'RASCUNHO' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">Rascunho</span>
+                            {% elif nota.status == 'ENVIANDO' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">Enviando</span>
+                            {% elif nota.status == 'CANCELADA' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">Cancelada</span>
+                            {% elif nota.status == 'REJEITADA' %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">Rejeitada</span>
+                            {% else %}
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">{{ nota.get_status_display }}</span>
                             {% endif %}
-                            {% if nota.xml_nfse or nota.xml_rps %}
-                            <a href="{% url 'nfse:xml' nota.pk %}" class="btn btn-outline-secondary" title="XML">
-                                <i class="bi bi-file-code"></i>
-                            </a>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
-                        Nenhuma nota fiscal encontrada.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="font-bold text-slate-700 dark:text-slate-200">R$ {{ nota.valor_servicos|floatformat:2 }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center justify-center gap-2">
+                                <a href="{% url 'nfse:detail' nota.pk %}" class="p-1 rounded text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors" title="Visualizar">
+                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                                </a>
+                                {% if nota.status == 'RASCUNHO' %}
+                                <a href="{% url 'nfse:update' nota.pk %}" class="p-1 rounded text-slate-400 hover:text-warning hover:bg-warning/10 transition-colors" title="Editar">
+                                    <span class="material-symbols-outlined text-lg">edit</span>
+                                </a>
+                                {% endif %}
+                                {% if nota.xml_nfse or nota.xml_rps %}
+                                <a href="{% url 'nfse:xml' nota.pk %}" class="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors" title="XML">
+                                    <span class="material-symbols-outlined text-lg">code</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-sm text-slate-500">
+                            <div class="flex flex-col items-center gap-2">
+                                <span class="material-symbols-outlined text-4xl text-slate-300">receipt_long</span>
+                                <p>Nenhuma nota fiscal encontrada.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="p-4 border-t border-slate-200 dark:border-border-dark flex items-center justify-between">
+            <div class="text-xs text-slate-500">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </div>
+            
+            <div class="flex gap-1">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.numero %}&numero={{ request.GET.numero }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                    <span class="material-symbols-outlined text-sm">chevron_left</span>
+                </a>
+                {% endif %}
+                
+                <span class="px-3 py-1 bg-primary/10 text-primary rounded text-xs font-bold">{{ page_obj.number }}</span>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.numero %}&numero={{ request.GET.numero }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
-
-<!-- Paginação -->
-{% if is_paginated %}
-<nav class="mt-4">
-    <ul class="pagination justify-content-center">
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-        </li>
-        {% endif %}
-        <li class="page-item disabled">
-            <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-        </li>
-        {% if page_obj.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
 {% endblock %}
