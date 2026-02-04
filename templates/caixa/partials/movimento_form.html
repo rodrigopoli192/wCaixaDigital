@@ -61,9 +61,14 @@
                     <label class="text-xs font-bold text-slate-400">Cliente (Tomador)</label>
                     <span class="text-[10px] bg-orange-500/20 text-orange-500 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Obrigatório para NFS-e</span>
                 </div>
-                <div class="relative">
-                    {% render_field form.cliente class="w-full appearance-none bg-[#202024] border border-white/10 rounded-lg pl-4 pr-10 py-3 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
-                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-lg">search</span>
+                <div class="flex gap-2">
+                    <div class="relative flex-1">
+                        {% render_field form.cliente class="w-full appearance-none bg-[#202024] border border-white/10 rounded-lg pl-4 pr-10 py-3 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-lg">search</span>
+                    </div>
+                    <a href="{% url 'clientes:create' %}" target="_blank" class="flex items-center justify-center px-4 bg-[#202024] border border-slate-700/50 rounded-lg hover:bg-slate-700 hover:border-slate-600 transition-all text-slate-400 hover:text-orange-500 group" title="Cadastrar Novo Cliente">
+                        <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">person_add</span>
+                    </a>
                 </div>
                 <p class="text-[11px] text-slate-500 px-1 italic">Vincular a um tomador de serviço para fins de compliance fiscal.</p>
             </div>
