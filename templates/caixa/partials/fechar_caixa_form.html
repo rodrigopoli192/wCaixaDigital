@@ -1,219 +1,187 @@
 {% load widget_tweaks %}
 
 <div id="fechar-caixa-container">
-    <form hx-post="{% url 'caixa:fechar' caixa.pk %}" hx-swap="outerHTML" class="space-y-6">
+    <form hx-post="{% url 'caixa:fechar' caixa.pk %}" hx-swap="outerHTML" class="flex flex-col h-full">
         {% csrf_token %}
 
-        <div class="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-border-dark pb-4">
-            <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">
-                <span class="material-symbols-outlined align-bottom text-warning mr-1">lock</span>
+        <!-- Header -->
+        <div class="flex justify-between items-center px-6 py-4 border-b border-slate-100 dark:border-border-dark">
+            <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <span class="material-symbols-outlined text-warning">lock</span>
                 Fechar Caixa
             </h3>
             <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-        
+
         {% if form.non_field_errors %}
-        <div class="p-4 mb-4 text-sm text-danger rounded-lg bg-danger/10 border border-danger/20" role="alert">
+        <div class="mx-6 mt-4 p-4 text-sm text-danger rounded-lg bg-danger/10 border border-danger/20" role="alert">
             {{ form.non_field_errors }}
         </div>
         {% endif %}
         
+        <!-- Obs. Abertura (se houver) -->
         {% if abertura.observacao %}
-        <div class="p-3 mb-4 text-xs italic text-slate-500 bg-slate-50 dark:bg-background-dark border border-slate-100 dark:border-border-dark rounded-lg flex items-start gap-2">
+        <div class="mx-6 mt-4 p-3 text-xs italic text-slate-500 bg-slate-50 dark:bg-background-dark border border-slate-100 dark:border-border-dark rounded-lg flex items-start gap-2">
             <span class="material-symbols-outlined text-sm">sticky_note_2</span>
-            <div>
-                <strong>Obs. Abertura:</strong> {{ abertura.observacao }}
-            </div>
+            <div><strong>Obs. Abertura:</strong> {{ abertura.observacao }}</div>
         </div>
         {% endif %}
 
-        <!-- Resumo Compacto -->
-        <div class="grid grid-cols-2 gap-4 p-4 rounded-lg bg-slate-50 dark:bg-background-dark/50 border border-slate-100 dark:border-border-dark mb-6">
-            <div class="text-center">
-                 <p class="text-xs text-slate-500 uppercase">Total Entradas</p>
-                 <p class="font-bold text-success">+ R$ {{ abertura.total_entradas|floatformat:2 }}</p>
-            </div>
-            <div class="text-center">
-                 <p class="text-xs text-slate-500 uppercase">Total Saídas</p>
-                 <p class="font-bold text-danger">- R$ {{ abertura.total_saidas|floatformat:2 }}</p>
-            </div>
-            <div class="col-span-2 text-center border-t border-slate-200 dark:border-border-dark pt-2 mt-1">
-                 <p class="text-xs text-primary uppercase font-bold">Saldo Sistema</p>
-                 <p class="text-xl font-bold text-primary">R$ {{ abertura.saldo_calculado|floatformat:2 }}</p>
-            </div>
-            
-            {% if totais_forma_pagamento %}
-            <div class="col-span-2 mt-2 pt-2 border-t border-slate-200 dark:border-border-dark">
-                <p class="text-[10px] text-slate-400 uppercase font-bold text-center mb-2">Detalhamento do Sistema</p>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    {% for item in totais_forma_pagamento %}
-                    <div class="flex justify-between p-1.5 rounded bg-white dark:bg-background-dark border border-slate-100 dark:border-border-dark">
-                        <span class="text-slate-600 dark:text-slate-400">
-                            {{ item.forma_pagamento__nome }}
-                            <span class="text-[9px] opacity-75">({{ item.tipo }})</span>
-                        </span>
-                        <span class="font-mono font-bold {% if item.tipo == 'ENTRADA' or item.tipo == 'SUPRIMENTO' %}text-success{% else %}text-danger{% endif %}">
-                            {{ item.total|floatformat:2 }}
-                        </span>
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- COLUNA ESQUERDA: SISTEMA -->
+            <div class="space-y-6">
+                <div>
+                    <h4 class="text-xs font-bold uppercase text-slate-400 mb-3 tracking-wider">Resumo do Sistema</h4>
+                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-background-dark/50 border border-slate-200 dark:border-border-dark space-y-4">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-600 dark:text-slate-400">Total Entradas</span>
+                            <span class="font-bold text-success font-mono">+ {{ abertura.total_entradas|floatformat:2 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-600 dark:text-slate-400">Total Saídas</span>
+                            <span class="font-bold text-danger font-mono">- {{ abertura.total_saidas|floatformat:2 }}</span>
+                        </div>
+                        <div class="pt-3 border-t border-slate-200 dark:border-border-dark flex justify-between items-center">
+                            <span class="font-bold text-slate-700 dark:text-slate-200">Saldo Final</span>
+                            <span class="text-xl font-bold text-primary font-mono" id="sistema-total" data-value="{{ abertura.saldo_calculado|stringformat:'.2f' }}">
+                                R$ {{ abertura.saldo_calculado|floatformat:2 }}
+                            </span>
+                        </div>
                     </div>
-                    {% endfor %}
                 </div>
-            </div>
-            {% endif %}
-        </div>
 
-        <!-- Campos de Valor -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <div class="space-y-1">
-                <label for="{{ form.valor_dinheiro.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Dinheiro
-                </label>
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <span class="text-slate-500 sm:text-sm">R$</span>
+                <!-- Breakdown -->
+                {% if totais_forma_pagamento %}
+                <div>
+                    <h4 class="text-xs font-bold uppercase text-slate-400 mb-3 tracking-wider">Detalhamento</h4>
+                    <div class="rounded-xl border border-slate-200 dark:border-border-dark divide-y divide-slate-100 dark:divide-border-dark overflow-hidden">
+                        {% for item in totais_forma_pagamento %}
+                        <div class="flex justify-between items-center px-4 py-2.5 bg-white dark:bg-surface-dark text-xs">
+                            <div class="flex items-center gap-2">
+                                <span class="size-1.5 rounded-full {% if item.tipo == 'ENTRADA' or item.tipo == 'SUPRIMENTO' %}bg-success{% else %}bg-danger{% endif %}"></span>
+                                <span class="text-slate-700 dark:text-slate-300 font-medium">{{ item.forma_pagamento__nome }}</span>
+                            </div>
+                            <span class="font-mono text-slate-500 dark:text-slate-400">{{ item.total|floatformat:2 }}</span>
+                        </div>
+                        {% endfor %}
                     </div>
-                    {% render_field form.valor_dinheiro class="valor-input block w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 pl-10 focus:border-warning focus:ring-warning sm:text-sm" placeholder="0,00" %}
                 </div>
-                 {% if form.valor_dinheiro.errors %}
-                    <p class="text-sm text-danger mt-1">{{ form.valor_dinheiro.errors.0 }}</p>
                 {% endif %}
             </div>
 
-            <div class="space-y-1">
-                <label for="{{ form.valor_cartao_debito.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Cartão Débito
-                </label>
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <span class="text-slate-500 sm:text-sm">R$</span>
+            <!-- COLUNA DIREITA: CONFERÊNCIA -->
+            <div class="space-y-6">
+                <h4 class="text-xs font-bold uppercase text-slate-400 mb-3 tracking-wider">Conferência (Informado)</h4>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase text-slate-500 font-bold">Dinheiro</label>
+                        {% render_field form.valor_dinheiro class="valor-input w-full rounded-lg text-right font-mono text-sm border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-warning focus:ring-warning" placeholder="0,00" %}
                     </div>
-                    {% render_field form.valor_cartao_debito class="valor-input block w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 pl-10 focus:border-warning focus:ring-warning sm:text-sm" placeholder="0,00" %}
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase text-slate-500 font-bold">Débito</label>
+                        {% render_field form.valor_cartao_debito class="valor-input w-full rounded-lg text-right font-mono text-sm border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-warning focus:ring-warning" placeholder="0,00" %}
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase text-slate-500 font-bold">Crédito</label>
+                        {% render_field form.valor_cartao_credito class="valor-input w-full rounded-lg text-right font-mono text-sm border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-warning focus:ring-warning" placeholder="0,00" %}
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase text-slate-500 font-bold">PIX</label>
+                        {% render_field form.valor_pix class="valor-input w-full rounded-lg text-right font-mono text-sm border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-warning focus:ring-warning" placeholder="0,00" %}
+                    </div>
+                    <div class="space-y-1 col-span-2">
+                        <label class="text-[10px] uppercase text-slate-500 font-bold">Outros</label>
+                        {% render_field form.valor_outros class="valor-input w-full rounded-lg text-right font-mono text-sm border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-warning focus:ring-warning" placeholder="0,00" %}
+                    </div>
                 </div>
-                 {% if form.valor_cartao_debito.errors %}
-                    <p class="text-sm text-danger mt-1">{{ form.valor_cartao_debito.errors.0 }}</p>
-                {% endif %}
-            </div>
 
-             <div class="space-y-1">
-                <label for="{{ form.valor_cartao_credito.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Cartão Crédito
-                </label>
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <span class="text-slate-500 sm:text-sm">R$</span>
+                <!-- Total e Diferença -->
+                <div class="p-4 rounded-xl bg-slate-100 dark:bg-background-dark border border-slate-200 dark:border-border-dark">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs text-slate-500 font-bold uppercase">Total Informado</span>
+                        <span id="display-total-informado" class="font-mono font-bold text-slate-800 dark:text-slate-100">R$ 0,00</span>
                     </div>
-                    {% render_field form.valor_cartao_credito class="valor-input block w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 pl-10 focus:border-warning focus:ring-warning sm:text-sm" placeholder="0,00" %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-slate-500 font-bold uppercase">Diferença</span>
+                        <span id="display-diferenca" class="font-mono font-bold text-gray-400">R$ 0,00</span>
+                    </div>
                 </div>
-                 {% if form.valor_cartao_credito.errors %}
-                    <p class="text-sm text-danger mt-1">{{ form.valor_cartao_credito.errors.0 }}</p>
-                {% endif %}
-            </div>
 
-             <div class="space-y-1">
-                <label for="{{ form.valor_pix.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    PIX
-                </label>
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <span class="text-slate-500 sm:text-sm">R$</span>
-                    </div>
-                    {% render_field form.valor_pix class="valor-input block w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 pl-10 focus:border-warning focus:ring-warning sm:text-sm" placeholder="0,00" %}
+                <!-- Justificativa (só aparece se diferença != 0 via JS ou se backend erro) -->
+                <div id="justificativa-container" class="space-y-1 {% if not form.justificativa_diferenca.errors %}hidden{% endif %}">
+                    <label for="{{ form.justificativa_diferenca.id_for_label }}" class="text-[10px] uppercase text-danger font-bold">
+                        Justificativa da Diferença
+                    </label>
+                    {% render_field form.justificativa_diferenca class="w-full rounded-lg border-danger text-sm dark:bg-background-dark dark:text-slate-200 focus:border-danger focus:ring-danger" rows="2" placeholder="Explique a divergência..." %}
+                    {% if form.justificativa_diferenca.errors %}
+                        <p class="text-xs text-danger mt-1">{{ form.justificativa_diferenca.errors.0 }}</p>
+                    {% endif %}
                 </div>
-                 {% if form.valor_pix.errors %}
-                    <p class="text-sm text-danger mt-1">{{ form.valor_pix.errors.0 }}</p>
-                {% endif %}
-            </div>
 
-             <div class="space-y-1">
-                <label for="{{ form.valor_outros.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Outros
-                </label>
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <span class="text-slate-500 sm:text-sm">R$</span>
-                    </div>
-                    {% render_field form.valor_outros class="valor-input block w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 pl-10 focus:border-warning focus:ring-warning sm:text-sm" placeholder="0,00" %}
-                </div>
-                 {% if form.valor_outros.errors %}
-                    <p class="text-sm text-danger mt-1">{{ form.valor_outros.errors.0 }}</p>
-                {% endif %}
-            </div>
-
-            <div class="space-y-1">
-                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300">
-                    Total Informado
-                </label>
-                <div class="relative mt-1 rounded-md shadow-sm">
-                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <span class="text-slate-500 sm:text-sm font-bold">R$</span>
-                    </div>
-                    <input type="text" id="total_informado" class="block w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-100 pl-10 bg-slate-100 dark:bg-slate-800 font-bold focus:ring-0 sm:text-sm" readonly>
+                <div class="space-y-1">
+                    <label for="{{ form.observacoes.id_for_label }}" class="text-[10px] uppercase text-slate-500 font-bold">
+                        Observações Gerais
+                    </label>
+                    {% render_field form.observacoes class="w-full rounded-lg border-slate-300 dark:border-border-dark text-sm dark:bg-background-dark dark:text-slate-200 focus:border-warning focus:ring-warning" rows="2" %}
                 </div>
             </div>
         </div>
 
-        <div class="space-y-1">
-            <label for="{{ form.justificativa_diferenca.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Justificativa <span class="text-slate-400 font-normal">(se houver diferença)</span>
-            </label>
-            {% render_field form.justificativa_diferenca class="w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-warning focus:ring-warning shadow-sm" rows="2" %}
-            {% if form.justificativa_diferenca.errors %}
-                <p class="text-sm text-danger mt-1">{{ form.justificativa_diferenca.errors.0 }}</p>
-            {% endif %}
-        </div>
-
-        <div class="space-y-1">
-            <label for="{{ form.observacoes.id_for_label }}" class="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Observações
-            </label>
-            {% render_field form.observacoes class="w-full rounded-lg border-slate-300 dark:border-border-dark dark:bg-background-dark dark:text-slate-200 focus:border-warning focus:ring-warning shadow-sm" rows="2" %}
-             {% if form.observacoes.errors %}
-                <p class="text-sm text-danger mt-1">{{ form.observacoes.errors.0 }}</p>
-            {% endif %}
-        </div>
-
-        <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-border-dark">
-            <button type="button" @click="open = false" class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-background-dark border border-slate-300 dark:border-border-dark rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-warning focus:ring-offset-2 transition-all">
+        <div class="px-6 py-4 bg-slate-50 dark:bg-surface-dark border-t border-slate-100 dark:border-border-dark rounded-b-lg flex justify-end gap-3">
+            <button type="button" @click="open = false" class="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-background-dark border border-slate-300 dark:border-border-dark rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                 Cancelar
             </button>
             <button type="submit" class="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-bold rounded-lg shadow-sm text-white bg-warning hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-warning transition-all">
-                 {% if is_loading %}
-                    <span class="animate-spin -ml-1 mr-3 h-5 w-5 text-white material-symbols-outlined">refresh</span>
-                    Salvando...
-                 {% else %}
-                   <span class="material-symbols-outlined mr-2 text-sm">lock</span>
-                   Fechar Caixa
-                 {% endif %}
+               <span class="material-symbols-outlined mr-2 text-sm">lock</span>
+               Confirmar Fechamento
             </button>
         </div>
     </form>
     
     <script>
     (function() {
-        function calcularTotal() {
-            let total = 0;
+        const sistemaTotalEl = document.getElementById('sistema-total');
+        const sistemaTotal = parseFloat(sistemaTotalEl.dataset.value.replace(',', '.')) || 0;
+        const totalDisplay = document.getElementById('display-total-informado');
+        const diffDisplay = document.getElementById('display-diferenca');
+        const justContainer = document.getElementById('justificativa-container');
+
+        function calcular() {
+            let totalInformado = 0;
             document.querySelectorAll('.valor-input').forEach(el => {
                 if (el.value) {
-                    // Trata formato pt-BR (1.000,00) ou formato simples (1000.00)
                     let valStr = el.value.replace('.', '').replace(',', '.');
-                    total += parseFloat(valStr) || 0;
+                    totalInformado += parseFloat(valStr) || 0;
                 }
             });
-             const totalEl = document.getElementById('total_informado');
-             if(totalEl) {
-                totalEl.value = total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-             }
+
+            // Update Total Informado
+            totalDisplay.textContent = 'R$ ' + totalInformado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            // Calculate Difference
+            const diff = totalInformado - sistemaTotal;
+            diffDisplay.textContent = 'R$ ' + diff.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            if (diff === 0) {
+                diffDisplay.className = 'font-mono font-bold text-success';
+                diffDisplay.textContent += ' (OK)';
+                justContainer.classList.add('hidden');
+            } else {
+                diffDisplay.className = 'font-mono font-bold text-danger';
+                justContainer.classList.remove('hidden');
+            }
         }
 
         // Attach events
         document.querySelectorAll('.valor-input').forEach(el => {
-            el.addEventListener('input', calcularTotal);
+            el.addEventListener('input', calcular);
         });
         
         // Initial calc
-        calcularTotal();
+        calcular();
     })();
     </script>
 </div>
