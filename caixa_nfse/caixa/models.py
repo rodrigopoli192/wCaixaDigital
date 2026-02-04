@@ -202,6 +202,25 @@ class AberturaCaixa(TenantAwareModel):
 
         return self.saldo_abertura + entradas - saidas
 
+    @property
+    def total_entradas(self) -> Decimal:
+        """Calcula total de entradas."""
+        return self.movimentos.filter(
+            tipo__in=[TipoMovimento.ENTRADA, TipoMovimento.SUPRIMENTO]
+        ).aggregate(total=models.Sum("valor"))["total"] or Decimal("0.00")
+
+    @property
+    def total_saidas(self) -> Decimal:
+        """Calcula total de saídas."""
+        return self.movimentos.filter(
+            tipo__in=[TipoMovimento.SAIDA, TipoMovimento.SANGRIA, TipoMovimento.ESTORNO]
+        ).aggregate(total=models.Sum("valor"))["total"] or Decimal("0.00")
+
+    @property
+    def saldo_calculado(self) -> Decimal:
+        """Alias para saldo_movimentos."""
+        return self.saldo_movimentos
+
 
 class MovimentoCaixa(TenantAwareModel):
     """

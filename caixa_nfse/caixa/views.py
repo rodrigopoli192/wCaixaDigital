@@ -151,6 +151,11 @@ class FecharCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
         return context
 
+    def get_template_names(self):
+        if self.request.headers.get("HX-Request"):
+            return ["caixa/partials/fechar_caixa_form.html"]
+        return [self.template_name]
+
     def form_valid(self, form):
         caixa = self.get_caixa()
         abertura = self.get_abertura()
@@ -182,6 +187,13 @@ class FecharCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                     f"Caixa fechado com diferença de R$ {fechamento.diferenca}. "
                     "Aguardando aprovação.",
                 )
+
+        if self.request.headers.get("HX-Request"):
+            from django.http import HttpResponse
+
+            response = HttpResponse()
+            response["HX-Refresh"] = "true"
+            return response
 
         return redirect("caixa:detail", pk=caixa.pk)
 
@@ -233,6 +245,11 @@ class NovoMovimentoView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         context["saldo_atual"] = abertura.saldo_movimentos
         return context
 
+    def get_template_names(self):
+        if self.request.headers.get("HX-Request"):
+            return ["caixa/partials/movimento_form.html"]
+        return [self.template_name]
+
     def form_valid(self, form):
         abertura = self.get_abertura()
 
@@ -252,6 +269,15 @@ class NovoMovimentoView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             caixa.save(update_fields=["saldo_atual"])
 
         messages.success(self.request, "Movimento registrado com sucesso!")
+
+        # Se for HTMX, recarrega a página para atualizar cards/tabelas
+        if self.request.headers.get("HX-Request"):
+            from django.http import HttpResponse
+
+            response = HttpResponse()
+            response["HX-Refresh"] = "true"
+            return response
+
         return redirect("caixa:detail", pk=abertura.caixa.pk)
 
 
