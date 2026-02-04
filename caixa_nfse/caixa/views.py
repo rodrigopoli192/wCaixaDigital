@@ -156,6 +156,13 @@ class FecharCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             return ["caixa/partials/fechar_caixa_form.html"]
         return [self.template_name]
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        abertura = self.get_abertura()
+        if abertura:
+            kwargs["saldo_sistema"] = abertura.saldo_movimentos
+        return kwargs
+
     def form_valid(self, form):
         caixa = self.get_caixa()
         abertura = self.get_abertura()

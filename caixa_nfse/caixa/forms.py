@@ -78,7 +78,8 @@ class FechamentoCaixaForm(forms.ModelForm):
             "justificativa_diferenca": forms.Textarea(attrs={"rows": 3}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, saldo_sistema=None, **kwargs):
+        self.saldo_sistema = saldo_sistema
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -92,4 +93,17 @@ class FechamentoCaixaForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        saldo_informado = cleaned_data.get("saldo_informado")
+        justificativa = cleaned_data.get("justificativa_diferenca")
+
+        if saldo_informado is not None and self.saldo_sistema is not None:
+            diferenca = saldo_informado - self.saldo_sistema
+
+            # Se houver diferença maior que 1 centavo (abs), exige justificativa
+            if abs(diferenca) > 0.01 and not justificativa:
+                self.add_error(
+                    "justificativa_diferenca",
+                    f"Justificativa obrigatória pois há uma diferença de R$ {diferenca:,.2f}.",
+                )
+
         return cleaned_data
