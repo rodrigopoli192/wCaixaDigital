@@ -35,6 +35,13 @@ class AbrirCaixaForm(forms.ModelForm):
 class MovimentoCaixaForm(forms.ModelForm):
     """Form para movimento de caixa."""
 
+    emitir_nfse = forms.BooleanField(
+        label="Emitir NFS-e automaticamente",
+        required=False,
+        initial=True,
+        help_text="Gera a nota fiscal eletrônica após o registro",
+    )
+
     class Meta:
         model = MovimentoCaixa
         fields = ["tipo", "forma_pagamento", "valor", "descricao", "cliente"]
