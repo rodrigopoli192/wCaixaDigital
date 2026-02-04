@@ -171,6 +171,7 @@ class FecharCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             fechamento.operador = self.request.user
             fechamento.saldo_sistema = abertura.saldo_movimentos
             fechamento.created_by = self.request.user
+            fechamento.observacao = form.cleaned_data.get("observacoes", "")
 
             # Monta detalhamento
             fechamento.detalhamento = self._calcular_detalhamento(abertura)

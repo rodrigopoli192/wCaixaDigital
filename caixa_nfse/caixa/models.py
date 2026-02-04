@@ -398,10 +398,15 @@ class FechamentoCaixa(TenantAwareModel):
         help_text=_("Totais por forma de pagamento"),
     )
 
-    # Justificativa (obrigatória se houver diferença)
     justificativa_diferenca = models.TextField(
         _("justificativa da diferença"),
         blank=True,
+    )
+
+    observacao = models.TextField(
+        _("observação"),
+        blank=True,
+        help_text=_("Observações gerais do operador"),
     )
 
     # Aprovação em dupla
