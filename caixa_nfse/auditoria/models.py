@@ -142,7 +142,7 @@ class RegistroAuditoria(BaseModel):
 
     def save(self, *args, **kwargs):
         """Generate hash before saving. Record is immutable after creation."""
-        if self.pk:
+        if self.pk and not self._state.adding:
             raise ValueError("Registros de auditoria não podem ser alterados.")
 
         if not self.hash_registro:

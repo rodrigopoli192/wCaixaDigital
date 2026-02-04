@@ -8,18 +8,13 @@ from django.dispatch import receiver
 from .middleware import get_current_request
 from .models import AcaoAuditoria, RegistroAuditoria
 
-# Models to audit automatically
-AUDITED_MODELS = [
-    "caixa_nfse.core.Tenant",
-    "caixa_nfse.core.User",
-    "caixa_nfse.core.FormaPagamento",
-    "caixa_nfse.caixa.Caixa",
-    "caixa_nfse.caixa.AberturaCaixa",
-    "caixa_nfse.caixa.MovimentoCaixa",
-    "caixa_nfse.caixa.FechamentoCaixa",
-    "caixa_nfse.clientes.Cliente",
-    "caixa_nfse.nfse.NotaFiscalServico",
-    "caixa_nfse.contabil.LancamentoContabil",
+# Apps to audit automatically
+AUDITED_APPS = [
+    "core",
+    "caixa",
+    "nfse",
+    "clientes",
+    "contabil",
 ]
 
 
@@ -27,24 +22,34 @@ def model_to_dict(instance) -> dict:
     """Convert model instance to dictionary for audit."""
     data = {}
     for field in instance._meta.fields:
-        value = getattr(instance, field.name)
-        # Handle special types
-        if hasattr(value, "pk"):
-            value = str(value.pk)
-        elif hasattr(value, "isoformat"):
-            value = value.isoformat()
-        elif isinstance(value, bytes):
-            value = "[BINARY DATA]"
-        else:
-            value = str(value) if value is not None else None
-        data[field.name] = value
+        try:
+            value = getattr(instance, field.name)
+            # Handle special types
+            if hasattr(value, "pk"):
+                value = str(value.pk)
+            elif hasattr(value, "isoformat"):
+                value = value.isoformat()
+            elif isinstance(value, bytes):
+                value = "[BINARY DATA]"
+            else:
+                value = str(value) if value is not None else None
+            data[field.name] = value
+        except Exception:
+            data[field.name] = "[ERROR GETTING VALUE]"
     return data
 
 
 def should_audit(sender) -> bool:
     """Check if model should be audited."""
-    model_path = f"{sender._meta.app_label}.{sender.__name__}"
-    return f"caixa_nfse.{model_path}" in AUDITED_MODELS
+    # Don't audit the audit log itself to prevent infinite recursion
+    if sender._meta.app_label == "auditoria":
+        return False
+
+    # Audit configured apps
+    if sender._meta.app_label in AUDITED_APPS:
+        return True
+
+    return False
 
 
 @receiver(pre_save)

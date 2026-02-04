@@ -13,8 +13,6 @@ class AuditoriaConfig(AppConfig):
     verbose_name = "Auditoria"
 
     def ready(self):
-        """Import signals when app is ready."""
-        try:
-            import caixa_nfse.auditoria.signals  # noqa: F401
-        except ImportError:
-            pass
+        """Register signals."""
+        from . import signals  # noqa
+        from . import auth_signals  # noqa
