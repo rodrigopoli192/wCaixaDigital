@@ -4,7 +4,7 @@
 {% block title %}{{ page_title }} - wCaixaDigital{% endblock %}
 
 {% block content %}
-<div class="p-6 w-full space-y-6">
+<div class="p-6 w-full space-y-6" x-data="{ open: false }">
 
     <!-- Header -->
     <div class="flex items-center justify-between">
@@ -180,10 +180,15 @@
                         <span class="material-symbols-outlined text-primary text-4xl mb-3">point_of_sale</span>
                         <h4 class="font-bold mb-1">{{ caixa.identificador }}</h4>
                         <p class="text-sm text-slate-500 mb-4">{{ caixa.get_tipo_display }}</p>
-                        <a href="{% url 'caixa:abrir' caixa.pk %}" class="bg-success hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold w-full flex items-center justify-center gap-2 transition-all">
+                        <button 
+                            hx-get="{% url 'caixa:abrir' caixa.pk %}"
+                            hx-target="#modal-content"
+                            hx-swap="innerHTML"
+                            @click="open = true"
+                            class="bg-success hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold w-full flex items-center justify-center gap-2 transition-all cursor-pointer">
                             <span class="material-symbols-outlined text-sm">login</span>
                             Abrir
-                        </a>
+                        </button>
                     </div>
                     {% endfor %}
                 </div>
@@ -224,6 +229,29 @@
                     <span class="material-symbols-outlined text-slate-400 text-2xl group-hover:scale-110 transition-transform">logout</span>
                     <span class="text-sm font-medium">Sair</span>
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Abrir Caixa -->
+    <div x-show="open" 
+         x-cloak
+         @keydown.escape.window="open = false"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="open = false"></div>
+        
+        <!-- Modal Container -->
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div id="modal-content" class="relative">
+                <!-- Content loaded via HTMX -->
             </div>
         </div>
     </div>
