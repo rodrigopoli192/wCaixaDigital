@@ -144,12 +144,12 @@
 
     <!-- 3. Filters Section -->
     <div class="bg-[#1c222d] p-4 rounded-xl border border-[#2d3544]">
-        <form method="get" class="flex flex-col xl:flex-row items-end gap-4">
-             <!-- Tipo de Lançamento -->
-            <div class="w-full xl:w-1/4 space-y-1.5">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4 items-end">
+             <!-- Tipo de Lançamento (3 cols) -->
+            <div class="col-span-1 md:col-span-2 xl:col-span-3 space-y-1.5">
                 <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Tipo de Lançamento</label>
                 <div class="relative">
-                    <select name="tipo" class="w-full h-12 bg-[#151a23] border border-[#2d3544] rounded-lg px-4 text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none appearance-none font-medium text-sm">
+                    <select name="tipo" class="w-full h-11 bg-[#151a23] border border-[#2d3544] rounded-lg px-4 text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none appearance-none font-medium text-sm transition-all hover:border-slate-600">
                         <option value="">Todos os Movimentos</option>
                         <option value="ENTRADA" {% if request.GET.tipo == 'ENTRADA' %}selected{% endif %}>Entradas</option>
                         <option value="SAIDA" {% if request.GET.tipo == 'SAIDA' %}selected{% endif %}>Saídas</option>
@@ -160,33 +160,34 @@
                 </div>
             </div>
 
-            <!-- Data Início -->
-            <div class="w-full xl:w-1/4 space-y-1.5">
+            <!-- Data Início (3 cols) -->
+            <div class="col-span-1 xl:col-span-3 space-y-1.5">
                 <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data Início</label>
                 <div class="relative">
-                     <input type="date" name="data_inicio" value="{{ request.GET.data_inicio }}" placeholder="dd/mm/yyyy"
-                       class="w-full h-12 bg-[#151a23] border border-[#2d3544] rounded-lg pl-4 pr-10 text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm text-placeholder-gray">
+                     <!-- Added [&::-webkit-calendar-picker-indicator]:hidden to hide native icon -->
+                     <input type="date" name="data_inicio" value="{{ request.GET.data_inicio }}"
+                       class="w-full h-11 bg-[#151a23] border border-[#2d3544] rounded-lg pl-4 pr-10 text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm text-placeholder-gray transition-all hover:border-slate-600 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer">
                      <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-sm">calendar_today</span>
                 </div>
             </div>
 
-            <!-- Data Fim -->
-            <div class="w-full xl:w-1/4 space-y-1.5">
+            <!-- Data Fim (3 cols) -->
+            <div class="col-span-1 xl:col-span-3 space-y-1.5">
                 <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data Fim</label>
                  <div class="relative">
-                     <input type="date" name="data_fim" value="{{ request.GET.data_fim }}" placeholder="dd/mm/yyyy"
-                       class="w-full h-12 bg-[#151a23] border border-[#2d3544] rounded-lg pl-4 pr-10 text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm text-placeholder-gray">
+                     <input type="date" name="data_fim" value="{{ request.GET.data_fim }}"
+                       class="w-full h-11 bg-[#151a23] border border-[#2d3544] rounded-lg pl-4 pr-10 text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm text-placeholder-gray transition-all hover:border-slate-600 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer">
                      <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-sm">calendar_today</span>
                 </div>
             </div>
 
-            <!-- Buttons -->
-            <div class="flex gap-2 w-full xl:w-auto">
-                <button type="submit" class="h-12 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg px-8 flex-1 xl:flex-none flex items-center justify-center gap-2 transition-colors">
+            <!-- Buttons (3 cols) -->
+            <div class="col-span-1 md:col-span-2 xl:col-span-3 flex gap-2">
+                <button type="submit" class="h-11 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg px-6 flex-1 flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-orange-500/20 active:scale-95">
                     <span class="material-symbols-outlined text-xl">search</span>
                     Filtrar
                 </button>
-                <a href="{% url 'caixa:lista_movimentos' abertura.pk %}" class="h-12 w-12 bg-[#151a23] border border-[#2d3544] hover:bg-[#2d3544] rounded-lg text-slate-400 hover:text-white flex items-center justify-center transition-colors" title="Limpar Filtros">
+                <a href="{% url 'caixa:lista_movimentos' abertura.pk %}" class="h-11 w-12 bg-[#151a23] border border-[#2d3544] hover:bg-[#2d3544] rounded-lg text-slate-400 hover:text-white flex items-center justify-center transition-colors hover:border-slate-500 active:scale-95" title="Limpar Filtros">
                     <span class="material-symbols-outlined">filter_alt_off</span>
                 </a>
             </div>
