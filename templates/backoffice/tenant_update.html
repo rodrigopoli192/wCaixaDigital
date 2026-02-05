@@ -1,0 +1,111 @@
+{% extends "base_dark.html" %}
+{% load widget_tweaks %}
+
+{% block page_title %}Editar Empresa{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-12 px-6">
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-lg">
+        
+        <div class="px-8 py-6 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">edit_square</span>
+                    Editar Empresa
+                </h2>
+                <p class="text-slate-500 dark:text-slate-400 mt-1">{{ tenant.razao_social }}</p>
+            </div>
+            <a href="{% url 'backoffice:tenant_delete' tenant.pk %}" class="text-red-500 hover:text-red-700 font-medium text-sm flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                <span class="material-symbols-outlined text-lg">delete</span>
+                Excluir Empresa
+            </a>
+        </div>
+
+        <form method="post" class="p-8 space-y-8">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="p-4 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 text-sm">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <!-- Dados da Empresa -->
+            <section>
+                <h3 class="text-sm font-bold uppercase text-slate-400 mb-4 tracking-wider">Dados Cadastrais</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Razão Social</label>
+                        {% render_field form.razao_social class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                        {{ form.razao_social.errors }}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Nome Fantasia</label>
+                        {% render_field form.nome_fantasia class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                        {{ form.nome_fantasia.errors }}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">CNPJ</label>
+                        {% render_field form.cnpj class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                        {{ form.cnpj.errors }}
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium">Regime Tributário</label>
+                        {% render_field form.regime_tributario class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none appearance-none" %}
+                        {{ form.regime_tributario.errors }}
+                    </div>
+                     <div class="space-y-2 flex items-center gap-3 pt-6">
+                        <label class="text-sm font-medium">Ativo?</label>
+                        {% render_field form.ativo class="w-5 h-5 text-primary rounded focus:ring-primary focus:ring-offset-0 bg-slate-50 dark:bg-background-dark border-slate-300 dark:border-border-dark" %}
+                    </div>
+                </div>
+            </section>
+
+            <hr class="border-slate-200 dark:border-border-dark">
+
+            <!-- Endereço e Contato -->
+            <section>
+                <h3 class="text-sm font-bold uppercase text-slate-400 mb-4 tracking-wider">Localização & Contato</h3>
+                <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="text-sm font-medium">CEP</label>
+                        {% render_field form.cep class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    </div>
+                    <div class="md:col-span-4 space-y-2">
+                        <label class="text-sm font-medium">Logradouro</label>
+                        {% render_field form.logradouro class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    </div>
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="text-sm font-medium">Número</label>
+                        {% render_field form.numero class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    </div>
+                     <div class="md:col-span-2 space-y-2">
+                        <label class="text-sm font-medium">Bairro</label>
+                        {% render_field form.bairro class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    </div>
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="text-sm font-medium">Telefone</label>
+                        {% render_field form.telefone class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    </div>
+                    <div class="md:col-span-4 space-y-2">
+                        <label class="text-sm font-medium">Cidade</label>
+                        {% render_field form.cidade class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    </div>
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="text-sm font-medium">UF</label>
+                        {% render_field form.uf class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none uppercase" maxlength="2" %}
+                    </div>
+                </div>
+            </section>
+
+             <div class="flex items-center justify-end gap-3 pt-4">
+                <a href="{% url 'backoffice:dashboard' %}" class="px-6 py-3 rounded-lg border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-background-dark transition-colors">Voltar</a>
+                <button type="submit" class="bg-primary hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-bold shadow-lg shadow-primary/30 transition-all transform hover:scale-[1.02]">
+                    Salvar Alterações
+                </button>
+             </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

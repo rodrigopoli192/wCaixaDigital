@@ -63,3 +63,26 @@ class TenantOnboardingForm(forms.ModelForm):
         )
 
         return tenant
+
+
+class TenantUpdateForm(forms.ModelForm):
+    """
+    Form to update Tenant details.
+    """
+
+    class Meta:
+        model = Tenant
+        fields = [
+            "razao_social",
+            "nome_fantasia",
+            "cnpj",
+            "cidade",
+            "uf",
+            "regime_tributario",
+            "logradouro",
+            "numero",
+            "bairro",
+            "cep",
+            "telefone",
+            "ativo",
+        ]

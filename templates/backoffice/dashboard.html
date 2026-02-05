@@ -55,14 +55,15 @@
                         <th class="px-6 py-4">Empresa</th>
                         <th class="px-6 py-4">CNPJ</th>
                         <th class="px-6 py-4">Cidade/UF</th>
+                        <th class="px-6 py-4">Usuários</th>
                         <th class="px-6 py-4">Status</th>
                         <th class="px-6 py-4">Criado em</th>
-                        <!-- <th class="px-6 py-4 text-right">Ações</th> -->
+                        <th class="px-6 py-4 text-right">Ações</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-border-dark">
                     {% for tenant in tenants %}
-                    <tr class="hover:bg-slate-50 dark:hover:bg-background-dark/30 transition-colors">
+                    <tr class="hover:bg-slate-50 dark:hover:bg-background-dark/30 transition-colors group">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="size-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold text-lg">
@@ -81,6 +82,12 @@
                             {{ tenant.cidade }}/{{ tenant.uf }}
                         </td>
                         <td class="px-6 py-4">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                                <span class="material-symbols-outlined text-[14px]">person</span>
+                                {{ tenant.user_count }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
                             {% if tenant.ativo %}
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                                     Ativo
@@ -94,11 +101,11 @@
                         <td class="px-6 py-4 text-sm text-slate-500">
                             {{ tenant.created_at|date:"d/m/Y" }}
                         </td>
-                        <!-- <td class="px-6 py-4 text-right">
-                            <button class="text-slate-400 hover:text-primary transition-colors">
-                                <span class="material-symbols-outlined">edit</span>
-                            </button>
-                        </td> -->
+                        <td class="px-6 py-4 text-right">
+                            <a href="{% url 'backoffice:tenant_edit' tenant.pk %}" class="text-slate-400 hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10 inline-flex" title="Editar Empresa">
+                                <span class="material-symbols-outlined">edit_square</span>
+                            </a>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
