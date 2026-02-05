@@ -2,8 +2,11 @@
 Core views.
 """
 
+from decimal import Decimal
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db import models
 from django.db.models import Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -201,6 +204,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "ultimas_movimentacoes": ultimas_movimentacoes,
             "ultimas_nfses": ultimas_nfses,
             "retencoes_mes": retencoes_mes,
+            "caixas_lista": caixas_lista,
             "hoje": hoje,
         }
 

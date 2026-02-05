@@ -64,6 +64,116 @@
 
     <!-- Main Content Area -->
     <div class="flex flex-col gap-6">
+        <!-- Situação dos Caixas -->
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden w-full">
+            <div class="p-6 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
+                <div>
+                    <h4 class="font-bold text-lg">Situação dos Caixas</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Visão geral de todos os terminais do estabelecimento</p>
+                </div>
+                <a href="{% url 'caixa:list' %}" class="text-primary text-sm font-bold flex items-center gap-1">
+                    Gerenciar <span class="material-symbols-outlined text-sm">chevron_right</span>
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <th class="px-6 py-4">Caixa</th>
+                            <th class="px-6 py-4">Status</th>
+                            <th class="px-6 py-4">Operador</th>
+                            <th class="px-6 py-4">Abertura</th>
+                            <th class="px-6 py-4">Último Fechamento</th>
+                            <th class="px-6 py-4 text-right">Saldo Abertura</th>
+                            <th class="px-6 py-4 text-right">Entradas</th>
+                            <th class="px-6 py-4 text-right">Saídas</th>
+                            <th class="px-6 py-4 text-right">Saldo Atual</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                        {% for item in caixas_lista %}
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-9 rounded-lg bg-slate-100 dark:bg-background-dark flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-lg {% if item.caixa.status == 'ABERTO' %}text-success{% elif item.caixa.status == 'BLOQUEADO' %}text-danger{% else %}text-slate-400{% endif %}">point_of_sale</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold">{{ item.caixa.identificador }}</p>
+                                        <p class="text-[10px] text-slate-500">{{ item.caixa.get_tipo_display }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                {% if item.caixa.status == 'ABERTO' %}
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Aberto</span>
+                                {% elif item.caixa.status == 'BLOQUEADO' %}
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">Bloqueado</span>
+                                {% else %}
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-700 text-slate-500 border border-slate-200 dark:border-slate-600">Fechado</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4">
+                                {% if item.abertura_ativa %}
+                                <div>
+                                    <p class="text-sm font-medium">{{ item.abertura_ativa.operador.first_name|default:item.abertura_ativa.operador.email }}</p>
+                                    <p class="text-[10px] text-slate-500">Desde {{ item.abertura_ativa.data_hora|date:"H:i" }}</p>
+                                </div>
+                                {% else %}
+                                <span class="text-sm text-slate-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                {% if item.abertura_ativa %}
+                                <p class="font-medium">{{ item.abertura_ativa.data_hora|date:"d/m/Y" }}</p>
+                                <p class="text-[10px] text-slate-500">{{ item.abertura_ativa.data_hora|date:"H:i" }}</p>
+                                {% else %}
+                                <span class="text-slate-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                {% if item.ultimo_fechamento %}
+                                <p class="font-medium">{{ item.ultimo_fechamento.data_hora|date:"d/m/Y" }}</p>
+                                <p class="text-[10px] text-slate-500">{{ item.ultimo_fechamento.data_hora|date:"H:i" }}</p>
+                                {% else %}
+                                <span class="text-slate-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-right">
+                                {% if item.abertura_ativa %}
+                                <span class="font-medium">R$ {{ item.abertura_ativa.saldo_abertura|floatformat:2 }}</span>
+                                {% else %}
+                                <span class="text-slate-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-right">
+                                {% if item.abertura_ativa %}
+                                <span class="font-bold text-success">+R$ {{ item.total_entradas|floatformat:2 }}</span>
+                                {% else %}
+                                <span class="text-slate-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-right">
+                                {% if item.abertura_ativa %}
+                                <span class="font-bold text-danger">-R$ {{ item.total_saidas|floatformat:2 }}</span>
+                                {% else %}
+                                <span class="text-slate-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="text-lg font-bold {% if item.caixa.status == 'ABERTO' %}text-primary{% else %}text-slate-400{% endif %}">R$ {{ item.caixa.saldo_atual|floatformat:2 }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="px-6 py-8 text-center text-sm text-slate-500">Nenhum caixa cadastrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Movimentações de Caixa -->
         <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm flex flex-col w-full">
             <div class="flex items-center justify-between mb-6">
