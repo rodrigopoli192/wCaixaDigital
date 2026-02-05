@@ -1,0 +1,24 @@
+{% extends "base_dark.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} - Relatórios{% endblock %}
+
+{% block content %}
+<div class="p-6 w-full space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'relatorios:index' %}" class="size-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors">
+                <span class="material-symbols-outlined text-primary">arrow_back</span>
+            </a>
+            <div>
+                <h3 class="text-2xl font-bold tracking-tight">{{ page_title }}</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Relatórios Gerenciais</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    {% block report_content %}{% endblock %}
+</div>
+{% endblock %}

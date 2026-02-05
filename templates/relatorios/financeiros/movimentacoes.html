@@ -1,0 +1,107 @@
+{% extends "relatorios/base_relatorio.html" %}
+
+{% block report_content %}
+<!-- Filtros -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Início</label>
+            <input type="date" name="data_inicio" value="{{ filtro_data_inicio }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Fim</label>
+            <input type="date" name="data_fim" value="{{ filtro_data_fim }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Tipo</label>
+            <select name="tipo" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+                <option value="">Todos</option>
+                <option value="ENTRADA" {% if filtro_tipo == 'ENTRADA' %}selected{% endif %}>Entrada</option>
+                <option value="SAIDA" {% if filtro_tipo == 'SAIDA' %}selected{% endif %}>Saída</option>
+                <option value="SANGRIA" {% if filtro_tipo == 'SANGRIA' %}selected{% endif %}>Sangria</option>
+                <option value="SUPRIMENTO" {% if filtro_tipo == 'SUPRIMENTO' %}selected{% endif %}>Suprimento</option>
+                <option value="ESTORNO" {% if filtro_tipo == 'ESTORNO' %}selected{% endif %}>Estorno</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Caixa</label>
+            <select name="caixa" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+                <option value="">Todos os caixas</option>
+                {% for c in caixas %}
+                <option value="{{ c.pk }}" {% if filtro_caixa == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.identificador }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="w-full px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors">
+                <span class="material-symbols-outlined text-sm align-middle mr-1">filter_alt</span>
+                Filtrar
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Totais -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+        <p class="text-sm text-slate-500 mb-1">Total de Entradas</p>
+        <p class="text-2xl font-bold text-success">R$ {{ total_entradas|floatformat:2 }}</p>
+    </div>
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+        <p class="text-sm text-slate-500 mb-1">Total de Saídas</p>
+        <p class="text-2xl font-bold text-danger">R$ {{ total_saidas|floatformat:2 }}</p>
+    </div>
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+        <p class="text-sm text-slate-500 mb-1">Total de Registros</p>
+        <p class="text-2xl font-bold">{{ total_registros }}</p>
+    </div>
+</div>
+
+<!-- Tabela -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 dark:bg-background-dark text-xs uppercase text-slate-500">
+                <tr>
+                    <th class="px-6 py-3 text-left">Caixa</th>
+                    <th class="px-6 py-3 text-left">Operador</th>
+                    <th class="px-6 py-3 text-left">Tipo</th>
+                    <th class="px-6 py-3 text-left">Forma Pgto</th>
+                    <th class="px-6 py-3 text-left">Descrição</th>
+                    <th class="px-6 py-3 text-left">Data/Hora</th>
+                    <th class="px-6 py-3 text-right">Valor</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                {% for mov in movimentos %}
+                <tr class="hover:bg-slate-50 dark:hover:bg-background-dark">
+                    <td class="px-6 py-4 text-sm font-medium">{{ mov.abertura.caixa.identificador }}</td>
+                    <td class="px-6 py-4 text-sm">{{ mov.abertura.operador.first_name|default:mov.abertura.operador.email }}</td>
+                    <td class="px-6 py-4">
+                        {% if mov.tipo == 'ENTRADA' or mov.tipo == 'SUPRIMENTO' %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success">{{ mov.get_tipo_display }}</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-danger/10 text-danger">{{ mov.get_tipo_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm">{{ mov.forma_pagamento.nome }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500">{{ mov.descricao|default:"-"|truncatechars:30 }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500">{{ mov.data_hora|date:"d/m/Y H:i" }}</td>
+                    <td class="px-6 py-4 text-right font-mono font-semibold {% if mov.is_entrada %}text-success{% else %}text-danger{% endif %}">
+                        {% if mov.is_entrada %}+{% else %}-{% endif %}R$ {{ mov.valor|floatformat:2 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-6 py-8 text-center text-slate-500">
+                        Nenhum movimento encontrado com os filtros aplicados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

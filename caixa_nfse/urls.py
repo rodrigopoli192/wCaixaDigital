@@ -18,6 +18,7 @@ urlpatterns = [
     path("contabil/", include("caixa_nfse.contabil.urls")),
     path("fiscal/", include("caixa_nfse.fiscal.urls")),
     path("auditoria/", include("caixa_nfse.auditoria.urls")),
+    path("relatorios/", include("caixa_nfse.relatorios.urls")),
     # API
     path("api/v1/", include("caixa_nfse.api.urls")),
     # Backoffice (Platform Admin)

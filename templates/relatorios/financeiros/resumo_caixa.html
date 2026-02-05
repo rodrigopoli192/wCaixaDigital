@@ -1,0 +1,80 @@
+{% extends "relatorios/base_relatorio.html" %}
+
+{% block report_content %}
+<!-- Filtros -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Início</label>
+            <input type="date" name="data_inicio" value="{{ filtro_data_inicio }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Fim</label>
+            <input type="date" name="data_fim" value="{{ filtro_data_fim }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Caixa</label>
+            <select name="caixa" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+                <option value="">Todos os caixas</option>
+                {% for c in caixas %}
+                <option value="{{ c.pk }}" {% if filtro_caixa == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.identificador }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="w-full px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors">
+                <span class="material-symbols-outlined text-sm align-middle mr-1">filter_alt</span>
+                Filtrar
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Tabela de Resumos -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 dark:bg-background-dark text-xs uppercase text-slate-500">
+                <tr>
+                    <th class="px-6 py-3 text-left">Caixa</th>
+                    <th class="px-6 py-3 text-left">Operador</th>
+                    <th class="px-6 py-3 text-left">Abertura</th>
+                    <th class="px-6 py-3 text-right">Saldo Inicial</th>
+                    <th class="px-6 py-3 text-right">Entradas</th>
+                    <th class="px-6 py-3 text-right">Saídas</th>
+                    <th class="px-6 py-3 text-right">Saldo Final</th>
+                    <th class="px-6 py-3 text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                {% for resumo in resumos %}
+                <tr class="hover:bg-slate-50 dark:hover:bg-background-dark">
+                    <td class="px-6 py-4 text-sm font-medium">{{ resumo.abertura.caixa.identificador }}</td>
+                    <td class="px-6 py-4 text-sm">{{ resumo.abertura.operador.first_name|default:resumo.abertura.operador.email }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500">{{ resumo.abertura.data_hora|date:"d/m/Y H:i" }}</td>
+                    <td class="px-6 py-4 text-right font-mono">R$ {{ resumo.saldo_inicial|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right font-mono text-success">+R$ {{ resumo.entradas|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right font-mono text-danger">-R$ {{ resumo.saidas|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right font-mono font-bold">R$ {{ resumo.saldo_final|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-center">
+                        {% if resumo.fechamento %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 dark:bg-background-dark text-slate-500">Fechado</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success">Aberto</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="px-6 py-8 text-center text-slate-500">
+                        Nenhuma abertura encontrada com os filtros aplicados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

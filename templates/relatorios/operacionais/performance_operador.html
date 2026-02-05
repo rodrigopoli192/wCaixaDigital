@@ -1,0 +1,69 @@
+{% extends "relatorios/base_relatorio.html" %}
+
+{% block report_content %}
+<!-- Filtros -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Início</label>
+            <input type="date" name="data_inicio" value="{{ filtro_data_inicio }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Fim</label>
+            <input type="date" name="data_fim" value="{{ filtro_data_fim }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="w-full px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors">
+                <span class="material-symbols-outlined text-sm align-middle mr-1">filter_alt</span>
+                Filtrar
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Tabela de Performance -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 dark:bg-background-dark text-xs uppercase text-slate-500">
+                <tr>
+                    <th class="px-6 py-3 text-left">Operador</th>
+                    <th class="px-6 py-3 text-right">Movimentos</th>
+                    <th class="px-6 py-3 text-right">Entradas</th>
+                    <th class="px-6 py-3 text-right">Saídas</th>
+                    <th class="px-6 py-3 text-right">Total Movimentado</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                {% for item in performance %}
+                <tr class="hover:bg-slate-50 dark:hover:bg-background-dark">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-primary">person</span>
+                            </div>
+                            <div>
+                                <p class="font-semibold">{{ item.abertura__operador__first_name|default:"Operador" }}</p>
+                                <p class="text-xs text-slate-500">{{ item.abertura__operador__email }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right font-mono font-semibold">{{ item.total_movimentos }}</td>
+                    <td class="px-6 py-4 text-right font-mono text-success">R$ {{ item.total_entradas|floatformat:2|default:"0,00" }}</td>
+                    <td class="px-6 py-4 text-right font-mono text-danger">R$ {{ item.total_saidas|floatformat:2|default:"0,00" }}</td>
+                    <td class="px-6 py-4 text-right font-mono font-bold text-lg">R$ {{ item.total_valor|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-8 text-center text-slate-500">
+                        Nenhum dado encontrado com os filtros aplicados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

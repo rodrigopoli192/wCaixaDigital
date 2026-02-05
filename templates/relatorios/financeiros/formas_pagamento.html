@@ -1,0 +1,78 @@
+{% extends "relatorios/base_relatorio.html" %}
+
+{% block report_content %}
+<!-- Filtros -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Início</label>
+            <input type="date" name="data_inicio" value="{{ filtro_data_inicio }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Fim</label>
+            <input type="date" name="data_fim" value="{{ filtro_data_fim }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="w-full px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors">
+                <span class="material-symbols-outlined text-sm align-middle mr-1">filter_alt</span>
+                Filtrar
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Total Geral -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+    <p class="text-sm text-slate-500 mb-1">Total Geral</p>
+    <p class="text-3xl font-bold text-primary">R$ {{ total_geral|floatformat:2 }}</p>
+</div>
+
+<!-- Tabela Consolidada -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 dark:bg-background-dark text-xs uppercase text-slate-500">
+                <tr>
+                    <th class="px-6 py-3 text-left">Forma de Pagamento</th>
+                    <th class="px-6 py-3 text-right">Quantidade</th>
+                    <th class="px-6 py-3 text-right">Total</th>
+                    <th class="px-6 py-3 text-right">% do Total</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                {% for item in consolidado %}
+                <tr class="hover:bg-slate-50 dark:hover:bg-background-dark">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-primary">credit_card</span>
+                            </div>
+                            <span class="font-semibold">{{ item.forma_pagamento__nome|default:"Não informado" }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right font-mono">{{ item.quantidade }}</td>
+                    <td class="px-6 py-4 text-right font-mono font-semibold">R$ {{ item.total|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right">
+                        {% widthratio item.total total_geral 100 as percentage %}
+                        <div class="flex items-center justify-end gap-2">
+                            <div class="w-20 bg-slate-200 dark:bg-background-dark rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full" style="width: {{ percentage }}%"></div>
+                            </div>
+                            <span class="text-sm font-medium">{{ percentage }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-6 py-8 text-center text-slate-500">
+                        Nenhum movimento encontrado com os filtros aplicados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -105,7 +105,7 @@
                     <span class="text-sm">Contabilidade</span>
                 </a>
                 
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'relatorios' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="#">
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'relatorios' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'relatorios:index' %}">
                     <span class="material-symbols-outlined">bar_chart</span>
                     <span class="text-sm">Relatórios</span>
                 </a>

@@ -46,6 +46,7 @@ LOCAL_APPS = [
     "caixa_nfse.contabil",
     "caixa_nfse.fiscal",
     "caixa_nfse.auditoria",
+    "caixa_nfse.relatorios",
     "caixa_nfse.api",
     "caixa_nfse.backoffice",
 ]

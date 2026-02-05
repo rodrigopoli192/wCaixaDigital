@@ -1,0 +1,89 @@
+{% extends "base_dark.html" %}
+{% load static %}
+
+{% block title %}Relatórios - wCaixaDigital{% endblock %}
+
+{% block content %}
+<div class="p-6 w-full space-y-6">
+    <!-- Header -->
+    <div class="flex items-center gap-4">
+        <div class="size-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+            <span class="material-symbols-outlined text-primary text-2xl">analytics</span>
+        </div>
+        <div>
+            <h3 class="text-2xl font-bold tracking-tight">Relatórios</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm">Central de relatórios gerenciais</p>
+        </div>
+    </div>
+
+    <!-- Relatórios Financeiros -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2">
+            <span class="material-symbols-outlined text-success">payments</span>
+            <h4 class="font-bold">Relatórios Financeiros</h4>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
+            <a href="{% url 'relatorios:movimentacoes' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group">
+                <span class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-2">receipt_long</span>
+                <h5 class="font-semibold mb-1">Movimentações por Período</h5>
+                <p class="text-xs text-slate-500">Entradas, saídas e todos os movimentos por período</p>
+            </a>
+            <a href="{% url 'relatorios:resumo_caixa' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group">
+                <span class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-2">account_balance</span>
+                <h5 class="font-semibold mb-1">Resumo de Caixa</h5>
+                <p class="text-xs text-slate-500">Saldo inicial, movimentos e final por abertura</p>
+            </a>
+            <a href="{% url 'relatorios:formas_pagamento' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group">
+                <span class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-2">credit_card</span>
+                <h5 class="font-semibold mb-1">Por Forma de Pagamento</h5>
+                <p class="text-xs text-slate-500">Consolidado por dinheiro, cartão, PIX, etc.</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Relatórios Operacionais -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2">
+            <span class="material-symbols-outlined text-warning">groups</span>
+            <h4 class="font-bold">Relatórios Operacionais</h4>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
+            <a href="{% url 'relatorios:performance_operador' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group">
+                <span class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-2">trending_up</span>
+                <h5 class="font-semibold mb-1">Performance por Operador</h5>
+                <p class="text-xs text-slate-500">Quantidade e valores por operador</p>
+            </a>
+            <a href="{% url 'relatorios:historico_aberturas' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group">
+                <span class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-2">history</span>
+                <h5 class="font-semibold mb-1">Histórico de Aberturas</h5>
+                <p class="text-xs text-slate-500">Timeline de aberturas e fechamentos</p>
+            </a>
+            <a href="{% url 'relatorios:diferencas_caixa' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group">
+                <span class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-2">error</span>
+                <h5 class="font-semibold mb-1">Diferenças de Caixa</h5>
+                <p class="text-xs text-slate-500">Quebras e diferenças identificadas</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Relatórios de Auditoria -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">security</span>
+            <h4 class="font-bold">Auditoria e Compliance</h4>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
+            <a href="{% url 'relatorios:log_acoes' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group">
+                <span class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-2">description</span>
+                <h5 class="font-semibold mb-1">Log de Ações</h5>
+                <p class="text-xs text-slate-500">Trilha de auditoria de todas as operações</p>
+            </a>
+            <a href="{% url 'relatorios:fechamentos_pendentes' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group">
+                <span class="material-symbols-outlined text-3xl text-slate-400 group-hover:text-primary mb-2">pending_actions</span>
+                <h5 class="font-semibold mb-1">Fechamentos Pendentes</h5>
+                <p class="text-xs text-slate-500">Caixas aguardando aprovação</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
