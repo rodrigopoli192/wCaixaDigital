@@ -216,36 +216,6 @@
     </div>
     {% endif %}
 
-    <!-- Quick Links -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">link</span>
-            <h4 class="font-bold">Links Úteis</h4>
-        </div>
-        <div class="p-6">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <a href="{% url 'caixa:list' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary/50 hover:bg-primary/5 flex flex-col items-center gap-2 transition-all group">
-                    <span class="material-symbols-outlined text-primary text-2xl group-hover:scale-110 transition-transform">list_alt</span>
-                    <span class="text-sm font-medium">Meus Caixas</span>
-                </a>
-                <a href="{% url 'clientes:list' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-blue-500/50 hover:bg-blue-500/5 flex flex-col items-center gap-2 transition-all group">
-                    <span class="material-symbols-outlined text-blue-400 text-2xl group-hover:scale-110 transition-transform">group</span>
-                    <span class="text-sm font-medium">Clientes</span>
-                </a>
-                {% if request.user.pode_emitir_nfse %}
-                <a href="{% url 'nfse:list' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-success/50 hover:bg-success/5 flex flex-col items-center gap-2 transition-all group">
-                    <span class="material-symbols-outlined text-success text-2xl group-hover:scale-110 transition-transform">receipt_long</span>
-                    <span class="text-sm font-medium">NFS-e</span>
-                </a>
-                {% endif %}
-                <a href="{% url 'core:logout' %}" class="p-4 rounded-lg border border-slate-200 dark:border-border-dark hover:border-slate-400/50 hover:bg-slate-500/5 flex flex-col items-center gap-2 transition-all group">
-                    <span class="material-symbols-outlined text-slate-400 text-2xl group-hover:scale-110 transition-transform">logout</span>
-                    <span class="text-sm font-medium">Sair</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Container -->
     <div x-show="open" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">

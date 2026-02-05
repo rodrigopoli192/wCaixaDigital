@@ -82,10 +82,12 @@
                     <span class="text-sm">Dashboard</span>
                 </a>
                 
+                {% if user.pode_aprovar_fechamento %}
                 <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'caixa' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'caixa:list' %}">
                     <span class="material-symbols-outlined">account_balance_wallet</span>
                     <span class="text-sm">Caixa</span>
                 </a>
+                {% endif %}
                 
                 <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'nfse' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'nfse:list' %}">
                     <span class="material-symbols-outlined">description</span>
@@ -97,6 +99,7 @@
                     <span class="text-sm">Gestão de Clientes</span>
                 </a>
                 
+                {% if user.pode_aprovar_fechamento %}
                 <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'contabil' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'contabil:lancamentos' %}">
                     <span class="material-symbols-outlined">calculate</span>
                     <span class="text-sm">Contabilidade</span>
@@ -111,17 +114,11 @@
                     <span class="material-symbols-outlined">verified_user</span>
                     <span class="text-sm">Auditoria</span>
                 </a>
+                {% endif %}
             {% endif %}
         </nav>
 
         <div class="p-4 border-t border-slate-200 dark:border-border-dark space-y-4">
-            {% if request.resolver_match.app_name != 'backoffice' %}
-            <a href="{% url 'caixa:list' %}" class="w-full bg-primary hover:bg-orange-600 text-white rounded-lg py-2.5 text-sm font-semibold flex items-center justify-center gap-2 transition-all">
-                <span class="material-symbols-outlined text-sm">add</span>
-                Novo Lançamento
-            </a>
-            {% endif %}
-            
             <div class="space-y-1">
                 {% if user.pode_aprovar_fechamento %}
                 <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'settings' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark{% endif %}" href="{% url 'core:settings' %}">
