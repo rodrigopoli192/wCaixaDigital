@@ -109,12 +109,22 @@
 
     <!-- Usuários da Empresa -->
     <section class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden">
-        <div class="p-6 border-b border-slate-200 dark:border-border-dark">
-            <h3 class="text-lg font-bold flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">group</span>
-                Usuários da Empresa
-            </h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400">{{ usuarios.count }} usuário(s) vinculado(s)</p>
+        <div class="p-6 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">group</span>
+                    Usuários da Empresa
+                </h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{{ usuarios.count }} usuário(s) vinculado(s)</p>
+            </div>
+            <button 
+                hx-get="{% url 'backoffice:tenant_user_add' tenant.pk %}" 
+                hx-target="#modal-container" 
+                hx-swap="innerHTML"
+                class="h-10 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg px-4 flex items-center gap-2 transition-colors shadow-lg shadow-emerald-500/20">
+                <span class="material-symbols-outlined text-xl">person_add</span>
+                Novo Usuário
+            </button>
         </div>
         
         <div class="overflow-x-auto">
@@ -126,6 +136,7 @@
                         <th class="px-6 py-4">Cargo</th>
                         <th class="px-6 py-4">Permissões</th>
                         <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4 text-right">Ações</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 dark:divide-border-dark">
@@ -165,6 +176,16 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">Inativo</span>
                             {% endif %}
                         </td>
+                        <td class="px-6 py-4 text-right">
+                            <button 
+                                hx-get="{% url 'backoffice:tenant_user_edit' tenant.pk usuario.pk %}" 
+                                hx-target="#modal-container" 
+                                hx-swap="innerHTML"
+                                class="text-slate-400 hover:text-primary transition-colors p-2 rounded-full hover:bg-primary/10 inline-flex" 
+                                title="Editar Usuário">
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -180,4 +201,7 @@
     </section>
 
 </div>
+
+<!-- Modal Container -->
+<div id="modal-container"></div>
 {% endblock %}

@@ -88,3 +88,80 @@ class TenantDeleteView(LoginRequiredMixin, PlatformAdminRequiredMixin, DeleteVie
     template_name = "backoffice/tenant_confirm_delete.html"
     success_url = reverse_lazy("backoffice:dashboard")
     context_object_name = "tenant"
+
+
+class TenantUserCreateView(LoginRequiredMixin, PlatformAdminRequiredMixin, CreateView):
+    """
+    Create a new user for a specific Tenant (modal form).
+    """
+
+    model = User
+    template_name = "backoffice/partials/tenant_user_form.html"
+
+    def get_form_class(self):
+        from caixa_nfse.backoffice.forms import TenantUserForm
+
+        return TenantUserForm
+
+    def get_tenant(self):
+        return Tenant.objects.get(pk=self.kwargs["tenant_pk"])
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["tenant"] = self.get_tenant()
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tenant"] = self.get_tenant()
+        context["is_new"] = True
+        return context
+
+    def form_valid(self, form):
+        form.save()
+        # Return success partial that triggers HTMX refresh
+        from django.http import HttpResponse
+
+        return HttpResponse(
+            '<div hx-trigger="load" hx-get="'
+            + str(reverse_lazy("backoffice:tenant_edit", kwargs={"pk": self.kwargs["tenant_pk"]}))
+            + '" hx-target="body" hx-swap="outerHTML"></div>'
+        )
+
+
+class TenantUserUpdateView(LoginRequiredMixin, PlatformAdminRequiredMixin, UpdateView):
+    """
+    Edit an existing user within a Tenant (modal form).
+    """
+
+    model = User
+    template_name = "backoffice/partials/tenant_user_form.html"
+
+    def get_form_class(self):
+        from caixa_nfse.backoffice.forms import TenantUserForm
+
+        return TenantUserForm
+
+    def get_tenant(self):
+        return Tenant.objects.get(pk=self.kwargs["tenant_pk"])
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["tenant"] = self.get_tenant()
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tenant"] = self.get_tenant()
+        context["is_new"] = False
+        return context
+
+    def form_valid(self, form):
+        form.save()
+        from django.http import HttpResponse
+
+        return HttpResponse(
+            '<div hx-trigger="load" hx-get="'
+            + str(reverse_lazy("backoffice:tenant_edit", kwargs={"pk": self.kwargs["tenant_pk"]}))
+            + '" hx-target="body" hx-swap="outerHTML"></div>'
+        )

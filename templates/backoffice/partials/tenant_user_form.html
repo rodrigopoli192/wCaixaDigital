@@ -1,0 +1,112 @@
+{% load widget_tweaks %}
+<!-- Modal Overlay -->
+<div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
+     id="user-modal"
+     onclick="if(event.target === this) this.remove()">
+    
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+        
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50 flex items-center justify-between sticky top-0 z-10">
+            <div>
+                <h2 class="text-lg font-bold flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">{% if is_new %}person_add{% else %}edit{% endif %}</span>
+                    {% if is_new %}Novo Usuário{% else %}Editar Usuário{% endif %}
+                </h2>
+                <p class="text-sm text-slate-500 dark:text-slate-400">{{ tenant.razao_social }}</p>
+            </div>
+            <button type="button" onclick="document.getElementById('user-modal').remove()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Form -->
+        <form method="post" 
+              hx-post 
+              hx-target="#modal-container" 
+              hx-swap="innerHTML"
+              class="p-6 space-y-6">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="p-3 rounded-lg bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 text-sm">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <!-- Basic Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2 space-y-1.5">
+                    <label class="text-sm font-medium">E-mail (Login)</label>
+                    {% render_field form.email class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" placeholder="email@empresa.com" %}
+                    {% if form.email.errors %}<p class="text-xs text-red-500">{{ form.email.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium">Nome</label>
+                    {% render_field form.first_name class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" placeholder="João" %}
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium">Sobrenome</label>
+                    {% render_field form.last_name class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" placeholder="Silva" %}
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium">Cargo</label>
+                    {% render_field form.cargo class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" placeholder="Operador de Caixa" %}
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-sm font-medium">Telefone</label>
+                    {% render_field form.telefone class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" placeholder="(11) 99999-9999" %}
+                </div>
+                <div class="md:col-span-2 space-y-1.5">
+                    <label class="text-sm font-medium">Senha{% if not is_new %} (deixe em branco para manter){% endif %}</label>
+                    {% render_field form.password class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" placeholder="••••••••" %}
+                    {% if form.password.errors %}<p class="text-xs text-red-500">{{ form.password.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            <hr class="border-slate-200 dark:border-border-dark">
+
+            <!-- Permissions -->
+            <div>
+                <h3 class="text-sm font-bold uppercase text-slate-400 mb-3 tracking-wider">Permissões</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <label class="flex items-center gap-2 p-3 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary/50 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        {% render_field form.pode_operar_caixa class="w-4 h-4 text-primary rounded focus:ring-primary" %}
+                        <span class="text-sm font-medium">Operar Caixa</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-3 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary/50 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        {% render_field form.pode_emitir_nfse class="w-4 h-4 text-primary rounded focus:ring-primary" %}
+                        <span class="text-sm font-medium">Emitir NFS-e</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-3 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary/50 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        {% render_field form.pode_cancelar_nfse class="w-4 h-4 text-primary rounded focus:ring-primary" %}
+                        <span class="text-sm font-medium">Cancelar NFS-e</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-3 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary/50 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        {% render_field form.pode_aprovar_fechamento class="w-4 h-4 text-primary rounded focus:ring-primary" %}
+                        <span class="text-sm font-medium">Gerente/Admin</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-3 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary/50 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        {% render_field form.pode_exportar_dados class="w-4 h-4 text-primary rounded focus:ring-primary" %}
+                        <span class="text-sm font-medium">Exportar Dados</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-3 rounded-lg border border-slate-200 dark:border-border-dark hover:border-primary/50 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                        {% render_field form.is_active class="w-4 h-4 text-primary rounded focus:ring-primary" %}
+                        <span class="text-sm font-medium">Usuário Ativo</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="button" onclick="document.getElementById('user-modal').remove()" class="px-5 py-2.5 rounded-lg border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-background-dark transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit" class="bg-primary hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg font-bold shadow-lg shadow-primary/30 transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">save</span>
+                    {% if is_new %}Criar Usuário{% else %}Salvar{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

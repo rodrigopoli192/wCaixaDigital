@@ -86,3 +86,52 @@ class TenantUpdateForm(forms.ModelForm):
             "telefone",
             "ativo",
         ]
+
+
+class TenantUserForm(forms.ModelForm):
+    """
+    Form for creating/editing users within a Tenant (backoffice).
+    """
+
+    password = forms.CharField(
+        label="Senha",
+        widget=forms.PasswordInput,
+        required=False,
+        help_text="Deixe em branco para manter a senha atual (edição).",
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "cargo",
+            "telefone",
+            "is_active",
+            "pode_operar_caixa",
+            "pode_emitir_nfse",
+            "pode_cancelar_nfse",
+            "pode_aprovar_fechamento",
+            "pode_exportar_dados",
+        ]
+
+    def __init__(self, *args, tenant=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tenant = tenant
+        # Password required for new users
+        if not self.instance.pk:
+            self.fields["password"].required = True
+            self.fields["password"].help_text = "Senha inicial obrigatória."
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.tenant = self.tenant
+
+        password = self.cleaned_data.get("password")
+        if password:
+            user.set_password(password)
+
+        if commit:
+            user.save()
+        return user
