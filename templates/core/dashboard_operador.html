@@ -25,159 +25,215 @@
     </div>
 
     {% if abertura_atual %}
-    <!-- Caixa Aberto -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Caixa Aberto - Novo Design -->
+    
+    <!-- Header Principal -->
+    <div class="bg-surface-dark rounded-2xl border border-border-dark p-5 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="size-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                <span class="material-symbols-outlined text-primary text-2xl">point_of_sale</span>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h3 class="text-xl font-bold text-white">Meu Caixa</h3>
+                    <span class="text-slate-500">—</span>
+                    <span class="text-slate-400">{{ caixa_atual.identificador }}</span>
+                    <span class="size-2 rounded-full bg-emerald-400 animate-pulse ml-2"></span>
+                </div>
+                <p class="text-sm text-slate-500">Terminal em operação desde às <span class="text-primary font-semibold">{{ abertura_atual.data_hora|date:"H:i" }}</span></p>
+            </div>
+        </div>
         
-        <!-- Status Card Principal -->
-        <div class="lg:col-span-2 bg-white dark:bg-surface-dark rounded-xl border border-success/30 shadow-sm overflow-hidden">
-            <div class="px-6 py-4 bg-success/10 border-b border-success/20 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined text-success text-2xl">check_circle</span>
-                    <div>
-                        <h4 class="font-bold text-success">{{ caixa_atual.identificador }} - Aberto</h4>
-                        <p class="text-sm text-slate-500">Terminal em operação</p>
-                    </div>
-                </div>
-                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-success/20 text-success border border-success/30">
-                    Desde {{ abertura_atual.data_hora|date:"H:i" }}
-                </span>
+        <div class="flex items-center gap-4">
+            <div class="text-right">
+                <p class="text-[10px] uppercase tracking-wider text-slate-500">Status do Sistema</p>
+                <p class="text-sm font-medium text-emerald-400 flex items-center gap-1.5 justify-end">
+                    Totalmente Operacional
+                    <span class="size-1.5 rounded-full bg-emerald-400"></span>
+                </p>
             </div>
-            
-            <div class="p-6">
-                <div class="grid grid-cols-3 gap-4 text-center">
-                    <div class="p-4 rounded-lg bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark">
-                        <p class="text-sm text-slate-500 mb-1">Saldo Inicial</p>
-                        <p class="text-2xl font-bold">R$ {{ abertura_atual.saldo_abertura|floatformat:2 }}</p>
-                    </div>
-                    <div class="p-4 rounded-lg bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark">
-                        <p class="text-sm text-slate-500 mb-1">Movimentação</p>
-                        <div class="flex items-center justify-center gap-2">
-                            <span class="text-success font-bold">+{{ total_entradas|floatformat:2 }}</span>
-                            <span class="text-danger font-bold">-{{ total_saidas|floatformat:2 }}</span>
-                        </div>
-                    </div>
-                    <div class="p-4 rounded-lg bg-primary/5 border border-primary/20">
-                        <p class="text-sm text-slate-500 mb-1">Saldo Atual</p>
-                        <p class="text-2xl font-bold text-primary">R$ {{ saldo_atual|floatformat:2 }}</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="px-6 py-4 border-t border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50 flex items-center justify-center gap-3">
-                <a href="#" 
-                    hx-get="{% url 'caixa:novo_movimento' abertura_atual.pk %}"
-                    hx-target="#modal-content"
-                    hx-trigger="click"
-                    hx-swap="innerHTML"
-                    @click.prevent="open = true"
-                    class="bg-primary hover:bg-orange-600 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-lg shadow-primary/30 transition-all">
-                    <span class="material-symbols-outlined text-sm">add</span>
-                    Novo Movimento
-                </a>
-                {% if request.user.pode_emitir_nfse %}
-                <a href="{% url 'nfse:create' %}" class="bg-success hover:bg-green-600 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-lg shadow-success/30 transition-all">
-                    <span class="material-symbols-outlined text-sm">receipt_long</span>
-                    Emitir NFS-e
-                </a>
-                {% endif %}
-                <a href="#" 
-                    hx-get="{% url 'caixa:fechar' caixa_atual.pk %}"
-                    hx-target="#modal-content"
-                    hx-trigger="click"
-                    hx-swap="innerHTML"
-                    @click.prevent="open = true"
-                    class="bg-warning hover:bg-yellow-600 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-lg shadow-warning/30 transition-all">
-                    <span class="material-symbols-outlined text-sm">logout</span>
-                    Fechar Caixa
-                </a>
-            </div>
-        </div>
-
-        <!-- Info Card -->
-        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">info</span>
-                <h4 class="font-bold">Informações</h4>
-            </div>
-            <div class="p-6 space-y-4">
-                <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-border-dark/50">
-                    <span class="text-sm text-slate-500">Caixa</span>
-                    <span class="font-bold">{{ caixa_atual.identificador }}</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-border-dark/50">
-                    <span class="text-sm text-slate-500">Tipo</span>
-                    <span class="font-semibold">{{ caixa_atual.get_tipo_display }}</span>
-                </div>
-                <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-border-dark/50">
-                    <span class="text-sm text-slate-500">Aberto em</span>
-                    <span class="font-semibold">{{ abertura_atual.data_hora|date:"d/m/Y H:i" }}</span>
-                </div>
-                <div class="flex justify-between items-center py-2">
-                    <span class="text-sm text-slate-500">Fundo de Troco</span>
-                    <span class="font-bold text-primary">R$ {{ abertura_atual.fundo_troco|floatformat:2 }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Últimos Movimentos -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">history</span>
-                <h4 class="font-bold">Movimentos do Caixa</h4>
-            </div>
-            <a href="{% url 'caixa:lista_movimentos' abertura_atual.pk %}" class="text-sm text-primary hover:underline flex items-center gap-1">
-                Ver Todos
-                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            <a href="#" 
+                hx-get="{% url 'caixa:fechar' caixa_atual.pk %}"
+                hx-target="#modal-content"
+                hx-trigger="click"
+                hx-swap="innerHTML"
+                @click.prevent="open = true"
+                class="bg-primary hover:bg-orange-400 text-white px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined">lock</span>
+                Fechar Caixa
             </a>
         </div>
+    </div>
+    
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Saldo Inicial -->
+        <div class="bg-surface-dark rounded-2xl border border-border-dark p-5">
+            <div class="flex items-start justify-between mb-4">
+                <div class="size-10 rounded-xl bg-slate-700/50 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-slate-400">login</span>
+                </div>
+                <span class="text-[10px] uppercase tracking-wider text-slate-500">Saldo Inicial</span>
+            </div>
+            <p class="text-3xl font-bold text-white">R$ {{ abertura_atual.saldo_abertura|floatformat:2 }}</p>
+            <p class="text-xs text-slate-500 mt-1">Valor de abertura do terminal</p>
+        </div>
         
-        <!-- Container HTMX para movimentos paginados -->
-        <div class="p-4"
-             hx-get="{% url 'core:movimentos_list' %}" 
-             hx-trigger="load" 
-             hx-swap="innerHTML">
-            <div class="flex justify-center items-center py-8">
-                <span class="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></span>
+        <!-- Fluxo de Caixa -->
+        <div class="bg-surface-dark rounded-2xl border border-border-dark p-5">
+            <div class="flex items-start justify-between mb-4">
+                <div class="size-10 rounded-xl bg-slate-700/50 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-slate-400">swap_vert</span>
+                </div>
+                <span class="text-[10px] uppercase tracking-wider text-slate-500">Fluxo de Caixa</span>
+            </div>
+            <div class="flex items-baseline gap-3">
+                <span class="text-xl font-bold text-emerald-400">+{{ total_entradas|floatformat:2 }}</span>
+                <span class="text-slate-600">/</span>
+                <span class="text-xl font-bold text-red-400">-{{ total_saidas|floatformat:2 }}</span>
+                <span class="material-symbols-outlined text-slate-500 ml-auto">bar_chart</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Movimentações do dia</p>
+        </div>
+        
+        <!-- Saldo Atual -->
+        <div class="bg-surface-dark rounded-2xl border-2 border-primary/30 p-5 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
+            <div class="relative">
+                <div class="flex items-start justify-between mb-4">
+                    <div class="size-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+                    </div>
+                    <span class="text-[10px] uppercase tracking-wider text-slate-500">Saldo Atual</span>
+                </div>
+                <p class="text-3xl font-bold text-emerald-400">R$ {{ saldo_atual|floatformat:2 }}</p>
+                <p class="text-xs text-primary mt-1">Disponível em caixa agora</p>
             </div>
         </div>
     </div>
-
-    <!-- Card de Histórico de Caixas -->
-    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">schedule</span>
-            <h4 class="font-bold">Meu Histórico</h4>
+    
+    <!-- Botões de Ação -->
+    <div class="flex flex-wrap items-center justify-center gap-4">
+        <a href="#" 
+            hx-get="{% url 'caixa:novo_movimento' abertura_atual.pk %}"
+            hx-target="#modal-content"
+            hx-trigger="click"
+            hx-swap="innerHTML"
+            @click.prevent="open = true"
+            class="bg-primary hover:bg-orange-400 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/20">
+            <span class="material-symbols-outlined">shopping_cart</span>
+            Registrar Venda
+        </a>
+        {% if request.user.pode_emitir_nfse %}
+        <a href="{% url 'nfse:create' %}" class="bg-transparent hover:bg-primary/10 text-primary border-2 border-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
+            <span class="material-symbols-outlined">description</span>
+            Emitir NFS-e
+        </a>
+        {% endif %}
+        <a href="#" 
+            hx-get="{% url 'caixa:novo_movimento' abertura_atual.pk %}?tipo=sangria"
+            hx-target="#modal-content"
+            hx-trigger="click"
+            hx-swap="innerHTML"
+            @click.prevent="open = true"
+            class="bg-transparent hover:bg-slate-700/50 text-slate-300 border border-border-dark px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
+            <span class="material-symbols-outlined">diamond</span>
+            Justificar Sangria/Suprimento
+        </a>
+    </div>
+    
+    <!-- Layout 2 Colunas: Movimentações + Histórico/Info -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Movimentações do Caixa (2/3) -->
+        <div class="lg:col-span-2 bg-surface-dark rounded-2xl border border-border-dark overflow-hidden">
+            <div class="px-6 py-4 border-b border-border-dark flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">schedule</span>
+                    <h4 class="font-bold text-white">Movimentações do Caixa</h4>
+                </div>
+                <a href="{% url 'caixa:lista_movimentos' abertura_atual.pk %}" class="text-sm text-primary hover:text-orange-400 flex items-center gap-1 transition-colors">
+                    Ver Todos
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            </div>
+            
+            <!-- Container HTMX para movimentos paginados -->
+            <div class="p-4"
+                 hx-get="{% url 'core:movimentos_list' %}" 
+                 hx-trigger="load" 
+                 hx-swap="innerHTML">
+                <div class="flex justify-center items-center py-8">
+                    <span class="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></span>
+                </div>
+            </div>
         </div>
-        <div class="divide-y divide-slate-100 dark:divide-border-dark">
-            {% for abertura in historico_aberturas %}
-            <div class="px-6 py-4 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="size-10 rounded-lg bg-slate-100 dark:bg-background-dark flex items-center justify-center">
-                        <span class="material-symbols-outlined text-slate-500">laptop_mac</span>
+        
+        <!-- Sidebar: Histórico + Info (1/3) -->
+        <div class="space-y-6">
+            
+            <!-- Meu Histórico -->
+            <div class="bg-surface-dark rounded-2xl border border-border-dark overflow-hidden">
+                <div class="px-5 py-4 border-b border-border-dark flex items-center gap-2">
+                    <span class="material-symbols-outlined text-slate-400">trending_up</span>
+                    <h4 class="font-bold text-white">Meu Histórico</h4>
+                </div>
+                <div class="divide-y divide-border-dark">
+                    {% for abertura in historico_aberturas %}
+                    <div class="px-5 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="size-9 rounded-lg bg-slate-700/50 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-slate-500 text-lg">laptop_mac</span>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-white text-sm">{{ abertura.caixa.identificador }}</p>
+                                <p class="text-xs text-slate-500">{{ abertura.data_hora|date:"d/m/Y H:i" }}</p>
+                            </div>
+                        </div>
+                        {% if abertura.fechado %}
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-700/50 text-slate-400 border border-border-dark">
+                            Fechado
+                        </span>
+                        {% else %}
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            Aberto
+                        </span>
+                        {% endif %}
                     </div>
-                    <div>
-                        <p class="font-semibold">{{ abertura.caixa.identificador }}</p>
-                        <p class="text-xs text-slate-500">{{ abertura.data_hora|date:"d/m/Y H:i" }}</p>
+                    {% empty %}
+                    <div class="p-5 text-center text-slate-500">
+                        <span class="material-symbols-outlined text-2xl text-slate-600 mb-2">inbox</span>
+                        <p class="text-sm">Nenhum registro.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Informações do Terminal -->
+            <div class="bg-surface-dark rounded-2xl border border-border-dark overflow-hidden">
+                <div class="px-5 py-4 border-b border-border-dark">
+                    <p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Informações do Terminal</p>
+                </div>
+                <div class="p-5 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-slate-500">Caixa</span>
+                        <div class="flex items-center gap-2">
+                            <span class="size-1.5 rounded-full bg-emerald-400"></span>
+                            <span class="text-sm text-slate-300">{{ caixa_atual.identificador }}</span>
+                            <span class="text-xs text-slate-600 ml-2">v 2.4.1</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-slate-500">Tipo</span>
+                        <span class="text-sm text-slate-300">{{ caixa_atual.get_tipo_display }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-slate-500">Fundo de Troco</span>
+                        <span class="text-sm font-bold text-primary">R$ {{ abertura_atual.fundo_troco|floatformat:2 }}</span>
                     </div>
                 </div>
-                {% if abertura.fechado %}
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 dark:bg-background-dark text-slate-500 border border-slate-200 dark:border-border-dark">
-                    Fechado
-                </span>
-                {% else %}
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">
-                    Aberto
-                </span>
-                {% endif %}
             </div>
-            {% empty %}
-            <div class="p-6 text-center text-slate-500">
-                <span class="material-symbols-outlined text-3xl text-slate-300 mb-2">inbox</span>
-                <p>Nenhum registro encontrado.</p>
-            </div>
-            {% endfor %}
+            
         </div>
     </div>
 

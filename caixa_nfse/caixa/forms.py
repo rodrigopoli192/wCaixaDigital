@@ -42,17 +42,23 @@ class MovimentoCaixaForm(forms.ModelForm):
         help_text="Gera a nota fiscal eletrônica após o registro",
     )
 
+    # Override: use CharField to handle Brazilian currency format (1.234,56)
+    valor = forms.CharField(
+        label="Valor",
+        widget=forms.TextInput(
+            attrs={
+                "inputmode": "decimal",
+                "autocomplete": "off",
+                "placeholder": "0,00",
+            }
+        ),
+    )
+
     class Meta:
         model = MovimentoCaixa
         fields = ["tipo", "forma_pagamento", "valor", "descricao", "cliente"]
         widgets = {
             "descricao": forms.Textarea(attrs={"rows": 2}),
-            "valor": forms.TextInput(
-                attrs={
-                    "inputmode": "decimal",
-                    "autocomplete": "off",
-                }
-            ),
         }
 
     def __init__(self, *args, tenant=None, **kwargs):

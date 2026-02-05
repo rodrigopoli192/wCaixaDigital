@@ -47,6 +47,9 @@
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold group-focus-within:text-white transition-colors">R$</span>
                     {% render_field form.valor class="w-full bg-[#202024] border border-white/10 rounded-lg pl-10 pr-4 py-3 text-lg font-bold text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="0,00" %}
                 </div>
+                {% if form.valor.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.valor.errors|join:", " }}</p>
+                {% endif %}
             </div>
 
              <!-- Descrição -->
@@ -117,8 +120,13 @@
         
         function formatCurrency(value) {
             // Remove tudo que não é número
-            let numStr = value.replace(/\D/g, '');
+            let numStr = String(value).replace(/\D/g, '');
             if (!numStr) return '0,00';
+            
+            // Limita a um número razoável (max 9999999999 centavos = 99.999.999,99)
+            if (numStr.length > 12) {
+                numStr = numStr.slice(0, 12);
+            }
             
             // Converte para número e divide por 100 para ter os centavos
             let num = parseInt(numStr, 10) / 100;
@@ -130,21 +138,24 @@
             });
         }
         
-        // Formata valor inicial se existir
-        if (valorInput.value && valorInput.value !== '0,00') {
-            let initialVal = valorInput.value.replace(/\D/g, '');
-            if (initialVal) {
-                valorInput.value = formatCurrency(initialVal);
-            } else {
-                valorInput.value = '0,00';
-            }
-        } else {
+        // Inicializa com 0,00
+        if (!valorInput.value || valorInput.value === '0' || valorInput.value.trim() === '') {
             valorInput.value = '0,00';
         }
         
         valorInput.addEventListener('input', function(e) {
-            let val = e.target.value;
-            e.target.value = formatCurrency(val);
+            // Pega a posição do cursor antes da formatação
+            const cursorPos = e.target.selectionStart;
+            const oldLength = e.target.value.length;
+            
+            // Formata o valor
+            e.target.value = formatCurrency(e.target.value);
+            
+            // Ajusta a posição do cursor
+            const newLength = e.target.value.length;
+            const diff = newLength - oldLength;
+            const newPos = Math.max(0, cursorPos + diff);
+            e.target.setSelectionRange(newPos, newPos);
         });
         
         valorInput.addEventListener('focus', function() {
