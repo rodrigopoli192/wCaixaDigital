@@ -20,6 +20,19 @@
     <form hx-post="{% url 'caixa:fechar' caixa.pk %}" hx-target="#fechar-caixa-container" hx-swap="outerHTML" class="flex flex-col flex-1 overflow-hidden">
         {% csrf_token %}
         
+        {% if fechando_outro_operador %}
+        <!-- Warning: Closing another operator's register -->
+        <div class="mx-8 mt-6 p-4 rounded-xl bg-amber-950/30 border border-amber-500/30 flex items-start gap-3">
+            <span class="material-symbols-outlined text-amber-500 text-lg flex-shrink-0 mt-0.5">warning</span>
+            <div>
+                <p class="text-sm font-semibold text-amber-400">Atenção: Fechamento de Caixa de Outro Operador</p>
+                <p class="text-xs text-amber-400/70 mt-1">
+                    Este caixa foi aberto por <strong class="text-amber-300">{{ operador_original.get_full_name|default:operador_original.email }}</strong>. 
+                    Você está fechando como gerente. Esta ação ficará registrada na auditoria.
+                </p>
+            </div>
+        </div>
+        {% endif %}
         <div class="flex-1 overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
             <!-- COLUNA ESQUERDA: SISTEMA -->
             <div class="space-y-8">

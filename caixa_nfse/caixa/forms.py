@@ -118,11 +118,16 @@ class FechamentoCaixaForm(forms.ModelForm):
         label="Observações", required=False, widget=forms.Textarea(attrs={"rows": 3})
     )
 
+    # Override to handle Brazilian currency format (1.234,56)
+    saldo_informado = forms.CharField(
+        label="Saldo Informado",
+        widget=forms.TextInput(attrs={"inputmode": "decimal"}),
+    )
+
     class Meta:
         model = FechamentoCaixa
         fields = ["saldo_informado", "justificativa_diferenca"]
         widgets = {
-            "saldo_informado": forms.TextInput(attrs={"inputmode": "decimal"}),
             "justificativa_diferenca": forms.Textarea(attrs={"rows": 3}),
         }
 

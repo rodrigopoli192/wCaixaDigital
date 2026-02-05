@@ -171,7 +171,27 @@ class FecharCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     template_name = "caixa/fechar_caixa.html"
 
     def test_func(self):
-        return self.request.user.pode_operar_caixa
+        """
+        Allow closing if:
+        1. User has 'pode_operar_caixa' AND
+        2. User is the one who opened the register OR has 'pode_aprovar_fechamento' (manager)
+        """
+        if not self.request.user.pode_operar_caixa:
+            return False
+
+        abertura = self.get_abertura()
+        if not abertura:
+            return False
+
+        # User who opened can close their own register
+        if abertura.operador == self.request.user:
+            return True
+
+        # Managers can close any register
+        if self.request.user.pode_aprovar_fechamento:
+            return True
+
+        return False
 
     def get_caixa(self):
         return get_object_or_404(
@@ -192,6 +212,11 @@ class FecharCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         context["caixa"] = caixa
         context["abertura"] = abertura
         context["page_title"] = f"Fechar {caixa.identificador}"
+
+        # Check if closing another user's register
+        if abertura and abertura.operador != self.request.user:
+            context["fechando_outro_operador"] = True
+            context["operador_original"] = abertura.operador
 
         if abertura:
             # Calcula totais por forma de pagamento
