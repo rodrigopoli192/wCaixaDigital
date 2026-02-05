@@ -204,7 +204,14 @@
                         </div>
                         <p class="font-medium text-slate-600 dark:text-slate-300">Nenhuma abertura ativa</p>
                         <p class="text-sm">O caixa está fechado no momento.</p>
-                        <a href="{% url 'caixa:abrir' caixa.pk %}" class="mt-4 px-4 py-2 bg-success text-white rounded-lg text-sm font-bold hover:bg-emerald-600 transition-colors">
+                        <a href="#" 
+                           hx-get="{% url 'caixa:abrir' caixa.pk %}"
+                           hx-target="#modal-content"
+                           hx-trigger="click"
+                           hx-swap="innerHTML"
+                           @click.prevent="open = true"
+                           class="mt-4 px-4 py-2 bg-success text-white rounded-lg text-sm font-bold hover:bg-emerald-600 transition-colors flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">lock_open</span>
                             Realizar Abertura
                         </a>
                     </div>
