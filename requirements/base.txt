@@ -32,3 +32,7 @@ opentelemetry-instrumentation-celery>=0.46b0
 python-decouple>=3.8
 gunicorn>=22.0
 whitenoise>=6.7
+
+# Reports Export
+weasyprint>=68.0
+openpyxl>=3.1
