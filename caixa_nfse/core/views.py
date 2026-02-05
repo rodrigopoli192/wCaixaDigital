@@ -243,8 +243,16 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
             # Available caixas for opening
             caixas_disponiveis = Caixa.objects.filter(tenant=tenant, status="FECHADO", ativo=True)
+
+            # Histórico de aberturas do operador (últimas 5)
+            historico_aberturas = (
+                AberturaCaixa.objects.filter(operador=user)
+                .select_related("caixa")
+                .order_by("-data_hora")[:5]
+            )
         else:
             caixas_disponiveis = Caixa.objects.none()
+            historico_aberturas = []
 
         return {
             "page_title": "Meu Caixa",
@@ -256,6 +264,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "total_saidas": total_saidas,
             "saldo_atual": total_entradas - total_saidas,
             "caixas_disponiveis": caixas_disponiveis if not abertura_atual else [],
+            "historico_aberturas": historico_aberturas,
         }
 
 
