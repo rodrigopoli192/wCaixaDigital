@@ -241,8 +241,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 total_entradas = totais["entradas"] or 0
                 total_saidas = totais["saidas"] or 0
 
-            # Available caixas for opening
-            caixas_disponiveis = Caixa.objects.filter(tenant=tenant, status="FECHADO", ativo=True)
+            # All active caixas (available and in use)
+            todos_caixas = (
+                Caixa.objects.filter(tenant=tenant, ativo=True)
+                .select_related("operador_atual")
+                .order_by("identificador")
+            )
 
             # Histórico de aberturas do operador (últimas 5)
             historico_aberturas = (
@@ -251,7 +255,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 .order_by("-data_hora")[:5]
             )
         else:
-            caixas_disponiveis = Caixa.objects.none()
+            todos_caixas = Caixa.objects.none()
             historico_aberturas = []
 
         return {
@@ -263,7 +267,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "total_entradas": total_entradas,
             "total_saidas": total_saidas,
             "saldo_atual": total_entradas - total_saidas,
-            "caixas_disponiveis": caixas_disponiveis if not abertura_atual else [],
+            "todos_caixas": todos_caixas if not abertura_atual else [],
             "historico_aberturas": historico_aberturas,
         }
 
