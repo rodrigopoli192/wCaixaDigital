@@ -181,45 +181,118 @@
         </div>
     </div>
 
-    {% else %}
-    <!-- Nenhum Caixa Aberto -->
-    <div class="flex justify-center">
-        <div class="w-full max-w-3xl bg-white dark:bg-surface-dark rounded-xl border border-warning/30 shadow-sm overflow-hidden">
-            <div class="p-8 text-center">
-                <div class="size-16 rounded-full bg-warning/10 flex items-center justify-center mx-auto mb-4">
-                    <span class="material-symbols-outlined text-warning text-4xl">warning</span>
-                </div>
-                <h3 class="text-xl font-bold mb-2">Nenhum caixa aberto</h3>
-                <p class="text-slate-500 mb-6">Para começar a operar, abra um dos caixas disponíveis abaixo.</p>
 
-                {% if caixas_disponiveis %}
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {% for caixa in caixas_disponiveis %}
-                    <div class="p-6 rounded-xl bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark text-center hover:border-primary/50 transition-colors">
-                        <span class="material-symbols-outlined text-primary text-4xl mb-3">point_of_sale</span>
-                        <h4 class="font-bold mb-1">{{ caixa.identificador }}</h4>
-                        <p class="text-sm text-slate-500 mb-4">{{ caixa.get_tipo_display }}</p>
-                        <a href="#" 
-                            hx-get="{% url 'caixa:abrir' caixa.pk %}"
-                            hx-target="#modal-content"
-                            hx-trigger="click"
-                            hx-swap="innerHTML"
-                            @click.prevent="open = true"
-                            class="bg-success hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold w-full flex items-center justify-center gap-2 transition-all">
-                            <span class="material-symbols-outlined text-sm">login</span>
-                            Abrir
-                        </a>
+    {% else %}
+    <!-- Nenhum Caixa Aberto - Terminal Selection -->
+    <div class="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] px-4">
+        
+        <!-- Badge superior -->
+        <div class="px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 mb-6">
+            <span class="text-[10px] font-bold tracking-widest text-orange-500 uppercase flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">lock</span>
+                Acesso ao Caixa
+            </span>
+        </div>
+        
+        <!-- Título principal -->
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-3 text-center">Pronto para iniciar?</h1>
+        <p class="text-slate-400 mb-10 text-center max-w-lg">Seu ambiente do Caixa integrado está pronto. Selecione um dos caixas disponíveis abaixo para começar a operar.</p>
+        
+        {% if caixas_disponiveis %}
+        <!-- Container Card com Gradiente -->
+        <div class="p-8 rounded-3xl bg-gradient-to-br from-[#1f1f22] via-[#1a1a1c] to-[#1f1f22] border border-slate-800/50 shadow-2xl shadow-black/20 max-w-5xl w-full">
+            <!-- Grid de Caixas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for caixa in caixas_disponiveis %}
+            <div class="relative p-6 rounded-2xl bg-[#2B2C30] border border-slate-800 group hover:border-orange-500/30 transition-all duration-300">
+                
+                <!-- Badge Status -->
+                <div class="absolute top-4 right-4">
+                    {% if caixa.status == 'FECHADO' %}
+                    <span class="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                        <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        Disponível
+                    </span>
+                    {% elif caixa.status == 'ABERTO' %}
+                    <span class="flex items-center gap-1.5 text-[10px] font-bold text-amber-400 uppercase tracking-wider">
+                        <span class="size-2 rounded-full bg-amber-400"></span>
+                        Em Uso
+                    </span>
+                    {% else %}
+                    <span class="flex items-center gap-1.5 text-[10px] font-bold text-red-400 uppercase tracking-wider">
+                        <span class="size-2 rounded-full bg-red-400"></span>
+                        Bloqueado
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Ícone Terminal -->
+                <div class="size-12 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20 mb-4 group-hover:bg-orange-500/20 transition-colors">
+                    <span class="material-symbols-outlined text-orange-500 text-2xl">desktop_windows</span>
+                </div>
+                
+                <!-- Info -->
+                <h3 class="text-xl font-bold text-white mb-1">{{ caixa.identificador }}</h3>
+                <p class="text-sm text-slate-500 mb-4">{{ caixa.get_tipo_display }}</p>
+                
+                <!-- Meta -->
+                <div class="space-y-2 text-sm mb-6">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Último Fechamento:</span>
+                        <span class="text-slate-300 font-medium">{% if caixa.ultimo_fechamento %}{{ caixa.ultimo_fechamento|date:"d/m, H:i" }}{% else %}--{% endif %}</span>
                     </div>
-                    {% endfor %}
+                    <div class="flex justify-between text-slate-400">
+                        <span>Tipo de Caixa:</span>
+                        <span class="text-slate-300 font-medium">{{ caixa.get_tipo_display }}</span>
+                    </div>
                 </div>
+                
+                <!-- Botão Abrir -->
+                {% if caixa.status == 'FECHADO' %}
+                <a href="#" 
+                    hx-get="{% url 'caixa:abrir' caixa.pk %}"
+                    hx-target="#modal-content"
+                    hx-trigger="click"
+                    hx-swap="innerHTML"
+                    @click.prevent="open = true"
+                    class="w-full py-3.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 hover:-translate-y-0.5">
+                    <span class="material-symbols-outlined">login</span>
+                    Abrir Caixa
+                </a>
                 {% else %}
-                <div class="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center gap-3 justify-center">
-                    <span class="material-symbols-outlined">info</span>
-                    <span>Nenhum caixa disponível. Entre em contato com o administrador.</span>
-                </div>
+                <button disabled class="w-full py-3.5 rounded-xl bg-slate-700 text-slate-400 font-bold flex items-center justify-center gap-2 cursor-not-allowed">
+                    <span class="material-symbols-outlined">block</span>
+                    Indisponível
+                </button>
                 {% endif %}
             </div>
+            {% endfor %}
+            </div>
         </div>
+        
+        <!-- Footer Info -->
+        <div class="mt-12 flex flex-col md:flex-row items-center gap-4 md:gap-8 text-xs text-slate-500">
+            <span class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-emerald-500">verified_user</span>
+                Ambiente Seguro SSL
+            </span>
+            <span class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">update</span>
+                Versão 2.4.1
+            </span>
+            <a href="#" class="text-orange-500 hover:text-orange-400 transition-colors">Precisa de ajuda?</a>
+        </div>
+        
+        {% else %}
+        <!-- Sem caixas disponíveis -->
+        <div class="p-6 rounded-2xl bg-[#2B2C30] border border-slate-800 max-w-md w-full text-center">
+            <div class="size-16 rounded-full bg-slate-700/50 flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-slate-500 text-3xl">inbox</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">Nenhum terminal disponível</h3>
+            <p class="text-slate-400 text-sm">Entre em contato com o administrador do sistema para configurar os terminais.</p>
+        </div>
+        {% endif %}
     </div>
     {% endif %}
 
