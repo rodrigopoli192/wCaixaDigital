@@ -259,6 +259,77 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         }
 
 
+class MovimentosListView(LoginRequiredMixin, TemplateView):
+    """Lista de movimentos paginada para HTMX."""
+
+    template_name = "core/partials/movimentos_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from django.core.paginator import Paginator
+
+        from caixa_nfse.caixa.models import AberturaCaixa, Caixa, MovimentoCaixa
+
+        user = self.request.user
+        tenant = user.tenant
+        is_gerente = user.pode_aprovar_fechamento
+
+        # Pegar parâmetros de filtro
+        tipo = self.request.GET.get("tipo", "")
+        caixa = self.request.GET.get("caixa", "")
+        page = self.request.GET.get("page", 1)
+
+        # Query base - depende se é gerente ou operador
+        if is_gerente:
+            # Gerente vê todos os movimentos do tenant
+            if tenant:
+                movimentos = MovimentoCaixa.objects.filter(
+                    abertura__caixa__tenant=tenant
+                ).select_related("abertura__caixa", "abertura__operador", "forma_pagamento")
+            else:
+                movimentos = MovimentoCaixa.objects.all().select_related(
+                    "abertura__caixa", "abertura__operador", "forma_pagamento"
+                )
+        else:
+            # Operador vê apenas movimentos da sua abertura ativa
+            abertura_ativa = AberturaCaixa.objects.filter(operador=user, fechado=False).first()
+            if abertura_ativa:
+                movimentos = MovimentoCaixa.objects.filter(abertura=abertura_ativa).select_related(
+                    "abertura__caixa", "abertura__operador", "forma_pagamento"
+                )
+            else:
+                movimentos = MovimentoCaixa.objects.none()
+
+        # Aplicar filtros
+        if tipo:
+            movimentos = movimentos.filter(tipo=tipo)
+        if caixa and is_gerente:
+            movimentos = movimentos.filter(abertura__caixa__pk=caixa)
+
+        movimentos = movimentos.order_by("-data_hora")
+
+        # Paginação
+        paginator = Paginator(movimentos, 10)
+        page_obj = paginator.get_page(page)
+
+        # Caixas disponíveis para filtro (apenas para gerentes)
+        caixas = []
+        if is_gerente:
+            if tenant:
+                caixas = Caixa.objects.filter(tenant=tenant, ativo=True)
+            else:
+                caixas = Caixa.objects.filter(ativo=True)
+
+        context["movimentos"] = page_obj
+        context["page_obj"] = page_obj
+        context["caixas"] = caixas
+        context["filtro_tipo"] = tipo
+        context["filtro_caixa"] = caixa
+        context["is_gerente"] = is_gerente
+
+        return context
+
+
 class HealthCheckView(View):
     """Health check endpoint for container orchestration."""
 

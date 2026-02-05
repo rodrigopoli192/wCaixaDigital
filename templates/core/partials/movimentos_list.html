@@ -1,0 +1,144 @@
+<!-- Partial para lista de movimentos com filtros e paginação -->
+<div id="movimentos-container">
+    <!-- Barra de filtros -->
+    <div class="flex flex-wrap items-center gap-3 mb-4">
+        <select name="tipo" id="filtro-tipo"
+            hx-get="{% url 'core:movimentos_list' %}"
+            hx-target="#movimentos-container"
+            hx-swap="outerHTML"
+            hx-include="#filtro-tipo, #filtro-caixa"
+            class="text-xs px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
+            <option value="">Todos os tipos</option>
+            <option value="ENTRADA" {% if filtro_tipo == 'ENTRADA' %}selected{% endif %}>Entrada</option>
+            <option value="SAIDA" {% if filtro_tipo == 'SAIDA' %}selected{% endif %}>Saída</option>
+            <option value="SUPRIMENTO" {% if filtro_tipo == 'SUPRIMENTO' %}selected{% endif %}>Suprimento</option>
+            <option value="SANGRIA" {% if filtro_tipo == 'SANGRIA' %}selected{% endif %}>Sangria</option>
+            <option value="ESTORNO" {% if filtro_tipo == 'ESTORNO' %}selected{% endif %}>Estorno</option>
+        </select>
+
+        {% if is_gerente %}
+        <select name="caixa" id="filtro-caixa"
+            hx-get="{% url 'core:movimentos_list' %}"
+            hx-target="#movimentos-container"
+            hx-swap="outerHTML"
+            hx-include="#filtro-tipo, #filtro-caixa"
+            class="text-xs px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
+            <option value="">Todos os caixas</option>
+            {% for c in caixas %}
+            <option value="{{ c.pk }}" {% if filtro_caixa == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.identificador }}</option>
+            {% endfor %}
+        </select>
+        {% else %}
+        <input type="hidden" id="filtro-caixa" name="caixa" value="">
+        {% endif %}
+
+        <button type="button"
+            hx-get="{% url 'core:movimentos_list' %}"
+            hx-target="#movimentos-container"
+            hx-swap="outerHTML"
+            class="ml-auto text-xs px-3 py-2 rounded-lg bg-slate-100 dark:bg-background-dark hover:bg-slate-200 dark:hover:bg-border-dark text-slate-600 dark:text-slate-300 flex items-center gap-1 transition-all">
+            <span class="material-symbols-outlined text-sm">refresh</span>
+            Atualizar
+        </button>
+    </div>
+
+    <!-- Tabela de movimentos -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                    <th class="px-4 py-3">Caixa/Operador</th>
+                    <th class="px-4 py-3">Tipo</th>
+                    <th class="px-4 py-3">Descrição</th>
+                    <th class="px-4 py-3">Data/Hora</th>
+                    <th class="px-4 py-3 text-right">Valor (R$)</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                {% for mov in movimentos %}
+                <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                    <td class="px-4 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="size-8 rounded bg-slate-100 dark:bg-background-dark flex items-center justify-center">
+                                <span class="material-symbols-outlined text-sm text-slate-500">laptop_mac</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold">{{ mov.abertura.caixa.identificador }}</p>
+                                <p class="text-[10px] text-slate-500">{{ mov.abertura.operador.first_name|default:mov.abertura.operador.email }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4">
+                        {% if mov.tipo == 'ENTRADA' %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Venda</span>
+                        {% elif mov.tipo == 'SAIDA' %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">Saída</span>
+                        {% elif mov.tipo == 'SANGRIA' %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">Sangria</span>
+                        {% elif mov.tipo == 'SUPRIMENTO' %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-500/10 text-blue-400 border border-blue-500/20">Suprimento</span>
+                        {% elif mov.tipo == 'ESTORNO' %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-500/10 text-slate-500 border border-slate-500/20">Estorno</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">{{ mov.get_tipo_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-4 py-4 text-sm text-slate-600 dark:text-slate-300 max-w-[200px] truncate" title="{{ mov.descricao }}">
+                        {{ mov.descricao|default:"-" }}
+                    </td>
+                    <td class="px-4 py-4 text-sm text-slate-500">{{ mov.data_hora|date:"d/m - H:i" }}</td>
+                    <td class="px-4 py-4 text-sm font-bold text-right {% if mov.tipo in 'SAIDA,SANGRIA,ESTORNO' %}text-danger{% elif mov.tipo == 'SUPRIMENTO' %}text-blue-400{% else %}text-success{% endif %}">
+                        {% if mov.tipo in 'SAIDA,SANGRIA,ESTORNO' %}- {% endif %}R$ {{ mov.valor|floatformat:2 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-4 py-8 text-center text-sm text-slate-500">Nenhuma movimentação encontrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginação -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex items-center justify-between mt-4 pt-4 border-t border-slate-100 dark:border-border-dark">
+        <p class="text-xs text-slate-500">
+            Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }} movimentos
+        </p>
+        <div class="flex items-center gap-1">
+            {% if page_obj.has_previous %}
+            <button type="button"
+                hx-get="{% url 'core:movimentos_list' %}?page={{ page_obj.previous_page_number }}&tipo={{ filtro_tipo }}&caixa={{ filtro_caixa }}"
+                hx-target="#movimentos-container"
+                hx-swap="outerHTML"
+                class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-border-dark text-slate-500 transition-all">
+                <span class="material-symbols-outlined text-sm">chevron_left</span>
+            </button>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-3 py-1 rounded-lg bg-primary text-white text-xs font-bold">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <button type="button"
+                    hx-get="{% url 'core:movimentos_list' %}?page={{ num }}&tipo={{ filtro_tipo }}&caixa={{ filtro_caixa }}"
+                    hx-target="#movimentos-container"
+                    hx-swap="outerHTML"
+                    class="px-3 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-border-dark text-slate-500 text-xs font-medium transition-all">{{ num }}</button>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <button type="button"
+                hx-get="{% url 'core:movimentos_list' %}?page={{ page_obj.next_page_number }}&tipo={{ filtro_tipo }}&caixa={{ filtro_caixa }}"
+                hx-target="#movimentos-container"
+                hx-swap="outerHTML"
+                class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-border-dark text-slate-500 transition-all">
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

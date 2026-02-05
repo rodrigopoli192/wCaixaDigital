@@ -12,6 +12,7 @@ app_name = "core"
 urlpatterns = [
     # Dashboard
     path("", views.DashboardView.as_view(), name="dashboard"),
+    path("movimentos/", views.MovimentosListView.as_view(), name="movimentos_list"),
     # Authentication
     path("login/", LoginView.as_view(template_name="registration/login.html"), name="login"),
     path("logout/", LogoutView.as_view(next_page="core:login"), name="logout"),
