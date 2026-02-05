@@ -11,6 +11,7 @@ app_name = "caixa"
 urlpatterns = [
     # Lista de caixas
     path("", views.CaixaListView.as_view(), name="list"),
+    path("criar/", views.CaixaCreateView.as_view(), name="criar"),
     path("<uuid:pk>/", views.CaixaDetailView.as_view(), name="detail"),
     # Operações de caixa
     path("<uuid:pk>/abrir/", views.AbrirCaixaView.as_view(), name="abrir"),

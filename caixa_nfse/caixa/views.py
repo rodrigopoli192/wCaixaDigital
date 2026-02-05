@@ -50,6 +50,25 @@ class CaixaListView(LoginRequiredMixin, TenantMixin, SingleTableMixin, FilterVie
         return context
 
 
+class CaixaCreateView(LoginRequiredMixin, TenantMixin, CreateView):
+    """Criar novo caixa."""
+
+    model = Caixa
+    fields = ["identificador", "tipo"]
+    template_name = "caixa/caixa_form.html"
+    success_url = reverse_lazy("caixa:list")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Novo Caixa"
+        return context
+
+    def form_valid(self, form):
+        form.instance.tenant = self.request.user.tenant
+        messages.success(self.request, f"Caixa {form.instance.identificador} criado com sucesso!")
+        return super().form_valid(form)
+
+
 class CaixaDetailView(LoginRequiredMixin, TenantMixin, DetailView):
     """Detalhes do caixa."""
 
