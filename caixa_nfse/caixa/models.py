@@ -221,6 +221,11 @@ class AberturaCaixa(TenantAwareModel):
         """Alias para saldo_movimentos."""
         return self.saldo_movimentos
 
+    @property
+    def is_operacional_hoje(self) -> bool:
+        """Verifica se a abertura é do dia atual."""
+        return self.data_hora.date() == timezone.localdate()
+
 
 class MovimentoCaixa(TenantAwareModel):
     """

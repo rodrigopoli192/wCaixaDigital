@@ -231,6 +231,23 @@ class NovoMovimentoView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def test_func(self):
         return self.request.user.pode_operar_caixa
 
+    def dispatch(self, request, *args, **kwargs):
+        """Valida se a abertura é do dia atual."""
+        abertura = self.get_abertura()
+        if not abertura.is_operacional_hoje:
+            messages.error(
+                request, "Não é permitido lançar movimentos em datas diferentes da abertura."
+            )
+            # Se for HTMX, retorna erro 403 para não renderizar form
+            if request.headers.get("HX-Request"):
+                from django.http import HttpResponseForbidden
+
+                return HttpResponseForbidden("Operação não permitida em datas retroativas.")
+
+            return redirect("caixa:lista_movimentos", pk=abertura.pk)
+
+        return super().dispatch(request, *args, **kwargs)
+
     def get_abertura(self):
         return get_object_or_404(
             AberturaCaixa,

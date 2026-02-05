@@ -60,6 +60,7 @@
                 Abrir Caixa
             </a>
             {% elif abertura_atual %}
+            {% if abertura_atual.is_operacional_hoje %}
             <a href="#" 
                hx-get="{% url 'caixa:novo_movimento' abertura_atual.pk %}"
                hx-target="#modal-content"
@@ -70,6 +71,7 @@
                 <span class="material-symbols-outlined text-sm">add_circle</span>
                 Novo Movimento
             </a>
+            {% endif %}
             <a href="#" class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-background-dark/50 rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all"
                hx-get="{% url 'caixa:fechar' caixa.pk %}"
                hx-target="#modal-content"

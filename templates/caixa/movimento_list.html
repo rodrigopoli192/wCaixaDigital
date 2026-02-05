@@ -46,6 +46,7 @@
 
         {% if abertura.caixa.status == 'ABERTO' %}
         <div class="flex items-center gap-3">
+             {% if abertura.is_operacional_hoje %}
              <a href="#" 
                 hx-get="{% url 'caixa:novo_movimento' abertura.pk %}"
                 hx-target="#modal-content"
@@ -56,6 +57,7 @@
                 <span class="material-symbols-outlined">add_circle</span>
                 Novo Movimento
             </a>
+            {% endif %}
             <a href="#" class="bg-[#151a23] border border-[#2d3544] hover:bg-[#2d3544] text-slate-400 hover:text-white rounded-lg px-4 py-3 font-semibold flex items-center gap-2 transition-all"
                hx-get="{% url 'caixa:fechar' abertura.caixa.pk %}"
                hx-target="#modal-content"
