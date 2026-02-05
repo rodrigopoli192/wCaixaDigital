@@ -196,9 +196,12 @@ class FecharCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         if abertura:
             # Calcula totais por forma de pagamento
             context["saldo_sistema"] = abertura.saldo_movimentos
-            context["totais_forma_pagamento"] = abertura.movimentos.values(
-                "forma_pagamento__nome", "tipo"
-            ).annotate(total=Sum("valor"))
+            # Agrupa totais APENAS por forma de pagamento (não por tipo)
+            context["totais_forma_pagamento"] = (
+                abertura.movimentos.values("forma_pagamento__nome")
+                .annotate(total=Sum("valor"))
+                .order_by("-total")
+            )
 
         return context
 

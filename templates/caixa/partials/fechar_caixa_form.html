@@ -1,6 +1,6 @@
 {% load widget_tweaks %}
 
-<div id="fechar-caixa-container" class="bg-[#101622] text-slate-200 h-full flex flex-col w-full max-w-7xl rounded-xl shadow-2xl border border-[#2d3544] overflow-hidden">
+<div id="fechar-caixa-container" class="bg-[#212224] text-slate-200 h-full flex flex-col w-full max-w-7xl rounded-xl shadow-2xl border border-[#2d3544] overflow-hidden">
     <!-- Header -->
     <div class="flex justify-between items-start px-8 py-6 border-b border-slate-800/50">
         <div class="flex items-center gap-4">
@@ -161,13 +161,60 @@
         const justContainer = document.getElementById('justificativa-container');
         const saldoInput = document.querySelector('.valor-input');
 
+        // Máscara de moeda brasileira (1.234,56)
+        function formatarMoeda(valor) {
+            // Remove tudo que não é número
+            var numero = '';
+            for (var i = 0; i < valor.length; i++) {
+                var c = valor.charAt(i);
+                if (c >= '0' && c <= '9') numero += c;
+            }
+            
+            if (numero === '' || numero === '0') return '';
+            
+            // Remove zeros à esquerda exceto o último
+            numero = String(parseInt(numero, 10));
+            
+            // Pad com zeros à esquerda se necessário
+            while (numero.length < 3) numero = '0' + numero;
+            
+            // Separa inteiro e decimal
+            var inteiro = numero.slice(0, -2);
+            var decimal = numero.slice(-2);
+            
+            // Adiciona pontos de milhar
+            var resultado = '';
+            var contador = 0;
+            for (var j = inteiro.length - 1; j >= 0; j--) {
+                resultado = inteiro.charAt(j) + resultado;
+                contador++;
+                if (contador === 3 && j > 0) {
+                    resultado = '.' + resultado;
+                    contador = 0;
+                }
+            }
+            
+            return resultado + ',' + decimal;
+        }
+        
+        function parseMoeda(valor) {
+            if (!valor || valor === '') return NaN;
+            // Remove pontos e troca vírgula por ponto
+            var limpo = valor.split('.').join('').replace(',', '.');
+            return parseFloat(limpo);
+        }
+        
+        function aplicarMascara(e) {
+            var valorFormatado = formatarMoeda(e.target.value);
+            e.target.value = valorFormatado;
+        }
+
         function calcular() {
-            let valStr = saldoInput.value.replace('.', '').replace(',', '.');
-            let informado = parseFloat(valStr);
+            let informado = parseMoeda(saldoInput.value);
             
             // Estado Neutro (Vazio)
             if (isNaN(informado)) {
-                diffDisplay.textContent = '- R$ 0,00';
+                diffDisplay.textContent = 'R$ 0,00';
                 diffDisplay.className = 'font-mono text-3xl font-bold text-slate-600 transition-colors duration-300';
                 
                 diffPanel.className = 'p-6 rounded-2xl bg-[#1c222d] border border-slate-800 transition-all duration-300 relative overflow-hidden group';
@@ -186,11 +233,11 @@
             }
 
             const diff = informado - sistemaTotal;
-            diffDisplay.textContent = (diff > 0 ? '+ ' : '') + 'R$ ' + diff.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const diffFormatado = Math.abs(diff).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            diffDisplay.textContent = (diff >= 0 ? '+ ' : '- ') + 'R$ ' + diffFormatado;
 
             if (Math.abs(diff) < 0.01) {
                 // Success State (Verde)
-                // bg-emerald-950/30 border-emerald-500/30
                 diffPanel.className = 'p-6 rounded-2xl bg-emerald-950/20 border border-emerald-500/20 transition-all duration-300 relative overflow-hidden group shadow-[0_0_30px_-5px_rgba(16,185,129,0.1)]';
                 diffDisplay.className = 'font-mono text-3xl font-bold text-emerald-400 transition-colors duration-300';
                 
@@ -208,7 +255,6 @@
                 
             } else {
                 // Error State (Vermelho)
-                // bg-red-950/30 border-red-500/30
                 diffPanel.className = 'p-6 rounded-2xl bg-red-950/20 border border-red-500/20 transition-all duration-300 relative overflow-hidden group shadow-[0_0_30px_-5px_rgba(239,68,68,0.1)]';
                 diffDisplay.className = 'font-mono text-3xl font-bold text-red-500 transition-colors duration-300';
                 
@@ -227,7 +273,10 @@
         }
 
         if (saldoInput) {
-            saldoInput.addEventListener('input', calcular);
+            saldoInput.addEventListener('input', function(e) {
+                aplicarMascara(e);
+                calcular();
+            });
             calcular(); // Initial
         }
     })();

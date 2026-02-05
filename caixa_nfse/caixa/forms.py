@@ -88,6 +88,7 @@ class FechamentoCaixaForm(forms.ModelForm):
         model = FechamentoCaixa
         fields = ["saldo_informado", "justificativa_diferenca"]
         widgets = {
+            "saldo_informado": forms.TextInput(attrs={"inputmode": "decimal"}),
             "justificativa_diferenca": forms.Textarea(attrs={"rows": 3}),
         }
 
@@ -103,6 +104,21 @@ class FechamentoCaixaForm(forms.ModelForm):
         self.fields["saldo_informado"].widget.attrs.update(
             {"class": "valor-input text-xl font-bold text-center"}
         )
+
+    def clean_saldo_informado(self):
+        """Converte valor no formato brasileiro (1.234,56) para Decimal."""
+        from decimal import Decimal, InvalidOperation
+
+        valor = self.cleaned_data.get("saldo_informado")
+        if not valor:
+            raise forms.ValidationError("Este campo é obrigatório.")
+
+        # Remove pontos de milhar e troca vírgula por ponto
+        try:
+            valor_limpo = valor.replace(".", "").replace(",", ".")
+            return Decimal(valor_limpo)
+        except (InvalidOperation, AttributeError) as err:
+            raise forms.ValidationError("Informe um valor válido.") from err
 
     def clean(self):
         cleaned_data = super().clean()
