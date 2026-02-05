@@ -71,47 +71,56 @@
         </div>
 
         <nav class="flex-1 px-4 space-y-1 mt-4">
-            <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if request.resolver_match.url_name == 'dashboard' %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'core:dashboard' %}">
-                <span class="material-symbols-outlined">dashboard</span>
-                <span class="text-sm">Dashboard</span>
-            </a>
-            
-            <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'caixa' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'caixa:list' %}">
-                <span class="material-symbols-outlined">account_balance_wallet</span>
-                <span class="text-sm">Caixa</span>
-            </a>
-            
-            <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'nfse' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'nfse:list' %}">
-                <span class="material-symbols-outlined">description</span>
-                <span class="text-sm">NFS-e</span>
-            </a>
+            {% if request.resolver_match.app_name == 'backoffice' %}
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if request.resolver_match.url_name == 'dashboard' %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'backoffice:dashboard' %}">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="text-sm">Dashboard</span>
+                </a>
+            {% else %}
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if request.resolver_match.url_name == 'dashboard' %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'core:dashboard' %}">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="text-sm">Dashboard</span>
+                </a>
+                
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'caixa' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'caixa:list' %}">
+                    <span class="material-symbols-outlined">account_balance_wallet</span>
+                    <span class="text-sm">Caixa</span>
+                </a>
+                
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'nfse' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'nfse:list' %}">
+                    <span class="material-symbols-outlined">description</span>
+                    <span class="text-sm">NFS-e</span>
+                </a>
 
-            <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'clientes' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'clientes:list' %}">
-                <span class="material-symbols-outlined">groups</span>
-                <span class="text-sm">Gestão de Clientes</span>
-            </a>
-            
-            <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'contabil' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'contabil:lancamentos' %}">
-                <span class="material-symbols-outlined">calculate</span>
-                <span class="text-sm">Contabilidade</span>
-            </a>
-            
-            <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'relatorios' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="#">
-                <span class="material-symbols-outlined">bar_chart</span>
-                <span class="text-sm">Relatórios</span>
-            </a>
-            
-            <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'auditoria' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'auditoria:list' %}">
-                <span class="material-symbols-outlined">verified_user</span>
-                <span class="text-sm">Auditoria</span>
-            </a>
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'clientes' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'clientes:list' %}">
+                    <span class="material-symbols-outlined">groups</span>
+                    <span class="text-sm">Gestão de Clientes</span>
+                </a>
+                
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'contabil' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'contabil:lancamentos' %}">
+                    <span class="material-symbols-outlined">calculate</span>
+                    <span class="text-sm">Contabilidade</span>
+                </a>
+                
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'relatorios' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="#">
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    <span class="text-sm">Relatórios</span>
+                </a>
+                
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'auditoria' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors{% endif %}" href="{% url 'auditoria:list' %}">
+                    <span class="material-symbols-outlined">verified_user</span>
+                    <span class="text-sm">Auditoria</span>
+                </a>
+            {% endif %}
         </nav>
 
         <div class="p-4 border-t border-slate-200 dark:border-border-dark space-y-4">
+            {% if request.resolver_match.app_name != 'backoffice' %}
             <a href="{% url 'caixa:list' %}" class="w-full bg-primary hover:bg-orange-600 text-white rounded-lg py-2.5 text-sm font-semibold flex items-center justify-center gap-2 transition-all">
                 <span class="material-symbols-outlined text-sm">add</span>
                 Novo Lançamento
             </a>
+            {% endif %}
             
             <div class="space-y-1">
                 {% if user.pode_aprovar_fechamento %}
