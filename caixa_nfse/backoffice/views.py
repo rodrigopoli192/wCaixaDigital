@@ -73,6 +73,11 @@ class TenantUpdateView(LoginRequiredMixin, PlatformAdminRequiredMixin, UpdateVie
 
         return TenantUpdateForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["usuarios"] = self.object.usuarios.all()
+        return context
+
 
 class TenantDeleteView(LoginRequiredMixin, PlatformAdminRequiredMixin, DeleteView):
     """
