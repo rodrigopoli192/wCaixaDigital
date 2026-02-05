@@ -11,6 +11,10 @@ app_name = "relatorios"
 urlpatterns = [
     # Dashboard de relatórios
     path("", views.RelatoriosIndexView.as_view(), name="index"),
+    # Dashboard Analítico
+    path(
+        "dashboard-analitico/", views.DashboardAnaliticoView.as_view(), name="dashboard_analitico"
+    ),
     # Financeiros
     path("movimentacoes/", views.MovimentacoesReportView.as_view(), name="movimentacoes"),
     path("resumo-caixa/", views.ResumoCaixaReportView.as_view(), name="resumo_caixa"),

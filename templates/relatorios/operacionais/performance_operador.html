@@ -1,5 +1,9 @@
 {% extends "relatorios/base_relatorio.html" %}
 
+{% block export_buttons %}
+{% include "relatorios/includes/export_buttons.html" %}
+{% endblock %}
+
 {% block report_content %}
 <!-- Filtros -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
@@ -23,46 +27,47 @@
     </form>
 </div>
 
-<!-- Tabela de Performance -->
+<!-- Tabela -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full">
             <thead class="bg-slate-50 dark:bg-background-dark text-xs uppercase text-slate-500">
                 <tr>
                     <th class="px-6 py-3 text-left">Operador</th>
+                    <th class="px-6 py-3 text-left">E-mail</th>
                     <th class="px-6 py-3 text-right">Movimentos</th>
                     <th class="px-6 py-3 text-right">Entradas</th>
                     <th class="px-6 py-3 text-right">Saídas</th>
-                    <th class="px-6 py-3 text-right">Total Movimentado</th>
+                    <th class="px-6 py-3 text-right">Total</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
-                {% for item in performance %}
+                {% for p in performance %}
                 <tr class="hover:bg-slate-50 dark:hover:bg-background-dark">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-primary">person</span>
-                            </div>
-                            <div>
-                                <p class="font-semibold">{{ item.abertura__operador__first_name|default:"Operador" }}</p>
-                                <p class="text-xs text-slate-500">{{ item.abertura__operador__email }}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-right font-mono font-semibold">{{ item.total_movimentos }}</td>
-                    <td class="px-6 py-4 text-right font-mono text-success">R$ {{ item.total_entradas|floatformat:2|default:"0,00" }}</td>
-                    <td class="px-6 py-4 text-right font-mono text-danger">R$ {{ item.total_saidas|floatformat:2|default:"0,00" }}</td>
-                    <td class="px-6 py-4 text-right font-mono font-bold text-lg">R$ {{ item.total_valor|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-sm font-medium">{{ p.abertura__operador__first_name|default:"Operador" }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500">{{ p.abertura__operador__email }}</td>
+                    <td class="px-6 py-4 text-right text-sm">{{ p.total_movimentos }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono text-success">R$ {{ p.total_entradas|floatformat:2|default:"0,00" }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono text-danger">R$ {{ p.total_saidas|floatformat:2|default:"0,00" }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono font-bold">R$ {{ p.total_valor|floatformat:2 }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="px-6 py-8 text-center text-slate-500">
+                    <td colspan="6" class="px-6 py-8 text-center text-slate-500">
                         Nenhum dado encontrado com os filtros aplicados.
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot class="bg-slate-100 dark:bg-background-dark border-t-2 border-slate-300 dark:border-border-dark">
+                <tr class="font-bold">
+                    <td colspan="2" class="px-6 py-4 text-sm uppercase">Total</td>
+                    <td class="px-6 py-4 text-right text-sm">{{ total_movimentos }}</td>
+                    <td class="px-6 py-4 text-right text-sm text-success font-mono">{{ total_entradas }}</td>
+                    <td class="px-6 py-4 text-right text-sm text-danger font-mono">{{ total_saidas }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono">{{ total_valor }}</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>

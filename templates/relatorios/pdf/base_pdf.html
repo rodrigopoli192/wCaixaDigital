@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+{% load relatorios_tags %}
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1.5cm;
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 9px;
+                color: #64748b;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 10px;
+            color: #1e293b;
+            line-height: 1.4;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #6366f1;
+            margin-bottom: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #6366f1.html, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .logo-text h1 {
+            font-size: 16px;
+            color: #1e293b;
+            margin: 0;
+        }
+        
+        .logo-text p {
+            font-size: 10px;
+            color: #64748b;
+            margin: 0;
+        }
+        
+        .report-info {
+            text-align: right;
+        }
+        
+        .report-info h2 {
+            font-size: 14px;
+            color: #6366f1;
+            margin: 0 0 5px 0;
+        }
+        
+        .report-info p {
+            font-size: 9px;
+            color: #64748b;
+            margin: 0;
+        }
+        
+        .filters {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+        }
+        
+        .filters-title {
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 5px;
+        }
+        
+        .filters-content {
+            color: #64748b;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        thead th {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            font-weight: 600;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        thead th:first-child {
+            border-radius: 6px 0 0 0;
+        }
+        
+        thead th:last-child {
+            border-radius: 0 6px 0 0;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        tbody td {
+            padding: 8px 12px;
+            font-size: 10px;
+        }
+        
+        tfoot td {
+            background: #1e293b;
+            color: white;
+            font-weight: bold;
+            padding: 10px 12px;
+            font-size: 10px;
+        }
+        
+        tfoot td:first-child {
+            border-radius: 0 0 0 6px;
+        }
+        
+        tfoot td:last-child {
+            border-radius: 0 0 6px 0;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-success {
+            color: #10b981;
+        }
+        
+        .text-danger {
+            color: #ef4444;
+        }
+        
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px 1.5cm;
+            border-top: 1px solid #e2e8f0;
+            font-size: 8px;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">C</div>
+            <div class="logo-text">
+                <h1>Compliance Financeiro Pro</h1>
+                <p>{% if tenant_name %}{{ tenant_name }}{% else %}Sistema de Gestão{% endif %}</p>
+            </div>
+        </div>
+        <div class="report-info">
+            <h2>{{ title }}</h2>
+            <p>Gerado em {{ generated_at|date:"d/m/Y" }} às {{ generated_at|time:"H:i" }}</p>
+        </div>
+    </div>
+    
+    {% if filters %}
+    <div class="filters">
+        <div class="filters-title">Filtros Aplicados:</div>
+        <div class="filters-content">
+            {% for key, value in filters.items %}
+                {% if value %}{{ key }}: {{ value }}{% if not forloop.last %} | {% endif %}{% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <table>
+        <thead>
+            <tr>
+                {% for col in columns %}
+                <th class="{% if col.align == 'right' %}text-right{% elif col.align == 'center' %}text-center{% endif %}">
+                    {{ col.label }}
+                </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                {% for col in columns %}
+                <td class="{% if col.align == 'right' %}text-right{% elif col.align == 'center' %}text-center{% endif %}">
+                    {{ row|get_item:col.key|default:"-" }}
+                </td>
+                {% endfor %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="{{ columns|length }}" class="text-center">Nenhum registro encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        {% if totals %}
+        <tfoot>
+            <tr>
+                {% for col in columns %}
+                <td class="{% if col.align == 'right' %}text-right{% elif col.align == 'center' %}text-center{% endif %}">
+                    {% if forloop.first %}TOTAL{% else %}{{ totals|get_item:col.key|default:"" }}{% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+        </tfoot>
+        {% endif %}
+    </table>
+</body>
+</html>

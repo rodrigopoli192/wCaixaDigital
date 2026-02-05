@@ -1,5 +1,9 @@
 {% extends "relatorios/base_relatorio.html" %}
 
+{% block export_buttons %}
+{% include "relatorios/includes/export_buttons.html" %}
+{% endblock %}
+
 {% block report_content %}
 <!-- Filtros -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
@@ -32,7 +36,7 @@
     </form>
 </div>
 
-<!-- Tabela de Resumos -->
+<!-- Tabela -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full">
@@ -49,31 +53,40 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
-                {% for resumo in resumos %}
+                {% for r in resumos %}
                 <tr class="hover:bg-slate-50 dark:hover:bg-background-dark">
-                    <td class="px-6 py-4 text-sm font-medium">{{ resumo.abertura.caixa.identificador }}</td>
-                    <td class="px-6 py-4 text-sm">{{ resumo.abertura.operador.first_name|default:resumo.abertura.operador.email }}</td>
-                    <td class="px-6 py-4 text-sm text-slate-500">{{ resumo.abertura.data_hora|date:"d/m/Y H:i" }}</td>
-                    <td class="px-6 py-4 text-right font-mono">R$ {{ resumo.saldo_inicial|floatformat:2 }}</td>
-                    <td class="px-6 py-4 text-right font-mono text-success">+R$ {{ resumo.entradas|floatformat:2 }}</td>
-                    <td class="px-6 py-4 text-right font-mono text-danger">-R$ {{ resumo.saidas|floatformat:2 }}</td>
-                    <td class="px-6 py-4 text-right font-mono font-bold">R$ {{ resumo.saldo_final|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-sm font-medium">{{ r.abertura.caixa.identificador }}</td>
+                    <td class="px-6 py-4 text-sm">{{ r.abertura.operador.first_name|default:r.abertura.operador.email }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500">{{ r.abertura.data_hora|date:"d/m/Y H:i" }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono">R$ {{ r.saldo_inicial|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono text-success">+R$ {{ r.entradas|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono text-danger">-R$ {{ r.saidas|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono font-bold">R$ {{ r.saldo_final|floatformat:2 }}</td>
                     <td class="px-6 py-4 text-center">
-                        {% if resumo.fechamento %}
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 dark:bg-background-dark text-slate-500">Fechado</span>
+                        {% if r.fechamento %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success">Fechado</span>
                         {% else %}
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success">Aberto</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-warning/10 text-warning">Aberto</span>
                         {% endif %}
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
                     <td colspan="8" class="px-6 py-8 text-center text-slate-500">
-                        Nenhuma abertura encontrada com os filtros aplicados.
+                        Nenhum caixa encontrado com os filtros aplicados.
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot class="bg-slate-100 dark:bg-background-dark border-t-2 border-slate-300 dark:border-border-dark">
+                <tr class="font-bold">
+                    <td colspan="4" class="px-6 py-4 text-sm uppercase">Total</td>
+                    <td class="px-6 py-4 text-right text-sm text-success font-mono">+R$ {{ total_entradas|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm text-danger font-mono">-R$ {{ total_saidas|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono">R$ {{ total_saldo_final|floatformat:2 }}</td>
+                    <td class="px-6 py-4"></td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>

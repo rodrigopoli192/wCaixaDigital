@@ -1,5 +1,9 @@
 {% extends "relatorios/base_relatorio.html" %}
 
+{% block export_buttons %}
+{% include "relatorios/includes/export_buttons.html" %}
+{% endblock %}
+
 {% block report_content %}
 <!-- Filtros -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
@@ -23,13 +27,7 @@
     </form>
 </div>
 
-<!-- Total Geral -->
-<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
-    <p class="text-sm text-slate-500 mb-1">Total Geral</p>
-    <p class="text-3xl font-bold text-primary">R$ {{ total_geral|floatformat:2 }}</p>
-</div>
-
-<!-- Tabela Consolidada -->
+<!-- Tabela -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full">
@@ -44,34 +42,35 @@
             <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
                 {% for item in consolidado %}
                 <tr class="hover:bg-slate-50 dark:hover:bg-background-dark">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-primary">credit_card</span>
-                            </div>
-                            <span class="font-semibold">{{ item.forma_pagamento__nome|default:"Não informado" }}</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-right font-mono">{{ item.quantidade }}</td>
-                    <td class="px-6 py-4 text-right font-mono font-semibold">R$ {{ item.total|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-sm font-medium">{{ item.forma_pagamento__nome|default:"Não informado" }}</td>
+                    <td class="px-6 py-4 text-right text-sm">{{ item.quantidade }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono font-semibold">R$ {{ item.total|floatformat:2 }}</td>
                     <td class="px-6 py-4 text-right">
-                        {% widthratio item.total total_geral 100 as percentage %}
+                        {% widthratio item.total total_geral 100 as percentual %}
                         <div class="flex items-center justify-end gap-2">
-                            <div class="w-20 bg-slate-200 dark:bg-background-dark rounded-full h-2">
-                                <div class="bg-primary h-2 rounded-full" style="width: {{ percentage }}%"></div>
+                            <div class="w-24 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-primary rounded-full" style="width: {{ percentual }}%"></div>
                             </div>
-                            <span class="text-sm font-medium">{{ percentage }}%</span>
+                            <span class="text-sm font-medium w-12 text-right">{{ percentual }}%</span>
                         </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
                     <td colspan="4" class="px-6 py-8 text-center text-slate-500">
-                        Nenhum movimento encontrado com os filtros aplicados.
+                        Nenhum dado encontrado com os filtros aplicados.
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot class="bg-slate-100 dark:bg-background-dark border-t-2 border-slate-300 dark:border-border-dark">
+                <tr class="font-bold">
+                    <td class="px-6 py-4 text-sm uppercase">Total Geral</td>
+                    <td class="px-6 py-4 text-right text-sm">{{ total_quantidade }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono">R$ {{ total_geral|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm">100%</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>

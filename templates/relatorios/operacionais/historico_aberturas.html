@@ -1,5 +1,9 @@
 {% extends "relatorios/base_relatorio.html" %}
 
+{% block export_buttons %}
+{% include "relatorios/includes/export_buttons.html" %}
+{% endblock %}
+
 {% block report_content %}
 <!-- Filtros -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
@@ -32,40 +36,40 @@
     </form>
 </div>
 
-<!-- Timeline de Aberturas -->
-<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
-    <div class="divide-y divide-slate-100 dark:divide-border-dark">
-        {% for abertura in aberturas %}
-        <div class="p-6 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="size-12 rounded-lg {% if abertura.fechado %}bg-slate-100 dark:bg-background-dark{% else %}bg-success/10{% endif %} flex items-center justify-center">
-                    <span class="material-symbols-outlined {% if abertura.fechado %}text-slate-500{% else %}text-success{% endif %}">point_of_sale</span>
-                </div>
-                <div>
-                    <p class="font-semibold">{{ abertura.caixa.identificador }}</p>
-                    <p class="text-sm text-slate-500">{{ abertura.operador.first_name|default:abertura.operador.email }}</p>
-                </div>
+<!-- Timeline -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+    <div class="space-y-4">
+        {% for ab in aberturas %}
+        <div class="flex items-start gap-4 pb-4 border-b border-slate-100 dark:border-border-dark last:border-0 last:pb-0">
+            <div class="size-10 rounded-full flex items-center justify-center flex-shrink-0 {% if ab.fechado %}bg-success/10{% else %}bg-warning/10{% endif %}">
+                <span class="material-symbols-outlined {% if ab.fechado %}text-success{% else %}text-warning{% endif %}">
+                    {% if ab.fechado %}check_circle{% else %}pending{% endif %}
+                </span>
             </div>
-            <div class="text-right">
-                <p class="text-sm font-medium">{{ abertura.data_hora|date:"d/m/Y H:i" }}</p>
-                <p class="text-xs text-slate-500">
-                    {% if abertura.fechamento %}
-                        Fechado em {{ abertura.fechamento.data_hora|date:"H:i" }}
-                    {% else %}
-                        Em operação
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-1">
+                    <p class="font-semibold">{{ ab.caixa.identificador }}</p>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase {% if ab.fechado %}bg-success/10 text-success{% else %}bg-warning/10 text-warning{% endif %}">
+                        {% if ab.fechado %}Fechado{% else %}Aberto{% endif %}
+                    </span>
+                </div>
+                <p class="text-sm text-slate-500">Operador: {{ ab.operador.first_name|default:ab.operador.email }}</p>
+                <div class="flex items-center gap-4 mt-2 text-xs text-slate-400">
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">schedule</span>
+                        Abertura: {{ ab.data_hora|date:"d/m/Y H:i" }}
+                    </span>
+                    {% if ab.fechamento %}
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">event_available</span>
+                        Fechamento: {{ ab.fechamento.data_hora|date:"d/m/Y H:i" }}
+                    </span>
                     {% endif %}
-                </p>
-            </div>
-            <div>
-                {% if abertura.fechado %}
-                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-slate-100 dark:bg-background-dark text-slate-500">Fechado</span>
-                {% else %}
-                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-success/10 text-success">Aberto</span>
-                {% endif %}
+                </div>
             </div>
         </div>
         {% empty %}
-        <div class="p-8 text-center text-slate-500">
+        <div class="text-center text-slate-500 py-8">
             Nenhuma abertura encontrada com os filtros aplicados.
         </div>
         {% endfor %}

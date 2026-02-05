@@ -16,6 +16,23 @@
         </div>
     </div>
 
+    <!-- Dashboard Analítico - Destaque -->
+    <a href="{% url 'relatorios:dashboard_analitico' %}" 
+       class="block bg-gradient-to-r from-primary to-purple-600 rounded-xl p-6 text-white shadow-lg hover:shadow-xl transition-all group">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="size-14 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                    <span class="material-symbols-outlined text-3xl">insights</span>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold mb-1">Dashboard Analítico</h4>
+                    <p class="text-white/80 text-sm">Gráficos interativos e KPIs em tempo real</p>
+                </div>
+            </div>
+            <span class="material-symbols-outlined text-3xl opacity-60 group-hover:translate-x-2 transition-transform">arrow_forward</span>
+        </div>
+    </a>
+
     <!-- Relatórios Financeiros -->
     <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2">

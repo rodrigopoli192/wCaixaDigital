@@ -1,5 +1,9 @@
 {% extends "relatorios/base_relatorio.html" %}
 
+{% block export_buttons %}
+{% include "relatorios/includes/export_buttons.html" %}
+{% endblock %}
+
 {% block report_content %}
 <!-- Filtros -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
@@ -101,6 +105,13 @@
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot class="bg-slate-100 dark:bg-background-dark border-t-2 border-slate-300 dark:border-border-dark">
+                <tr class="font-bold">
+                    <td colspan="5" class="px-6 py-4 text-sm uppercase">Total</td>
+                    <td class="px-6 py-4 text-right text-sm text-success">+R$ {{ total_entradas|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm text-danger">-R$ {{ total_saidas|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>

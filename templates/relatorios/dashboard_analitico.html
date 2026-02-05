@@ -1,0 +1,278 @@
+{% extends "relatorios/base_relatorio.html" %}
+{% load humanize %}
+
+{% block report_content %}
+<!-- Filtro de Período -->
+<div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-4">
+        <span class="material-symbols-outlined text-primary text-3xl">insights</span>
+        <div>
+            <h2 class="text-xl font-bold">Visão Geral do Negócio</h2>
+            <p class="text-sm text-slate-500">Análise consolidada de movimentações</p>
+        </div>
+    </div>
+    <form method="get" class="flex items-center gap-2">
+        <label class="text-sm text-slate-500">Período:</label>
+        <select name="periodo" onchange="this.form.submit()"
+            class="px-4 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-surface-dark text-sm font-medium">
+            <option value="7" {% if periodo == 7 %}selected{% endif %}>Últimos 7 dias</option>
+            <option value="15" {% if periodo == 15 %}selected{% endif %}>Últimos 15 dias</option>
+            <option value="30" {% if periodo == 30 %}selected{% endif %}>Últimos 30 dias</option>
+            <option value="90" {% if periodo == 90 %}selected{% endif %}>Últimos 90 dias</option>
+        </select>
+    </form>
+</div>
+
+<!-- KPIs -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="size-10 rounded-lg bg-success/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-success">trending_up</span>
+            </div>
+            <span class="text-sm text-slate-500">Total Entradas</span>
+        </div>
+        <p class="text-2xl font-bold text-success">R$ {{ total_entradas|floatformat:2|intcomma }}</p>
+    </div>
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="size-10 rounded-lg bg-danger/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-danger">trending_down</span>
+            </div>
+            <span class="text-sm text-slate-500">Total Saídas</span>
+        </div>
+        <p class="text-2xl font-bold text-danger">R$ {{ total_saidas|floatformat:2|intcomma }}</p>
+    </div>
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary">payments</span>
+            </div>
+            <span class="text-sm text-slate-500">Ticket Médio</span>
+        </div>
+        <p class="text-2xl font-bold">R$ {{ ticket_medio|floatformat:2|intcomma }}</p>
+    </div>
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="size-10 rounded-lg bg-warning/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-warning">receipt_long</span>
+            </div>
+            <span class="text-sm text-slate-500">Movimentos/Dia</span>
+        </div>
+        <p class="text-2xl font-bold">{{ movimentos_por_dia|floatformat:1 }}</p>
+    </div>
+</div>
+
+<!-- Gráficos -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Movimentações por Dia -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+        <h3 class="font-bold mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">show_chart</span>
+            Movimentações por Dia
+        </h3>
+        <canvas id="chartMovimentacoes" height="200"></canvas>
+    </div>
+
+    <!-- Por Forma de Pagamento -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+        <h3 class="font-bold mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">donut_large</span>
+            Por Forma de Pagamento
+        </h3>
+        <canvas id="chartFormas" height="200"></canvas>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Entradas vs Saídas -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+        <h3 class="font-bold mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">bar_chart</span>
+            Entradas vs Saídas
+        </h3>
+        <canvas id="chartComparativo" height="200"></canvas>
+    </div>
+
+    <!-- Top Operadores -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+        <h3 class="font-bold mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">leaderboard</span>
+            Top 5 Operadores
+        </h3>
+        <canvas id="chartOperadores" height="200"></canvas>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const textColor = isDark ? '#94a3b8' : '#64748b';
+    const gridColor = isDark ? '#334155' : '#e2e8f0';
+    
+    Chart.defaults.color = textColor;
+    Chart.defaults.borderColor = gridColor;
+
+    // Cores modernas
+    const colors = {
+        primary: '#6366f1',
+        success: '#10b981',
+        danger: '#ef4444',
+        warning: '#f59e0b',
+        purple: '#8b5cf6',
+        pink: '#ec4899',
+        cyan: '#06b6d4',
+    };
+
+    // Gráfico de Movimentações por Dia
+    new Chart(document.getElementById('chartMovimentacoes'), {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [
+                {
+                    label: 'Entradas',
+                    data: {{ chart_entradas|safe }},
+                    borderColor: colors.success,
+                    backgroundColor: colors.success + '20',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                },
+                {
+                    label: 'Saídas',
+                    data: {{ chart_saidas|safe }},
+                    borderColor: colors.danger,
+                    backgroundColor: colors.danger + '20',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + value.toLocaleString('pt-BR');
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico de Formas de Pagamento
+    new Chart(document.getElementById('chartFormas'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ forma_labels|safe }},
+            datasets: [{
+                data: {{ forma_values|safe }},
+                backgroundColor: [
+                    colors.primary,
+                    colors.success,
+                    colors.warning,
+                    colors.purple,
+                    colors.pink
+                ],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'right' }
+            },
+            cutout: '60%'
+        }
+    });
+
+    // Gráfico Comparativo
+    new Chart(document.getElementById('chartComparativo'), {
+        type: 'bar',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [
+                {
+                    label: 'Entradas',
+                    data: {{ chart_entradas|safe }},
+                    backgroundColor: colors.success + 'cc',
+                    borderRadius: 4,
+                },
+                {
+                    label: 'Saídas',
+                    data: {{ chart_saidas|safe }},
+                    backgroundColor: colors.danger + 'cc',
+                    borderRadius: 4,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + value.toLocaleString('pt-BR');
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico de Operadores
+    new Chart(document.getElementById('chartOperadores'), {
+        type: 'bar',
+        data: {
+            labels: {{ operador_labels|safe }},
+            datasets: [{
+                label: 'Total Movimentado',
+                data: {{ operador_values|safe }},
+                backgroundColor: [
+                    colors.primary + 'cc',
+                    colors.purple + 'cc',
+                    colors.cyan + 'cc',
+                    colors.warning + 'cc',
+                    colors.pink + 'cc'
+                ],
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + value.toLocaleString('pt-BR');
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

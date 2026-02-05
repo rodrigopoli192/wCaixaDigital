@@ -1,5 +1,9 @@
 {% extends "relatorios/base_relatorio.html" %}
 
+{% block export_buttons %}
+{% include "relatorios/includes/export_buttons.html" %}
+{% endblock %}
+
 {% block report_content %}
 <!-- Filtros -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
@@ -18,18 +22,14 @@
             <label class="block text-xs font-medium text-slate-500 mb-1">Ação</label>
             <select name="acao" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
                 <option value="">Todas</option>
-                <option value="CREATE" {% if filtro_acao == 'CREATE' %}selected{% endif %}>Criação</option>
-                <option value="UPDATE" {% if filtro_acao == 'UPDATE' %}selected{% endif %}>Alteração</option>
-                <option value="DELETE" {% if filtro_acao == 'DELETE' %}selected{% endif %}>Exclusão</option>
-                <option value="LOGIN" {% if filtro_acao == 'LOGIN' %}selected{% endif %}>Login</option>
-                <option value="LOGOUT" {% if filtro_acao == 'LOGOUT' %}selected{% endif %}>Logout</option>
-                <option value="APPROVE" {% if filtro_acao == 'APPROVE' %}selected{% endif %}>Aprovação</option>
-                <option value="REJECT" {% if filtro_acao == 'REJECT' %}selected{% endif %}>Rejeição</option>
+                <option value="CREATE" {% if filtro_acao == 'CREATE' %}selected{% endif %}>Criar</option>
+                <option value="UPDATE" {% if filtro_acao == 'UPDATE' %}selected{% endif %}>Atualizar</option>
+                <option value="DELETE" {% if filtro_acao == 'DELETE' %}selected{% endif %}>Excluir</option>
             </select>
         </div>
         <div>
             <label class="block text-xs font-medium text-slate-500 mb-1">Tabela</label>
-            <input type="text" name="tabela" value="{{ filtro_tabela }}" placeholder="Ex: MovimentoCaixa"
+            <input type="text" name="tabela" value="{{ filtro_tabela }}" placeholder="Ex: Caixa"
                 class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
         </div>
         <div class="flex items-end">
@@ -41,7 +41,12 @@
     </form>
 </div>
 
-<!-- Tabela de Logs -->
+<!-- Info -->
+<div class="bg-slate-100 dark:bg-background-dark rounded-lg px-4 py-2 text-sm text-slate-600 dark:text-slate-400">
+    Total de registros: <span class="font-bold">{{ total_registros }}</span>
+</div>
+
+<!-- Tabela -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full">
@@ -56,29 +61,29 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
-                {% for registro in registros %}
+                {% for r in registros %}
                 <tr class="hover:bg-slate-50 dark:hover:bg-background-dark">
-                    <td class="px-6 py-4 text-sm text-slate-500">{{ registro.created_at|date:"d/m/Y H:i:s" }}</td>
-                    <td class="px-6 py-4 text-sm">{{ registro.usuario.first_name|default:registro.usuario.email|default:"-" }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500">{{ r.created_at|date:"d/m/Y H:i:s" }}</td>
+                    <td class="px-6 py-4 text-sm font-medium">{{ r.usuario.first_name|default:r.usuario.email|default:"-" }}</td>
                     <td class="px-6 py-4">
-                        {% if registro.acao == 'CREATE' %}
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success">{{ registro.get_acao_display }}</span>
-                        {% elif registro.acao == 'DELETE' %}
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-danger/10 text-danger">{{ registro.get_acao_display }}</span>
-                        {% elif registro.acao == 'UPDATE' %}
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-warning/10 text-warning">{{ registro.get_acao_display }}</span>
+                        {% if r.acao == 'CREATE' %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success">Criar</span>
+                        {% elif r.acao == 'UPDATE' %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-warning/10 text-warning">Atualizar</span>
+                        {% elif r.acao == 'DELETE' %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-danger/10 text-danger">Excluir</span>
                         {% else %}
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-primary/10 text-primary">{{ registro.get_acao_display }}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-500">{{ r.acao }}</span>
                         {% endif %}
                     </td>
-                    <td class="px-6 py-4 text-sm font-mono">{{ registro.tabela }}</td>
-                    <td class="px-6 py-4 text-sm font-mono text-slate-500">{{ registro.registro_id|truncatechars:12 }}</td>
-                    <td class="px-6 py-4 text-sm font-mono text-slate-500">{{ registro.ip_address|default:"-" }}</td>
+                    <td class="px-6 py-4 text-sm">{{ r.tabela }}</td>
+                    <td class="px-6 py-4 text-sm font-mono text-slate-500">{{ r.registro_id|truncatechars:12 }}</td>
+                    <td class="px-6 py-4 text-sm font-mono text-slate-500">{{ r.ip_address|default:"-" }}</td>
                 </tr>
                 {% empty %}
                 <tr>
                     <td colspan="6" class="px-6 py-8 text-center text-slate-500">
-                        Nenhum registro de auditoria encontrado.
+                        Nenhum registro encontrado com os filtros aplicados.
                     </td>
                 </tr>
                 {% endfor %}

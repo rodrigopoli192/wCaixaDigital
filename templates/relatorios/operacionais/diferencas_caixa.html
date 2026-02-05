@@ -1,5 +1,9 @@
 {% extends "relatorios/base_relatorio.html" %}
 
+{% block export_buttons %}
+{% include "relatorios/includes/export_buttons.html" %}
+{% endblock %}
+
 {% block report_content %}
 <!-- Filtros -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
@@ -14,11 +18,12 @@
             <input type="date" name="data_fim" value="{{ filtro_data_fim }}"
                 class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
         </div>
-        <div class="flex items-center gap-2 pt-6">
-            <input type="checkbox" name="apenas_diferencas" id="apenas_diferencas" value="1" 
-                {% if filtro_apenas_diferencas %}checked{% endif %}
-                class="rounded border-slate-300">
-            <label for="apenas_diferencas" class="text-sm">Apenas com diferença</label>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Apenas Diferenças</label>
+            <select name="apenas_diferencas" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+                <option value="">Todos os fechamentos</option>
+                <option value="1" {% if filtro_apenas_diferencas %}selected{% endif %}>Apenas com diferença</option>
+            </select>
         </div>
         <div class="flex items-end">
             <button type="submit" class="w-full px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors">
@@ -29,7 +34,7 @@
     </form>
 </div>
 
-<!-- Tabela de Diferenças -->
+<!-- Tabela -->
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full">
@@ -44,15 +49,15 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
-                {% for fechamento in fechamentos %}
-                <tr class="hover:bg-slate-50 dark:hover:bg-background-dark {% if fechamento.diferenca != 0 %}bg-danger/5{% endif %}">
-                    <td class="px-6 py-4 text-sm font-medium">{{ fechamento.abertura.caixa.identificador }}</td>
-                    <td class="px-6 py-4 text-sm">{{ fechamento.operador.first_name|default:fechamento.operador.email }}</td>
-                    <td class="px-6 py-4 text-sm text-slate-500">{{ fechamento.data_hora|date:"d/m/Y H:i" }}</td>
-                    <td class="px-6 py-4 text-right font-mono">R$ {{ fechamento.saldo_sistema|floatformat:2 }}</td>
-                    <td class="px-6 py-4 text-right font-mono">R$ {{ fechamento.saldo_informado|floatformat:2 }}</td>
-                    <td class="px-6 py-4 text-right font-mono font-bold {% if fechamento.diferenca > 0 %}text-success{% elif fechamento.diferenca < 0 %}text-danger{% endif %}">
-                        {% if fechamento.diferenca > 0 %}+{% endif %}R$ {{ fechamento.diferenca|floatformat:2 }}
+                {% for f in fechamentos %}
+                <tr class="hover:bg-slate-50 dark:hover:bg-background-dark">
+                    <td class="px-6 py-4 text-sm font-medium">{{ f.abertura.caixa.identificador }}</td>
+                    <td class="px-6 py-4 text-sm">{{ f.operador.first_name|default:f.operador.email }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500">{{ f.data_hora|date:"d/m/Y H:i" }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono">R$ {{ f.saldo_sistema|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono">R$ {{ f.saldo_informado|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right font-mono font-semibold {% if f.diferenca != 0 %}{% if f.diferenca > 0 %}text-success{% else %}text-danger{% endif %}{% endif %}">
+                        {% if f.diferenca > 0 %}+{% endif %}R$ {{ f.diferenca|floatformat:2 }}
                     </td>
                 </tr>
                 {% empty %}
@@ -63,6 +68,14 @@
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot class="bg-slate-100 dark:bg-background-dark border-t-2 border-slate-300 dark:border-border-dark">
+                <tr class="font-bold">
+                    <td colspan="5" class="px-6 py-4 text-sm uppercase">Total de Diferenças</td>
+                    <td class="px-6 py-4 text-right text-sm font-mono {% if total_diferenca > 0 %}text-success{% elif total_diferenca < 0 %}text-danger{% endif %}">
+                        {% if total_diferenca > 0 %}+{% endif %}R$ {{ total_diferenca|floatformat:2 }}
+                    </td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>

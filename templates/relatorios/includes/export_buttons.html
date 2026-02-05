@@ -1,0 +1,11 @@
+{# Template include for export buttons #}
+<a href="?{{ request.GET.urlencode }}&export=pdf" 
+   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-danger/30 bg-danger/5 text-danger hover:bg-danger/10 transition-colors text-sm font-medium">
+    <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+    PDF
+</a>
+<a href="?{{ request.GET.urlencode }}&export=xlsx" 
+   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-success/30 bg-success/5 text-success hover:bg-success/10 transition-colors text-sm font-medium">
+    <span class="material-symbols-outlined text-lg">table_view</span>
+    Excel
+</a>
