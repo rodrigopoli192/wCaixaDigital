@@ -49,7 +49,7 @@
                         {% endif %}
                     </dd>
                     
-                    <dt class="col-4">{{ cliente.tipo_pessoa == 'PF' and 'CPF' or 'CNPJ' }}</dt>
+                    <dt class="col-4">{% if cliente.tipo_pessoa == 'PF' %}CPF{% else %}CNPJ{% endif %}</dt>
                     <dd class="col-8">{{ cliente.documento_formatado }}</dd>
                     
                     <dt class="col-4">Razão Social</dt>
