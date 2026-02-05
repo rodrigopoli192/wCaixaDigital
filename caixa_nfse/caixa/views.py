@@ -69,6 +69,25 @@ class CaixaCreateView(LoginRequiredMixin, TenantMixin, CreateView):
         return super().form_valid(form)
 
 
+class CaixaUpdateView(LoginRequiredMixin, TenantMixin, UpdateView):
+    """Editar caixa existente."""
+
+    model = Caixa
+    fields = ["identificador", "tipo", "ativo"]
+    template_name = "caixa/caixa_form.html"
+    success_url = reverse_lazy("caixa:list")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = f"Editar {self.object.identificador}"
+        context["is_edit"] = True
+        return context
+
+    def form_valid(self, form):
+        messages.success(self.request, f"Caixa {form.instance.identificador} atualizado!")
+        return super().form_valid(form)
+
+
 class CaixaDetailView(LoginRequiredMixin, TenantMixin, DetailView):
     """Detalhes do caixa."""
 
