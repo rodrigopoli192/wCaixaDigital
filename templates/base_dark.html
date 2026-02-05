@@ -24,9 +24,9 @@
                     colors: {
                         "primary": "#f97316",
                         "background-light": "#f6f6f8",
-                        "background-dark": "#101622",
-                        "surface-dark": "#1c222d",
-                        "border-dark": "#2d3544",
+                        "background-dark": "#212224",
+                        "surface-dark": "#2B2C30",
+                        "border-dark": "#3d3e42",
                         "success": "#10b981",
                         "warning": "#f59e0b",
                         "danger": "#ef4444"
@@ -59,7 +59,7 @@
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex font-display">
     
     <!-- Sidebar -->
-    <aside class="w-64 border-r border-slate-200 dark:border-border-dark flex flex-col bg-white dark:bg-background-dark fixed h-full z-20">
+    <aside class="w-64 border-r border-slate-200 dark:border-border-dark flex flex-col bg-white dark:bg-surface-dark fixed h-full z-20">
         <div class="p-6 flex items-center gap-3">
             <div class="bg-primary size-10 rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20">
                 <span class="material-symbols-outlined">point_of_sale</span>
@@ -143,7 +143,7 @@
 
     <main class="flex-1 ml-64 flex flex-col">
         <!-- Header -->
-        <header class="h-16 border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-8 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md sticky top-0 z-10">
+        <header class="h-16 border-b border-slate-200 dark:border-border-dark flex items-center justify-between px-8 bg-white/80 dark:bg-surface-dark/80 backdrop-blur-md sticky top-0 z-10">
             <div class="flex items-center gap-4">
                 <h2 class="text-lg font-bold">{% block page_title %}Dashboard de Compliance{% endblock %}</h2>
             </div>

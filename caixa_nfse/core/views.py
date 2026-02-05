@@ -148,6 +148,45 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             or 0
         )
 
+        # Lista de todos os caixas com dados de abertura e valores
+        caixas_lista = []
+        for caixa in caixas.select_related("operador_atual").order_by("identificador"):
+            # Buscar abertura ativa (não fechada)
+            abertura_ativa = (
+                AberturaCaixa.objects.filter(caixa=caixa, fechado=False)
+                .select_related("operador")
+                .first()
+            )
+
+            # Buscar último fechamento
+            ultimo_fechamento = (
+                FechamentoCaixa.objects.filter(abertura__caixa=caixa)
+                .select_related("abertura")
+                .order_by("-data_hora")
+                .first()
+            )
+
+            # Calcular totais se houver abertura ativa
+            total_entradas_caixa = Decimal("0.00")
+            total_saidas_caixa = Decimal("0.00")
+            if abertura_ativa:
+                totais = abertura_ativa.movimentos.aggregate(
+                    entradas=Sum("valor", filter=models.Q(tipo__in=["ENTRADA", "SUPRIMENTO"])),
+                    saidas=Sum("valor", filter=models.Q(tipo__in=["SAIDA", "SANGRIA", "ESTORNO"])),
+                )
+                total_entradas_caixa = totais["entradas"] or Decimal("0.00")
+                total_saidas_caixa = totais["saidas"] or Decimal("0.00")
+
+            caixas_lista.append(
+                {
+                    "caixa": caixa,
+                    "abertura_ativa": abertura_ativa,
+                    "ultimo_fechamento": ultimo_fechamento,
+                    "total_entradas": total_entradas_caixa,
+                    "total_saidas": total_saidas_caixa,
+                }
+            )
+
         return {
             "page_title": "Dashboard de Compliance",
             "is_admin": True,

@@ -26,7 +26,7 @@
                 <!-- Resumo -->
                 <div>
                     <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Resumo do Sistema</h4>
-                <div class="p-6 rounded-2xl bg-[#1c222d] border border-slate-800 relative overflow-hidden">
+                <div class="p-6 rounded-2xl bg-[#2B2C30] border border-slate-800 relative overflow-hidden">
                         <!-- Background Glow -->
                         <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
 
@@ -60,7 +60,7 @@
                     <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Detalhamento por Meio</h4>
                     <div class="space-y-3">
                         {% for item in totais_forma_pagamento %}
-                        <div class="flex items-center justify-between p-4 rounded-xl bg-[#1c222d] border border-slate-800 hover:border-slate-700 transition-colors group">
+                        <div class="flex items-center justify-between p-4 rounded-xl bg-[#2B2C30] border border-slate-800 hover:border-slate-700 transition-colors group">
                             <div class="flex items-center gap-4">
                                 <div class="size-10 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-slate-700 transition-colors">
                                     <span class="material-symbols-outlined text-slate-400 text-lg">
@@ -87,7 +87,7 @@
                         <div class="absolute bottom-4 left-6 flex items-center gap-2 pointer-events-none">
                             <span class="text-2xl font-bold text-slate-600">R$</span>
                         </div>
-                        {% render_field form.saldo_informado class="valor-input block w-full pt-10 pb-4 pl-16 pr-6 rounded-2xl text-4xl font-mono font-bold text-right text-white bg-[#1c222d] border border-slate-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none placeholder-slate-700" placeholder="0.00" %}
+                        {% render_field form.saldo_informado class="valor-input block w-full pt-10 pb-4 pl-16 pr-6 rounded-2xl text-4xl font-mono font-bold text-right text-white bg-[#2B2C30] border border-slate-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none placeholder-slate-700" placeholder="0.00" %}
                     </div>
                      {% if form.saldo_informado.errors %}
                         <p class="text-xs text-red-500 mt-2 ml-1">{{ form.saldo_informado.errors.0 }}</p>
@@ -95,7 +95,7 @@
                 </div>
 
                 <!-- Painel Diferença -->
-                <div id="diff-panel" class="p-6 rounded-2xl bg-[#1c222d] border border-slate-800 transition-all duration-300 relative overflow-hidden group">
+                <div id="diff-panel" class="p-6 rounded-2xl bg-[#2B2C30] border border-slate-800 transition-all duration-300 relative overflow-hidden group">
                      <!-- Background Gradients -->
                      <div id="diff-bg-glow" class="absolute inset-0 opacity-0 transition-opacity duration-500"></div>
 
@@ -116,19 +116,19 @@
                 <!-- Justificativa -->
                 <div id="justificativa-container" class="hidden space-y-2 max-h-0 overflow-hidden transition-all duration-500 opacity-0 transform translate-y-4">
                     <label class="text-[10px] font-bold uppercase tracking-widest text-red-500 ml-1">Justificativa da Divergência (Obrigatório)</label>
-                    {% render_field form.justificativa_diferenca class="w-full rounded-xl bg-[#1c222d] border border-slate-700 text-sm text-slate-300 p-4 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none resize-none placeholder-slate-600" rows="3" placeholder="Explique detalhadamente o motivo da quebra de caixa..." %}
+                    {% render_field form.justificativa_diferenca class="w-full rounded-xl bg-[#2B2C30] border border-slate-700 text-sm text-slate-300 p-4 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none resize-none placeholder-slate-600" rows="3" placeholder="Explique detalhadamente o motivo da quebra de caixa..." %}
                 </div>
 
                 <!-- Observações -->
                 <div class="pt-4 space-y-2">
                     <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Observações Gerais</label>
-                    {% render_field form.observacoes class="w-full rounded-xl bg-[#1c222d] border border-slate-700 text-sm text-slate-300 p-4 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all outline-none resize-none placeholder-slate-600" rows="2" placeholder="Notas adicionais sobre o turno..." %}
+                    {% render_field form.observacoes class="w-full rounded-xl bg-[#2B2C30] border border-slate-700 text-sm text-slate-300 p-4 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all outline-none resize-none placeholder-slate-600" rows="2" placeholder="Notas adicionais sobre o turno..." %}
                 </div>
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="px-8 py-5 border-t border-slate-800 bg-[#101622] flex items-center justify-between z-20">
+        <div class="px-8 py-5 border-t border-slate-800 bg-[#212224] flex items-center justify-between z-20">
             <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/30 border border-slate-800/50">
                 <span class="material-symbols-outlined text-slate-500 text-sm">verified_user</span>
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Auditoria Imutável Ativa</span>
@@ -217,7 +217,7 @@
                 diffDisplay.textContent = 'R$ 0,00';
                 diffDisplay.className = 'font-mono text-3xl font-bold text-slate-600 transition-colors duration-300';
                 
-                diffPanel.className = 'p-6 rounded-2xl bg-[#1c222d] border border-slate-800 transition-all duration-300 relative overflow-hidden group';
+                diffPanel.className = 'p-6 rounded-2xl bg-[#2B2C30] border border-slate-800 transition-all duration-300 relative overflow-hidden group';
                 diffBgGlow.className = 'absolute inset-0 opacity-0 transition-opacity duration-500';
                 
                 diffIcon.textContent = 'pending';

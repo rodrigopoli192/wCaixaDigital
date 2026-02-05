@@ -20,7 +20,7 @@
                     hx-get="{% url 'core:settings_users_list' %}" 
                     hx-target="#settings-content" 
                     hx-swap="innerHTML"
-                    :class="activeTab === 'users' ? 'bg-[#1c222d] border border-orange-500/50 text-white shadow-sm' : 'text-slate-400 hover:bg-[#1c222d] hover:text-slate-200'"
+                    :class="activeTab === 'users' ? 'bg-[#2B2C30] border border-orange-500/50 text-white shadow-sm' : 'text-slate-400 hover:bg-[#2B2C30] hover:text-slate-200'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left">
                     <span class="material-symbols-outlined" :class="activeTab === 'users' ? 'text-orange-500' : ''">group</span>
                     <span class="font-medium">Usuários</span>
@@ -32,18 +32,18 @@
                     hx-get="{% url 'core:settings_formas_pagamento_list' %}" 
                     hx-target="#settings-content" 
                     hx-swap="innerHTML"
-                    :class="activeTab === 'pagamento' ? 'bg-[#1c222d] border border-orange-500/50 text-white shadow-sm' : 'text-slate-400 hover:bg-[#1c222d] hover:text-slate-200'"
+                    :class="activeTab === 'pagamento' ? 'bg-[#2B2C30] border border-orange-500/50 text-white shadow-sm' : 'text-slate-400 hover:bg-[#2B2C30] hover:text-slate-200'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left">
                     <span class="material-symbols-outlined" :class="activeTab === 'pagamento' ? 'text-orange-500' : ''">payments</span>
                     <span class="font-medium">Formas de Pagamento</span>
                 </button>
 
                 <!-- Placeholder for future settings -->
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-[#1c222d] hover:text-slate-200 rounded-lg transition-all opacity-50 cursor-not-allowed">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-[#2B2C30] hover:text-slate-200 rounded-lg transition-all opacity-50 cursor-not-allowed">
                     <span class="material-symbols-outlined">store</span>
                     <span class="font-medium">Empresa (Em Breve)</span>
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-[#1c222d] hover:text-slate-200 rounded-lg transition-all opacity-50 cursor-not-allowed">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-[#2B2C30] hover:text-slate-200 rounded-lg transition-all opacity-50 cursor-not-allowed">
                     <span class="material-symbols-outlined">receipt_long</span>
                     <span class="font-medium">NFS-e (Em Breve)</span>
                 </a>
@@ -52,7 +52,7 @@
 
         <!-- Main Content Area -->
         <div class="lg:col-span-9">
-            <div id="settings-content" class="bg-[#1c222d] rounded-xl border border-[#2d3544] overflow-hidden min-h-[600px]">
+            <div id="settings-content" class="bg-[#2B2C30] rounded-xl border border-[#2d3544] overflow-hidden min-h-[600px]">
                 <!-- Load User List via HTMX immediately -->
                 <div hx-get="{% url 'core:settings_users_list' %}" hx-trigger="load" hx-swap="innerHTML">
                     <div class="p-12 flex flex-col items-center justify-center text-slate-500 animate-pulse">

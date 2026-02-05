@@ -47,6 +47,12 @@ class MovimentoCaixaForm(forms.ModelForm):
         fields = ["tipo", "forma_pagamento", "valor", "descricao", "cliente"]
         widgets = {
             "descricao": forms.Textarea(attrs={"rows": 2}),
+            "valor": forms.TextInput(
+                attrs={
+                    "inputmode": "decimal",
+                    "autocomplete": "off",
+                }
+            ),
         }
 
     def __init__(self, *args, tenant=None, **kwargs):
@@ -75,6 +81,34 @@ class MovimentoCaixaForm(forms.ModelForm):
             "descricao",
             Submit("submit", "Registrar Movimento", css_class="btn-primary"),
         )
+
+    def clean_valor(self):
+        """Converte valor no formato brasileiro (1.234,56) para Decimal."""
+        from decimal import Decimal, InvalidOperation
+
+        valor = self.cleaned_data.get("valor")
+        if valor is None:
+            return valor
+
+        # Se já for Decimal, retorna
+        if isinstance(valor, Decimal):
+            return valor
+
+        # Converte para string e limpa
+        valor_str = str(valor).strip()
+        if not valor_str:
+            return Decimal("0")
+
+        # Remove R$ e espaços
+        valor_str = valor_str.replace("R$", "").strip()
+
+        # Converte formato brasileiro: 1.234,56 -> 1234.56
+        valor_str = valor_str.replace(".", "").replace(",", ".")
+
+        try:
+            return Decimal(valor_str)
+        except InvalidOperation as e:
+            raise forms.ValidationError("Valor inválido. Use o formato: 1.234,56") from e
 
 
 class FechamentoCaixaForm(forms.ModelForm):

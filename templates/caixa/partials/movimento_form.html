@@ -95,7 +95,7 @@
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-5 border-t border-[#2d3544] bg-[#101622] flex justify-end gap-3 rounded-b-lg">
+        <div class="px-6 py-5 border-t border-[#2d3544] bg-[#212224] flex justify-end gap-3 rounded-b-lg">
              <button type="button" @click="open = false" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">
                 Cancelar
             </button>
@@ -110,6 +110,49 @@
 <div id="modal-stack"></div>
 
 <script>
+    // Máscara de moeda brasileira para o campo valor
+    (function() {
+        const valorInput = document.getElementById('id_valor');
+        if (!valorInput) return;
+        
+        function formatCurrency(value) {
+            // Remove tudo que não é número
+            let numStr = value.replace(/\D/g, '');
+            if (!numStr) return '0,00';
+            
+            // Converte para número e divide por 100 para ter os centavos
+            let num = parseInt(numStr, 10) / 100;
+            
+            // Formata como moeda brasileira
+            return num.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+        
+        // Formata valor inicial se existir
+        if (valorInput.value && valorInput.value !== '0,00') {
+            let initialVal = valorInput.value.replace(/\D/g, '');
+            if (initialVal) {
+                valorInput.value = formatCurrency(initialVal);
+            } else {
+                valorInput.value = '0,00';
+            }
+        } else {
+            valorInput.value = '0,00';
+        }
+        
+        valorInput.addEventListener('input', function(e) {
+            let val = e.target.value;
+            e.target.value = formatCurrency(val);
+        });
+        
+        valorInput.addEventListener('focus', function() {
+            // Seleciona todo o texto ao focar
+            this.select();
+        });
+    })();
+
     document.body.addEventListener("clientCreated", function(evt){
         const data = evt.detail; // {id: "...", label: "..."}
         if(!data) return;
