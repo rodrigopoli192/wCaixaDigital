@@ -114,10 +114,12 @@
             </a>
             
             <div class="space-y-1">
-                <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark" href="{% url 'admin:index' %}">
+                {% if user.pode_aprovar_fechamento %}
+                <a class="flex items-center gap-3 px-3 py-2 rounded-lg {% if 'settings' in request.path %}bg-primary/10 text-primary font-medium{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-surface-dark{% endif %}" href="{% url 'core:settings' %}">
                     <span class="material-symbols-outlined">settings</span>
                     <span class="text-sm">Configurações</span>
                 </a>
+                {% endif %}
                 
                 <form action="{% url 'core:logout' %}" method="post" class="w-full">
                     {% csrf_token %}

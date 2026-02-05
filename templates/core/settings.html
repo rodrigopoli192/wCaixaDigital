@@ -1,0 +1,52 @@
+{% extends "base_dark.html" %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Configurações</h1>
+            <p class="text-slate-400 mt-1">Gerencie sua empresa e equipe</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Sidebar Navigation -->
+        <div class="lg:col-span-3 space-y-2">
+            <nav class="flex flex-col space-y-1">
+                <!-- Users Tab (Active) -->
+                <a href="#" class="flex items-center gap-3 px-4 py-3 bg-[#1c222d] border border-orange-500/50 text-white rounded-lg shadow-sm transition-all">
+                    <span class="material-symbols-outlined text-orange-500">group</span>
+                    <span class="font-medium">Usuários</span>
+                </a>
+                
+                <!-- Placeholder for future settings -->
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-[#1c222d] hover:text-slate-200 rounded-lg transition-all opacity-50 cursor-not-allowed">
+                    <span class="material-symbols-outlined">store</span>
+                    <span class="font-medium">Empresa (Em Breve)</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-[#1c222d] hover:text-slate-200 rounded-lg transition-all opacity-50 cursor-not-allowed">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                    <span class="font-medium">NFS-e (Em Breve)</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="lg:col-span-9">
+            <div class="bg-[#1c222d] rounded-xl border border-[#2d3544] overflow-hidden min-h-[600px]">
+                <!-- Load User List via HTMX immediately -->
+                <div hx-get="{% url 'core:settings_users_list' %}" hx-trigger="load" hx-swap="innerHTML">
+                    <div class="p-12 flex flex-col items-center justify-center text-slate-500 animate-pulse">
+                        <span class="material-symbols-outlined text-4xl mb-4">sync</span>
+                        <p>Carregando usuários...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Container -->
+<div id="modal-container"></div>
+{% endblock %}

@@ -1,0 +1,103 @@
+<div class="relative z-50 animate-fade-in" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black/80 transition-opacity backdrop-blur-sm"></div>
+
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            
+            <div class="relative transform overflow-hidden rounded-2xl bg-[#1c222d] text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-[#2d3544]">
+                
+                <form 
+                    {% if form.instance.pk %}
+                        hx-post="{% url 'core:settings_user_edit' form.instance.pk %}"
+                    {% else %}
+                        hx-post="{% url 'core:settings_user_add' %}"
+                    {% endif %}
+                    hx-swap="none"
+                    class="flex flex-col h-full"
+                    @submit.prevent="$el.requestSubmit().then(() => { location.reload() })"
+                >
+                    {% csrf_token %}
+                    
+                    <!-- Header -->
+                    <div class="bg-[#151a23] px-6 py-4 border-b border-[#2d3544] flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-emerald-500">
+                                {% if form.instance.pk %}edit{% else %}person_add{% endif %}
+                            </span>
+                            {% if form.instance.pk %}Editar Usuário{% else %}Novo Usuário{% endif %}
+                        </h3>
+                        <button type="button" onclick="document.getElementById('modal-container').innerHTML = ''" class="text-slate-400 hover:text-white transition-colors">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-6 space-y-6">
+                        
+                        <!-- Personal Info -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-400 uppercase">Nome</label>
+                                <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" required class="w-full h-10 bg-[#0d1117] border border-[#2d3544] rounded-lg px-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder-slate-600">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-400 uppercase">Sobrenome</label>
+                                <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" required class="w-full h-10 bg-[#0d1117] border border-[#2d3544] rounded-lg px-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder-slate-600">
+                            </div>
+                            <div class="space-y-1.5 md:col-span-2">
+                                <label class="text-xs font-bold text-slate-400 uppercase">E-mail (Login)</label>
+                                <input type="email" name="email" value="{{ form.email.value|default:'' }}" required class="w-full h-10 bg-[#0d1117] border border-[#2d3544] rounded-lg px-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder-slate-600">
+                                <p class="text-[10px] text-slate-500">Será usado para login. A senha inicial será: <strong>mudar123</strong></p>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-400 uppercase">CPF</label>
+                                <input type="text" name="cpf" value="{{ form.cpf.value|default:'' }}" class="w-full h-10 bg-[#0d1117] border border-[#2d3544] rounded-lg px-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder-slate-600">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-400 uppercase">Cargo</label>
+                                <input type="text" name="cargo" value="{{ form.cargo.value|default:'' }}" class="w-full h-10 bg-[#0d1117] border border-[#2d3544] rounded-lg px-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder-slate-600">
+                            </div>
+                        </div>
+
+                        <hr class="border-[#2d3544]">
+
+                        <!-- Permissions -->
+                        <div>
+                            <h4 class="text-sm font-bold text-white mb-3">Permissões de Acesso</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <label class="flex items-center gap-3 p-3 rounded-lg border border-[#2d3544] bg-[#151a23] hover:border-slate-500 cursor-pointer transition-all">
+                                    <input type="checkbox" name="pode_operar_caixa" {% if form.pode_operar_caixa.value %}checked{% endif %} class="w-4 h-4 rounded border-slate-500 text-emerald-500 focus:ring-emerald-500 bg-[#0d1117]">
+                                    <span class="text-sm text-slate-200">Operar Caixa</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-lg border border-[#2d3544] bg-[#151a23] hover:border-slate-500 cursor-pointer transition-all">
+                                    <input type="checkbox" name="pode_emitir_nfse" {% if form.pode_emitir_nfse.value %}checked{% endif %} class="w-4 h-4 rounded border-slate-500 text-emerald-500 focus:ring-emerald-500 bg-[#0d1117]">
+                                    <span class="text-sm text-slate-200">Emitir NFS-e</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-lg border border-[#2d3544] bg-[#151a23] hover:border-slate-500 cursor-pointer transition-all">
+                                    <input type="checkbox" name="pode_cancelar_nfse" {% if form.pode_cancelar_nfse.value %}checked{% endif %} class="w-4 h-4 rounded border-slate-500 text-emerald-500 focus:ring-emerald-500 bg-[#0d1117]">
+                                    <span class="text-sm text-slate-200">Cancelar NFS-e</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 rounded-lg border border-[#2d3544] bg-[#151a23] hover:border-orange-500/50 cursor-pointer transition-all">
+                                    <input type="checkbox" name="pode_aprovar_fechamento" {% if form.pode_aprovar_fechamento.value %}checked{% endif %} class="w-4 h-4 rounded border-slate-500 text-orange-500 focus:ring-orange-500 bg-[#0d1117]">
+                                    <span class="text-sm text-orange-400 font-bold">Gestor (Admin)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="bg-[#151a23] px-6 py-4 border-t border-[#2d3544] flex justify-end gap-3 rounded-b-2xl">
+                        <button type="button" onclick="document.getElementById('modal-container').innerHTML = ''" class="h-10 px-4 rounded-lg border border-[#2d3544] text-slate-300 hover:bg-[#2d3544] hover:text-white transition-all font-medium">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="h-10 px-6 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-500/20 transition-all">
+                            Salvar Usuário
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2,12 +2,16 @@
 Core views.
 """
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q, Sum
 from django.http import JsonResponse
+from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import CreateView, ListView, TemplateView, UpdateView
+
+User = get_user_model()
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -212,3 +216,105 @@ class HealthCheckView(View):
                 "version": "0.1.0",
             }
         )
+
+
+class TenantAdminRequiredMixin(UserPassesTestMixin):
+    """Ensure user is a tenant admin (can approve closing)."""
+
+    def test_func(self):
+        user = self.request.user
+        return user.is_authenticated and user.tenant and user.pode_aprovar_fechamento
+
+
+class SettingsView(LoginRequiredMixin, TenantAdminRequiredMixin, TemplateView):
+    """
+    Settings dashboard for Tenant Admins.
+    """
+
+    template_name = "core/settings.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Configurações da Loja"
+        context["active_tab"] = "users"  # Default tab
+        return context
+
+
+class TenantUserListView(LoginRequiredMixin, TenantAdminRequiredMixin, ListView):
+    """
+    List users for the current tenant.
+    Designed for HTMX partial loading.
+    """
+
+    model = User
+    template_name = "core/partials/settings_users_list.html"
+    context_object_name = "users"
+
+    def get_queryset(self):
+        return User.objects.filter(tenant=self.request.user.tenant).order_by("first_name")
+
+
+class TenantUserCreateView(LoginRequiredMixin, TenantAdminRequiredMixin, CreateView):
+    """
+    Create a new user linked to the current tenant.
+    """
+
+    model = User
+    fields = [
+        "email",
+        "first_name",
+        "last_name",
+        "cpf",
+        "telefone",
+        "cargo",
+        "pode_operar_caixa",
+        "pode_emitir_nfse",
+        "pode_cancelar_nfse",
+        "pode_aprovar_fechamento",
+        "pode_exportar_dados",
+    ]
+    template_name = "core/partials/settings_user_form.html"
+
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        user.tenant = self.request.user.tenant
+        user.username = user.email  # Ensure username matches email
+        user.set_password("mudar123")  # Default initial password
+        user.save()
+
+        # Return the updated list
+        return JsonResponse({"status": "success"}, status=200)
+
+    def get_success_url(self):
+        return reverse_lazy("core:settings_users_list")
+
+
+class TenantUserUpdateView(LoginRequiredMixin, TenantAdminRequiredMixin, UpdateView):
+    """
+    Update an existing user.
+    """
+
+    model = User
+    fields = [
+        "email",
+        "first_name",
+        "last_name",
+        "cpf",
+        "telefone",
+        "cargo",
+        "pode_operar_caixa",
+        "pode_emitir_nfse",
+        "pode_cancelar_nfse",
+        "pode_aprovar_fechamento",
+        "pode_exportar_dados",
+        "is_active",
+    ]
+    template_name = "core/partials/settings_user_form.html"
+
+    def get_queryset(self):
+        # Ensure we can only edit users from own tenant
+        return User.objects.filter(tenant=self.request.user.tenant)
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return JsonResponse({"status": "success"}, status=200)

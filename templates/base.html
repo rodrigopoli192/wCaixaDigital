@@ -74,7 +74,10 @@
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="#">Perfil</a></li>
                             {% if user.is_staff %}
-                            <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
+                            <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin Django</a></li>
+                            {% endif %}
+                            {% if user.pode_aprovar_fechamento %}
+                            <li><a class="dropdown-item" href="{% url 'core:settings' %}">Configurações da Loja</a></li>
                             {% endif %}
                             <li><hr class="dropdown-divider"></li>
                             <li>
