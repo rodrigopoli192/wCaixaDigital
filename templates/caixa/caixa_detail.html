@@ -55,7 +55,13 @@
         <!-- Actions -->
         <div class="flex flex-wrap gap-2">
             {% if caixa.status == 'FECHADO' %}
-            <a href="{% url 'caixa:abrir' caixa.pk %}" class="bg-success hover:bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-success/20">
+            <a href="#" 
+               hx-get="{% url 'caixa:abrir' caixa.pk %}"
+               hx-target="#modal-content"
+               hx-trigger="click"
+               hx-swap="innerHTML"
+               @click.prevent="open = true"
+               class="bg-success hover:bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-success/20">
                 <span class="material-symbols-outlined text-sm">login</span>
                 Abrir Caixa
             </a>

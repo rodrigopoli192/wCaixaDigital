@@ -87,6 +87,11 @@ class AbrirCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         context["page_title"] = f"Abrir {context['caixa'].identificador}"
         return context
 
+    def get_template_names(self):
+        if self.request.headers.get("HX-Request"):
+            return ["caixa/partials/abrir_caixa_form.html"]
+        return [self.template_name]
+
     def form_valid(self, form):
         caixa = self.get_caixa()
 
@@ -109,6 +114,14 @@ class AbrirCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             caixa.save()
 
         messages.success(self.request, f"Caixa {caixa.identificador} aberto com sucesso!")
+
+        if self.request.headers.get("HX-Request"):
+            from django.http import HttpResponse
+
+            response = HttpResponse()
+            response["HX-Refresh"] = "true"
+            return response
+
         return redirect("caixa:detail", pk=caixa.pk)
 
 
