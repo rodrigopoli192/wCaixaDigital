@@ -16,7 +16,7 @@ urlpatterns = [
         name="tenant_user_add",
     ),
     path(
-        "tenants/<uuid:tenant_pk>/users/<uuid:pk>/edit/",
+        "tenants/<uuid:tenant_pk>/users/<int:pk>/edit/",
         views.TenantUserUpdateView.as_view(),
         name="tenant_user_edit",
     ),
