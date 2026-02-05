@@ -20,6 +20,8 @@ urlpatterns = [
     path("auditoria/", include("caixa_nfse.auditoria.urls")),
     # API
     path("api/v1/", include("caixa_nfse.api.urls")),
+    # Backoffice (Platform Admin)
+    path("platform/", include("caixa_nfse.backoffice.urls")),
 ]
 
 if settings.DEBUG:

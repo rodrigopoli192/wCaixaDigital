@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q, Sum
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
@@ -17,10 +18,16 @@ User = get_user_model()
 class DashboardView(LoginRequiredMixin, TemplateView):
     """Main dashboard view - redirects based on user role."""
 
+    def get(self, request, *args, **kwargs):
+        # Redirect Superuser to Backoffice
+        if request.user.is_superuser:
+            return redirect("backoffice:dashboard")
+        return super().get(request, *args, **kwargs)
+
     def get_template_names(self):
         """Return template based on user permissions."""
         user = self.request.user
-        if user.is_superuser or user.pode_aprovar_fechamento:
+        if user.pode_aprovar_fechamento:
             return ["core/dashboard_admin.html"]
         return ["core/dashboard_operador.html"]
 

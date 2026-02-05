@@ -47,6 +47,7 @@ LOCAL_APPS = [
     "caixa_nfse.fiscal",
     "caixa_nfse.auditoria",
     "caixa_nfse.api",
+    "caixa_nfse.backoffice",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

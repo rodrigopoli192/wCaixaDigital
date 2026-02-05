@@ -1,0 +1,116 @@
+{% extends "base_dark.html" %}
+
+{% block page_title %}Backoffice da Plataforma{% endblock %}
+
+{% block content %}
+<div class="p-8 space-y-8">
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark flex items-center gap-4">
+            <div class="size-12 rounded-full bg-primary/20 text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl">domain</span>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Total de Empresas</p>
+                <h3 class="text-2xl font-bold">{{ total_tenants }}</h3>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark flex items-center gap-4">
+            <div class="size-12 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl">check_circle</span>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Ativas</p>
+                <h3 class="text-2xl font-bold">{{ active_tenants }}</h3>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark flex items-center gap-4">
+            <div class="size-12 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center">
+                <span class="material-symbols-outlined text-2xl">group</span>
+            </div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Total Usuários</p>
+                <h3 class="text-2xl font-bold">{{ total_users }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tenants List -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden">
+        <div class="p-6 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-bold">Empresas Cadastradas</h3>
+                <p class="text-sm text-slate-500">Gerencie todos os tenants da plataforma</p>
+            </div>
+            <a href="{% url 'backoffice:tenant_add' %}" class="bg-primary hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors">
+                <span class="material-symbols-outlined text-lg">add_business</span>
+                Nova Empresa
+            </a>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                    <tr class="border-b border-slate-200 dark:border-border-dark">
+                        <th class="px-6 py-4">Empresa</th>
+                        <th class="px-6 py-4">CNPJ</th>
+                        <th class="px-6 py-4">Cidade/UF</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Criado em</th>
+                        <!-- <th class="px-6 py-4 text-right">Ações</th> -->
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-border-dark">
+                    {% for tenant in tenants %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-background-dark/30 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="size-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold text-lg">
+                                    {{ tenant.razao_social|slice:":1" }}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-slate-900 dark:text-white">{{ tenant.nome_fantasia|default:tenant.razao_social }}</p>
+                                    <p class="text-xs text-slate-500">{{ tenant.razao_social }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 font-mono text-sm text-slate-600 dark:text-slate-300">
+                            {{ tenant.cnpj }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
+                            {{ tenant.cidade }}/{{ tenant.uf }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if tenant.ativo %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                    Ativo
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                    Inativo
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-500">
+                            {{ tenant.created_at|date:"d/m/Y" }}
+                        </td>
+                        <!-- <td class="px-6 py-4 text-right">
+                            <button class="text-slate-400 hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined">edit</span>
+                            </button>
+                        </td> -->
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                            <span class="material-symbols-outlined text-4xl mb-3 opacity-50">domain_disabled</span>
+                            <p>Nenhuma empresa cadastrada.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
