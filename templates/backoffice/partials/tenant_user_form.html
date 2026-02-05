@@ -22,7 +22,8 @@
 
         <!-- Form -->
         <form method="post" 
-              hx-post 
+              action="{% if is_new %}{% url 'backoffice:tenant_user_add' tenant.pk %}{% else %}{% url 'backoffice:tenant_user_edit' tenant.pk object.pk %}{% endif %}"
+              hx-post="{% if is_new %}{% url 'backoffice:tenant_user_add' tenant.pk %}{% else %}{% url 'backoffice:tenant_user_edit' tenant.pk object.pk %}{% endif %}" 
               hx-target="#modal-container" 
               hx-swap="innerHTML"
               class="p-6 space-y-6">
