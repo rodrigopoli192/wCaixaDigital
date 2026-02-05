@@ -1,0 +1,100 @@
+{% load widget_tweaks %}
+
+<!-- Forma de Pagamento Form Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4" x-data="{ open: true }" x-show="open" x-cloak>
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="open = false; document.getElementById('modal-container').innerHTML = ''"></div>
+    
+    <!-- Modal -->
+    <div class="relative bg-[#1c222d] rounded-xl border border-[#2d3544] shadow-2xl w-full max-w-lg overflow-hidden" @click.away="open = false; document.getElementById('modal-container').innerHTML = ''">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-[#2d3544]">
+            <h3 class="text-lg font-bold text-white">{{ form_title }}</h3>
+            <button type="button" @click="open = false; document.getElementById('modal-container').innerHTML = ''" class="text-slate-400 hover:text-white transition-colors">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <!-- Form -->
+        <form hx-post="{% if is_edit %}{% url 'core:settings_forma_pagamento_edit' object.pk %}{% else %}{% url 'core:settings_forma_pagamento_add' %}{% endif %}"
+              hx-target="#modal-container"
+              hx-swap="innerHTML"
+              hx-on::after-request="if(event.detail.successful && event.detail.xhr.status === 200) { htmx.ajax('GET', '{% url 'core:settings_formas_pagamento_list' %}', {target: '.lg\\:col-span-9 > div', swap: 'innerHTML'}); document.getElementById('modal-container').innerHTML = ''; }">
+            {% csrf_token %}
+            
+            <div class="p-6 space-y-5">
+                <!-- Nome -->
+                <div class="space-y-1.5">
+                    <label for="id_nome" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Nome *</label>
+                    {% render_field form.nome class="w-full bg-[#0d1117] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                    {% if form.nome.errors %}<p class="text-xs text-red-400 mt-1">{{ form.nome.errors.0 }}</p>{% endif %}
+                </div>
+                
+                <!-- Tipo -->
+                <div class="space-y-1.5">
+                    <label for="id_tipo" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tipo *</label>
+                    <div class="relative">
+                        {% render_field form.tipo class="w-full appearance-none bg-[#0d1117] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">arrow_drop_down</span>
+                    </div>
+                    {% if form.tipo.errors %}<p class="text-xs text-red-400 mt-1">{{ form.tipo.errors.0 }}</p>{% endif %}
+                </div>
+                
+                <!-- Row: Taxa + Prazo -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Taxa -->
+                    <div class="space-y-1.5">
+                        <label for="id_taxa_percentual" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Taxa (%)</label>
+                        <div class="relative">
+                            {% render_field form.taxa_percentual class="w-full bg-[#0d1117] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">%</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">{{ form.taxa_percentual.help_text }}</p>
+                    </div>
+                    
+                    <!-- Prazo -->
+                    <div class="space-y-1.5">
+                        <label for="id_prazo_recebimento" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Prazo (dias)</label>
+                        <div class="relative">
+                            {% render_field form.prazo_recebimento class="w-full bg-[#0d1117] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">d</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conta Contábil -->
+                <div class="space-y-1.5">
+                    <label for="id_conta_contabil" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Conta Contábil</label>
+                    {% render_field form.conta_contabil class="w-full bg-[#0d1117] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none font-mono" %}
+                    <p class="text-[11px] text-slate-500">Código para integração contábil (opcional)</p>
+                </div>
+                
+                <!-- Ativo Toggle -->
+                <div class="flex items-center justify-between p-4 rounded-lg bg-[#0d1117] border border-[#2d3544]">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-slate-400">toggle_on</span>
+                        <div>
+                            <p class="text-sm font-medium text-white">Status Ativo</p>
+                            <p class="text-xs text-slate-500">Habilita o uso desta forma nos lançamentos</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="ativo" class="sr-only peer" {% if form.ativo.value %}checked{% endif %}>
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#2d3544] bg-[#161b26]">
+                <button type="button" @click="open = false; document.getElementById('modal-container').innerHTML = ''" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">
+                    Cancelar
+                </button>
+                <button type="submit" class="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-lg shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">check</span>
+                    {% if is_edit %}Salvar Alterações{% else %}Cadastrar{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -24,4 +24,25 @@ urlpatterns = [
     path(
         "settings/users/<pk>/edit/", views.TenantUserUpdateView.as_view(), name="settings_user_edit"
     ),
+    # Payment Methods
+    path(
+        "settings/formas-pagamento/",
+        views.FormaPagamentoListView.as_view(),
+        name="settings_formas_pagamento_list",
+    ),
+    path(
+        "settings/formas-pagamento/add/",
+        views.FormaPagamentoCreateView.as_view(),
+        name="settings_forma_pagamento_add",
+    ),
+    path(
+        "settings/formas-pagamento/<pk>/edit/",
+        views.FormaPagamentoUpdateView.as_view(),
+        name="settings_forma_pagamento_edit",
+    ),
+    path(
+        "settings/formas-pagamento/<pk>/delete/",
+        views.FormaPagamentoDeleteView.as_view(),
+        name="settings_forma_pagamento_delete",
+    ),
 ]

@@ -12,6 +12,9 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
+from .forms import FormaPagamentoForm
+from .models import FormaPagamento
+
 User = get_user_model()
 
 
@@ -325,3 +328,85 @@ class TenantUserUpdateView(LoginRequiredMixin, TenantAdminRequiredMixin, UpdateV
     def form_valid(self, form):
         self.object = form.save()
         return JsonResponse({"status": "success"}, status=200)
+
+
+# =============================================================================
+# Formas de Pagamento Views
+# =============================================================================
+
+
+class FormaPagamentoListView(LoginRequiredMixin, TenantAdminRequiredMixin, ListView):
+    """
+    List payment methods for the current tenant.
+    Designed for HTMX partial loading.
+    """
+
+    model = FormaPagamento
+    template_name = "core/partials/settings_formas_pagamento_list.html"
+    context_object_name = "formas_pagamento"
+
+    def get_queryset(self):
+        return FormaPagamento.objects.filter(tenant=self.request.user.tenant).order_by("nome")
+
+
+class FormaPagamentoCreateView(LoginRequiredMixin, TenantAdminRequiredMixin, CreateView):
+    """
+    Create a new payment method linked to the current tenant.
+    """
+
+    model = FormaPagamento
+    form_class = FormaPagamentoForm
+    template_name = "core/partials/settings_forma_pagamento_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["is_edit"] = False
+        context["form_title"] = "Nova Forma de Pagamento"
+        return context
+
+    def form_valid(self, form):
+        forma = form.save(commit=False)
+        forma.tenant = self.request.user.tenant
+        forma.created_by = self.request.user
+        forma.save()
+        return JsonResponse({"status": "success"}, status=200)
+
+
+class FormaPagamentoUpdateView(LoginRequiredMixin, TenantAdminRequiredMixin, UpdateView):
+    """
+    Update an existing payment method.
+    """
+
+    model = FormaPagamento
+    form_class = FormaPagamentoForm
+    template_name = "core/partials/settings_forma_pagamento_form.html"
+
+    def get_queryset(self):
+        return FormaPagamento.objects.filter(tenant=self.request.user.tenant)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["is_edit"] = True
+        context["form_title"] = f"Editar {self.object.nome}"
+        return context
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.updated_by = self.request.user
+        self.object.save(update_fields=["updated_by", "updated_at"])
+        return JsonResponse({"status": "success"}, status=200)
+
+
+class FormaPagamentoDeleteView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
+    """
+    Delete a payment method (soft-delete by deactivating).
+    """
+
+    def post(self, request, pk):
+        forma = FormaPagamento.objects.filter(pk=pk, tenant=request.user.tenant).first()
+        if forma:
+            forma.ativo = False
+            forma.updated_by = request.user
+            forma.save(update_fields=["ativo", "updated_by", "updated_at"])
+            return JsonResponse({"status": "success"}, status=200)
+        return JsonResponse({"status": "error", "message": "Não encontrado"}, status=404)

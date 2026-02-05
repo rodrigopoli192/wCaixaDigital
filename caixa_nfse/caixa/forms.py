@@ -38,7 +38,7 @@ class MovimentoCaixaForm(forms.ModelForm):
     emitir_nfse = forms.BooleanField(
         label="Emitir NFS-e automaticamente",
         required=False,
-        initial=True,
+        initial=False,
         help_text="Gera a nota fiscal eletrônica após o registro",
     )
 
@@ -52,11 +52,17 @@ class MovimentoCaixaForm(forms.ModelForm):
     def __init__(self, *args, tenant=None, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # Set default value for "tipo" to ENTRADA
+        self.fields["tipo"].initial = "ENTRADA"
+
         if tenant:
             self.fields["forma_pagamento"].queryset = self.fields[
                 "forma_pagamento"
             ].queryset.filter(tenant=tenant, ativo=True)
             self.fields["cliente"].queryset = self.fields["cliente"].queryset.filter(tenant=tenant)
+
+        # Override label_from_instance to show only the name (não "Nome (Tipo)")
+        self.fields["forma_pagamento"].label_from_instance = lambda obj: obj.nome
 
         self.helper = FormHelper()
         self.helper.layout = Layout(
