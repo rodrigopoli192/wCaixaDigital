@@ -191,7 +191,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             )
 
         return {
-            "page_title": "Dashboard de Compliance",
+            "page_title": "Dashboard",
             "is_admin": True,
             "caixas_abertos": caixas_abertos,
             "caixas_fechados": caixas_fechados,

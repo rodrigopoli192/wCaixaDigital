@@ -14,7 +14,7 @@
                     {% endif %}
                     hx-swap="none"
                     class="flex flex-col h-full"
-                    @submit.prevent="$el.requestSubmit().then(() => { location.reload() })"
+                    @htmx:after-request="if($event.detail.successful) location.reload()"
                 >
                     {% csrf_token %}
                     
