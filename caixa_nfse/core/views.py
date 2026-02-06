@@ -643,7 +643,7 @@ class ConexaoExternaUpdateView(LoginRequiredMixin, TenantAdminRequiredMixin, Upd
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["is_edit"] = True
-        context["form_title"] = f"Editar {self.object.get_sistema_display()}"
+        context["form_title"] = f"Editar {self.object.sistema.nome}"
         return context
 
     def form_valid(self, form):

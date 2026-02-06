@@ -31,14 +31,14 @@
                         <div class="flex items-center gap-3">
                             <div class="size-10 rounded-lg bg-[#212224] flex items-center justify-center border border-[#2d3544]">
                                 <span class="material-symbols-outlined text-slate-400 group-hover:text-orange-500 transition-colors">
-                                    {% if conexao.sistema == 'RI' %}home_work
-                                    {% elif conexao.sistema == 'NOTAS' %}description
-                                    {% elif conexao.sistema == 'PROTESTO' %}gavel
+                                    {% if 'RI' in conexao.sistema.nome or 'Registro' in conexao.sistema.nome %}home_work
+                                    {% elif 'Notas' in conexao.sistema.nome or 'NOTAS' in conexao.sistema.nome %}description
+                                    {% elif 'Protesto' in conexao.sistema.nome or 'PROTESTO' in conexao.sistema.nome %}gavel
                                     {% else %}database{% endif %}
                                 </span>
                             </div>
                             <div>
-                                <p class="text-white font-bold">{{ conexao.get_sistema_display }}</p>
+                                <p class="text-white font-bold">{{ conexao.sistema.nome }}</p>
                                 <p class="text-xs text-slate-500">{{ conexao.created_at|date:"d/m/Y" }}</p>
                             </div>
                         </div>

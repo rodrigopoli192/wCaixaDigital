@@ -403,10 +403,13 @@ class ConexaoExterna(TenantAwareModel):
         MSSQL = "MSSQL", _("MsSQL Server")
         POSTGRES = "POSTGRES", _("PostgreSQL")
 
-    sistema = models.CharField(
-        _("sistema"),
-        max_length=20,
-        choices=Sistema.choices,
+    sistema = models.ForeignKey(
+        "backoffice.Sistema",
+        verbose_name=_("sistema"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="conexoes_externas",
     )
     tipo_conexao = models.CharField(
         _("tipo de conexão"),
