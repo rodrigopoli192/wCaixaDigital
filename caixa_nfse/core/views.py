@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
-from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.db import models
@@ -413,6 +413,7 @@ class TenantUserCreateView(LoginRequiredMixin, TenantAdminRequiredMixin, CreateV
         "pode_cancelar_nfse",
         "pode_aprovar_fechamento",
         "pode_exportar_dados",
+        "is_active",
     ]
     template_name = "core/partials/settings_user_form.html"
 
@@ -459,6 +460,40 @@ class TenantUserUpdateView(LoginRequiredMixin, TenantAdminRequiredMixin, UpdateV
     def form_valid(self, form):
         self.object = form.save()
         return JsonResponse({"status": "success"}, status=200)
+
+
+class TenantUserPasswordResetView(LoginRequiredMixin, TenantAdminRequiredMixin, UpdateView):
+    """
+    Allow Tenant Admin to reset password for a user.
+    """
+
+    model = User
+    form_class = SetPasswordForm
+    template_name = "core/partials/modal_admin_password_reset.html"
+
+    def get_queryset(self):
+        # Ensure we can only edit users from own tenant
+        return User.objects.filter(tenant=self.request.user.tenant)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # SetPasswordForm expects 'user' as the first positional argument
+        # UpdateView calls get_form_kwargs which returns 'instance': self.object
+        # We need to remove 'instance' because SetPasswordForm is not a ModelForm
+        kwargs["user"] = self.get_object()
+        if "instance" in kwargs:
+            del kwargs["instance"]
+        return kwargs
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(
+            self.request, f"Senha redefinida com sucesso para {form.user.get_full_name()}!"
+        )
+        # Return empty response to close modal
+        response = HttpResponse("")
+        response["HX-Trigger"] = "passwordResetSuccess"
+        return response
 
 
 # =============================================================================

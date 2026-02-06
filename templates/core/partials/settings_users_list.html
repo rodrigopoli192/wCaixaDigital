@@ -90,6 +90,14 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         <button 
+                            hx-get="{% url 'core:settings_user_reset_password' user_obj.pk %}" 
+                            hx-target="#modal-container" 
+                            hx-swap="innerHTML"
+                            class="text-slate-400 hover:text-blue-400 p-2 hover:bg-[#2d3544] rounded-lg transition-all" 
+                            title="Redefinir Senha">
+                            <span class="material-symbols-outlined">key</span>
+                        </button>
+                        <button 
                             hx-get="{% url 'core:settings_user_edit' user_obj.pk %}" 
                             hx-target="#modal-container" 
                             hx-swap="innerHTML"

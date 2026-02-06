@@ -1,11 +1,20 @@
 {% load static %}
 <!DOCTYPE html>
-<html class="dark" lang="pt-BR">
+<html lang="pt-BR">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <meta name="description" content="wCaixaDigital - Sistema de Caixa com NFS-e">
     <title>{% block title %}wCaixaDigital{% endblock %}</title>
+
+    <script>
+        // Prevent FOUC
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -57,7 +66,19 @@
     {% block extra_css %}{% endblock %}
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex font-display">
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex font-display"
+      x-data="{ 
+          darkMode: localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+          toggleTheme() {
+              this.darkMode = !this.darkMode;
+              localStorage.theme = this.darkMode ? 'dark' : 'light';
+              if (this.darkMode) {
+                  document.documentElement.classList.add('dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+              }
+          }
+      }">
     
     <!-- Sidebar -->
     <aside class="w-64 border-r border-slate-200 dark:border-border-dark flex flex-col bg-white dark:bg-surface-dark fixed h-full z-20">
@@ -153,6 +174,11 @@
                 
                 <!-- Notification -->
                 <div class="flex items-center gap-2">
+                    <button @click="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined" x-show="!darkMode">dark_mode</span>
+                        <span class="material-symbols-outlined" x-show="darkMode" style="display: none;">light_mode</span>
+                    </button>
+
                     <button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-dark relative">
                         <span class="material-symbols-outlined text-slate-500 dark:text-slate-400">notifications</span>
                         <span class="absolute top-2 right-2 size-2 bg-danger rounded-full border-2 border-white dark:border-background-dark"></span>

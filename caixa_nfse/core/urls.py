@@ -28,6 +28,11 @@ urlpatterns = [
     path(
         "settings/users/<pk>/edit/", views.TenantUserUpdateView.as_view(), name="settings_user_edit"
     ),
+    path(
+        "settings/users/<pk>/reset-password/",
+        views.TenantUserPasswordResetView.as_view(),
+        name="settings_user_reset_password",
+    ),
     # Payment Methods
     path(
         "settings/formas-pagamento/",

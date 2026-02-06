@@ -81,6 +81,10 @@
                                     <input type="checkbox" name="pode_aprovar_fechamento" {% if form.pode_aprovar_fechamento.value %}checked{% endif %} class="w-4 h-4 rounded border-slate-500 text-orange-500 focus:ring-orange-500 bg-[#0d1117]">
                                     <span class="text-sm text-orange-400 font-bold">Gestor (Admin)</span>
                                 </label>
+                                <label class="flex items-center gap-3 p-3 rounded-lg border border-[#2d3544] bg-[#212224] hover:border-emerald-500/50 cursor-pointer transition-all">
+                                    <input type="checkbox" name="is_active" {% if form.is_active.value %}checked{% endif %} class="w-4 h-4 rounded border-slate-500 text-emerald-500 focus:ring-emerald-500 bg-[#0d1117]">
+                                    <span class="text-sm text-emerald-400 font-bold">Ativo (Acesso Liberado)</span>
+                                </label>
                             </div>
                         </div>
 
