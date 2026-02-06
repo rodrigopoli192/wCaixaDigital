@@ -4,11 +4,14 @@ Core views.
 
 from decimal import Decimal
 
-from django.contrib.auth import get_user_model
+from django.contrib import messages
+from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.views import PasswordChangeView
 from django.db import models
 from django.db.models import Q, Sum
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -538,3 +541,45 @@ class FormaPagamentoDeleteView(LoginRequiredMixin, TenantAdminRequiredMixin, Vie
             forma.save(update_fields=["ativo", "updated_by", "updated_at"])
             return JsonResponse({"status": "success"}, status=200)
         return JsonResponse({"status": "error", "message": "Não encontrado"}, status=404)
+
+
+class UserProfileView(LoginRequiredMixin, UpdateView):
+    """View to update user profile via HTMX modal."""
+
+    model = User
+    fields = ["first_name", "last_name", "cpf"]
+    template_name = "core/partials/modal_profile.html"
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        self.object = form.save()
+        # Return empty response with trigger to update UI and close modal
+        response = HttpResponse("")
+        response["HX-Trigger"] = "profileUpdated"
+        return response
+
+    def form_invalid(self, form):
+        # Return form with errors to be re-rendered in modal
+        return super().form_invalid(form)
+
+
+class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    """View to change password via HTMX modal."""
+
+    template_name = "core/partials/modal_password.html"
+    form_class = PasswordChangeForm
+    success_url = reverse_lazy("core:dashboard")  # Fallback
+
+    def form_valid(self, form):
+        form.save()
+        # Updating the session so the user isn't logged out
+        update_session_auth_hash(self.request, form.user)
+
+        # Return empty response with trigger or success message
+        response = HttpResponse("")
+        # Add a toast message or trigger if you have a toast system
+        messages.success(self.request, "Senha alterada com sucesso!")
+        response["HX-Trigger"] = "passwordChanged"  # You can listen to this if needed
+        return response

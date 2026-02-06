@@ -6,20 +6,103 @@
 {% block content %}
 <div class="p-6 w-full space-y-6">
     <!-- Header Section -->
-    <div class="flex items-end justify-between">
+    <div class="flex items-end justify-between" x-data="{ 
+        loading: false, 
+        showModal: false, 
+        result: null,
+        async checkIntegrity() {
+            this.loading = true;
+            try {
+                const response = await fetch('{% url 'auditoria:verificar' %}');
+                const data = await response.json();
+                this.result = data;
+                this.showModal = true;
+            } catch (error) {
+                console.error('Erro na verificação:', error);
+                alert('Erro ao verificar integridade via servidor.');
+            } finally {
+                this.loading = false;
+            }
+        }
+    }">
         <div>
             <h3 class="text-2xl font-bold tracking-tight">Trilha de Auditoria</h3>
             <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Registro imutável de operações do sistema</p>
         </div>
         <div class="flex gap-3">
-            <a href="{% url 'auditoria:verificar' %}" class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-background-dark/50 rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
-                <span class="material-symbols-outlined text-sm text-success">verified_user</span>
-                Verificar Integridade
-            </a>
+            <button @click="checkIntegrity()" :disabled="loading" class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-background-dark/50 rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all disabled:opacity-50">
+                <span class="material-symbols-outlined text-sm text-success" x-show="!loading">verified_user</span>
+                <span class="material-symbols-outlined text-sm animate-spin" x-show="loading">sync</span>
+                <span x-text="loading ? 'Verificando...' : 'Verificar Integridade'"></span>
+            </button>
             <a href="{% url 'auditoria:exportar' %}" class="bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-background-dark/50 rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
                 <span class="material-symbols-outlined text-sm">download</span>
                 Exportar
             </a>
+        </div>
+
+        <!-- Integrity Result Modal -->
+        <div x-show="showModal" style="display: none;" 
+             class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+             x-transition.opacity>
+            <div class="bg-white dark:bg-surface-dark rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" 
+                 @click.away="showModal = false">
+                
+                <!-- Modal Header -->
+                <div class="p-6 border-b border-slate-100 dark:border-border-dark flex justify-between items-center">
+                    <h3 class="font-bold text-lg dark:text-white">Relatório de Integridade</h3>
+                    <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6">
+                    <!-- Success State -->
+                    <template x-if="result && result.integridade_ok">
+                        <div class="text-center py-4">
+                            <div class="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span class="material-symbols-outlined text-4xl text-success">check_circle</span>
+                            </div>
+                            <h4 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Integridade Confirmada!</h4>
+                            <p class="text-slate-500 dark:text-slate-400">
+                                A cadeia de hash foi verificada e nenhuma adulteração foi encontrada. Todos os registros estão consistentes.
+                            </p>
+                        </div>
+                    </template>
+
+                    <!-- Critical Failure State -->
+                    <template x-if="result && !result.integridade_ok">
+                        <div class="text-center py-4">
+                            <div class="w-16 h-16 bg-danger/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span class="material-symbols-outlined text-4xl text-danger">gpp_bad</span>
+                            </div>
+                            <h4 class="text-xl font-bold text-danger mb-2">Violação de Integridade Detectada!</h4>
+                            <p class="text-slate-500 dark:text-slate-400 mb-4">
+                                Foram encontrados <strong x-text="result.total_corrompidos"></strong> registros com hash inválido ou cadeia quebrada.
+                            </p>
+                            
+                            <div class="bg-slate-50 dark:bg-background-dark/50 rounded-lg p-3 text-left max-h-40 overflow-auto border border-slate-200 dark:border-border-dark">
+                                <p class="text-xs font-bold text-slate-500 uppercase mb-2">IDs dos registros afetados:</p>
+                                <ul class="space-y-1">
+                                    <template x-for="rec in result.registros_corrompidos" :key="rec.id">
+                                        <li class="text-xs font-mono text-danger">
+                                            #<span x-text="rec.id"></span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="p-4 bg-slate-50 dark:bg-background-dark/50 flex justify-end">
+                    <button @click="showModal = false" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-lg text-sm font-semibold transition-colors">
+                        Fechar
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -107,7 +190,7 @@
                     {% for registro in registros %}
                     <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
                         <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
-                            {{ registro.data_hora|date:"d/m/Y H:i:s" }}
+                            {{ registro.created_at|date:"d/m/Y H:i:s" }}
                         </td>
                         <td class="px-6 py-4">
                             {% if registro.acao == 'CREATE' %}
@@ -121,10 +204,10 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 text-sm font-mono text-slate-600 dark:text-slate-300">
-                            {{ registro.modelo }}
+                            {{ registro.tabela }}
                         </td>
                         <td class="px-6 py-4 text-sm font-mono text-slate-500 dark:text-slate-400">
-                            {{ registro.objeto_id }}
+                            {{ registro.registro_id }}
                         </td>
                         <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
                             {{ registro.usuario.get_full_name|default:registro.usuario }}
@@ -133,7 +216,7 @@
                             {{ registro.ip_address }}
                         </td>
                         <td class="px-6 py-4 text-center">
-                            {% if registro.hash_valido %}
+                            {% if registro.hash_registro %}
                             <span class="material-symbols-outlined text-success text-lg" title="Hash Válido">check_circle</span>
                             {% else %}
                             <span class="material-symbols-outlined text-danger text-lg animate-pulse" title="Hash Inválido">error</span>

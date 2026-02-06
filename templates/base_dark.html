@@ -159,19 +159,62 @@
                     </button>
                 </div>
                 
-                <!-- User Profile -->
-                <div class="flex items-center gap-3 pl-6 border-l border-slate-200 dark:border-border-dark">
-                    <div class="text-right">
-                        <p class="text-xs font-semibold leading-none">{{ user.first_name|default:user.email }}</p>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{% if user.is_superuser %}Admin Master{% else %}Operador{% endif %}</p>
+                <!-- User Profile Dropdown -->
+                <div class="relative pl-6 border-l border-slate-200 dark:border-border-dark" x-data="{ open: false }">
+                    <button @click="open = !open" @click.away="open = false" class="flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-surface-dark/50 rounded-lg p-2 transition-colors">
+                        <div class="text-right hidden md:block">
+                            <p class="text-xs font-semibold leading-none">{{ user.first_name|default:user.email }}</p>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">{% if user.is_superuser %}Admin Master{% else %}Operador{% endif %}</p>
+                        </div>
+                        {% if user.first_name %}
+                        <div class="size-8 rounded-full border border-slate-200 dark:border-border-dark bg-primary flex items-center justify-center text-white font-bold">
+                            {{ user.first_name|slice:":1"|upper }}
+                        </div>
+                        {% else %}
+                        <img alt="Avatar" class="size-8 rounded-full border border-slate-200 dark:border-border-dark" src="https://ui-avatars.com/api/?name={{ user.email }}&background=f97316&color=fff"/>
+                        {% endif %}
+                        <span class="material-symbols-outlined text-sm text-slate-400" :class="{'rotate-180': open}">expand_more</span>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="transform opacity-0 scale-95"
+                         x-transition:enter-end="transform opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="transform opacity-100 scale-100"
+                         x-transition:leave-end="transform opacity-0 scale-95"
+                         class="absolute right-0 mt-2 w-48 bg-white dark:bg-surface-dark rounded-xl shadow-lg border border-slate-200 dark:border-border-dark overflow-hidden py-1 z-50"
+                         style="display: none;">
+                        
+                        <a href="#" 
+                           hx-get="{% url 'core:user_profile' %}" 
+                           hx-target="#modal-global-container" 
+                           @click="open = false"
+                           class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-background-dark/50 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-lg">person</span>
+                            Meus Dados
+                        </a>
+                        
+                        <a href="#" 
+                           hx-get="{% url 'core:user_change_password' %}" 
+                           hx-target="#modal-global-container"
+                           @click="open = false"
+                           class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-background-dark/50 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-lg">lock</span>
+                            Alterar Senha
+                        </a>
+                        
+                        <div class="h-px bg-slate-100 dark:bg-border-dark my-1"></div>
+                        
+                        <form method="post" action="{% url 'core:logout' %}" class="block">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-danger hover:bg-danger/5 transition-colors text-left">
+                                <span class="material-symbols-outlined text-lg">logout</span>
+                                Sair
+                            </button>
+                        </form>
                     </div>
-                    {% if user.first_name %}
-                    <div class="size-8 rounded-full border border-slate-200 dark:border-border-dark bg-primary flex items-center justify-center text-white font-bold">
-                        {{ user.first_name|slice:":1"|upper }}
-                    </div>
-                    {% else %}
-                    <img alt="Avatar" class="size-8 rounded-full border border-slate-200 dark:border-border-dark" src="https://ui-avatars.com/api/?name={{ user.email }}&background=f97316&color=fff"/>
-                    {% endif %}
                 </div>
             </div>
         </header>
@@ -205,6 +248,19 @@
 
     <!-- HTMX (Opcional, mas mantendo compatibilidade) -->
     <script src="https://unpkg.com/htmx.org@1.9.9"></script>
+
+    <!-- Global Modal Container -->
+    <div id="modal-global-container"></div>
+    
+    <script>
+        document.body.addEventListener('profileUpdated', function() {
+            window.location.reload();
+        });
+        document.body.addEventListener('passwordChanged', function() {
+            alert('Senha alterada com sucesso!');
+            window.location.reload();
+        });
+    </script>
     
     {% block extra_js %}{% endblock %}
 </body>

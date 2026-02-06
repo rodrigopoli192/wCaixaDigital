@@ -13,6 +13,9 @@ urlpatterns = [
     # Dashboard
     path("", views.DashboardView.as_view(), name="dashboard"),
     path("movimentos/", views.MovimentosListView.as_view(), name="movimentos_list"),
+    # User Profile
+    path("perfil/", views.UserProfileView.as_view(), name="user_profile"),
+    path("perfil/senha/", views.UserPasswordChangeView.as_view(), name="user_change_password"),
     # Authentication
     path("login/", LoginView.as_view(template_name="registration/login.html"), name="login"),
     path("logout/", LogoutView.as_view(next_page="core:login"), name="logout"),

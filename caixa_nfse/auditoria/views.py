@@ -5,22 +5,23 @@ Auditoria views.
 import csv
 from datetime import datetime
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.views import View
 from django.views.generic import DetailView, ListView
 
+from caixa_nfse.core.views import TenantAdminRequiredMixin
+
 from .models import RegistroAuditoria
 
 
-class AuditoriaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+class AuditoriaListView(LoginRequiredMixin, TenantAdminRequiredMixin, ListView):
     """Lista de registros de auditoria."""
 
     model = RegistroAuditoria
     template_name = "auditoria/auditoria_list.html"
     context_object_name = "registros"
     paginate_by = 100
-    permission_required = "auditoria.view_registroauditoria"
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -48,12 +49,12 @@ class AuditoriaListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         return qs.select_related("usuario", "tenant")
 
 
-class AuditoriaDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+class AuditoriaDetailView(LoginRequiredMixin, TenantAdminRequiredMixin, DetailView):
     """Detalhes de um registro de auditoria."""
 
     model = RegistroAuditoria
     template_name = "auditoria/auditoria_detail.html"
-    permission_required = "auditoria.view_registroauditoria"
+    context_object_name = "registro"
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -62,10 +63,8 @@ class AuditoriaDetailView(LoginRequiredMixin, PermissionRequiredMixin, DetailVie
         return qs
 
 
-class VerificarIntegridadeView(LoginRequiredMixin, PermissionRequiredMixin, View):
+class VerificarIntegridadeView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
     """Verifica integridade da trilha de auditoria."""
-
-    permission_required = "auditoria.view_audit_report"
 
     def get(self, request):
         tenant = request.user.tenant
@@ -80,10 +79,8 @@ class VerificarIntegridadeView(LoginRequiredMixin, PermissionRequiredMixin, View
         )
 
 
-class ExportarAuditoriaView(LoginRequiredMixin, PermissionRequiredMixin, View):
+class ExportarAuditoriaView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
     """Exporta registros de auditoria para CSV."""
-
-    permission_required = "auditoria.export_audit_log"
 
     def get(self, request):
         tenant = request.user.tenant

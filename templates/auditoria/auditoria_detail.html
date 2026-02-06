@@ -1,163 +1,155 @@
-{% extends "base.html" %}
+{% extends "base_dark.html" %}
 
-{% block title %}Registro de Auditoria - Caixa Digital{% endblock %}
+{% block title %}Detalhes da Auditoria - wCaixaDigital{% endblock %}
 
 {% block content %}
-<nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'auditoria:list' %}">Auditoria</a></li>
-        <li class="breadcrumb-item active">Registro #{{ registro.id }}</li>
-    </ol>
-</nav>
+<div class="p-6 w-full space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex text-sm font-medium text-slate-500 dark:text-slate-400">
+        <a href="{% url 'auditoria:list' %}" class="hover:text-primary transition-colors">Auditoria</a>
+        <span class="mx-2">/</span>
+        <span class="text-slate-900 dark:text-slate-200">Registro #{{ registro.id }}</span>
+    </nav>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">
-        <i class="bi bi-shield-check me-2"></i>Registro de Auditoria
-        {% if registro.hash_valido %}
-        <span class="badge bg-success">Íntegro</span>
-        {% else %}
-        <span class="badge bg-danger">Hash Inválido</span>
-        {% endif %}
-    </h2>
-</div>
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <h2 class="text-2xl font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">verified_user</span>
+            Registro de Auditoria
+            {% if registro.hash_registro %}
+            <span class="ml-2 px-2 py-1 rounded-full text-xs font-bold bg-success/10 text-success border border-success/20 flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs">check_circle</span> Íntegro
+            </span>
+            {% else %}
+            <span class="ml-2 px-2 py-1 rounded-full text-xs font-bold bg-danger/10 text-danger border border-danger/20 flex items-center gap-1">
+                <span class="material-symbols-outlined text-xs">error</span> Hash Inválido
+            </span>
+            {% endif %}
+        </h2>
+    </div>
 
-<div class="row g-4">
-    <!-- Informações Gerais -->
-    <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header">
-                <i class="bi bi-info-circle me-2"></i>Informações do Registro
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Informações Gerais -->
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+            <div class="p-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2 font-bold text-lg">
+                <span class="material-symbols-outlined text-slate-400">info</span>
+                Informações do Registro
             </div>
-            <div class="card-body">
-                <dl class="row mb-0">
-                    <dt class="col-4">Data/Hora</dt>
-                    <dd class="col-8">{{ registro.data_hora|date:"d/m/Y H:i:s" }}</dd>
-                    
-                    <dt class="col-4">Ação</dt>
-                    <dd class="col-8">
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="text-sm font-medium text-slate-500 dark:text-slate-400">Data/Hora</div>
+                    <div class="col-span-2 text-sm font-mono">{{ registro.created_at|date:"d/m/Y H:i:s" }}</div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4 border-t border-slate-100 dark:border-border-dark pt-4">
+                    <div class="text-sm font-medium text-slate-500 dark:text-slate-400">Ação</div>
+                    <div class="col-span-2">
                         {% if registro.acao == 'CREATE' %}
-                        <span class="badge bg-success">Criação</span>
+                        <span class="px-2 py-1 rounded text-xs font-bold uppercase bg-success/10 text-success border border-success/20">Criação</span>
                         {% elif registro.acao == 'UPDATE' %}
-                        <span class="badge bg-warning text-dark">Alteração</span>
+                        <span class="px-2 py-1 rounded text-xs font-bold uppercase bg-warning/10 text-warning border border-warning/20">Alteração</span>
                         {% elif registro.acao == 'DELETE' %}
-                        <span class="badge bg-danger">Exclusão</span>
-                        {% endif %}
-                    </dd>
-                    
-                    <dt class="col-4">Modelo</dt>
-                    <dd class="col-8"><code>{{ registro.modelo }}</code></dd>
-                    
-                    <dt class="col-4">ID do Objeto</dt>
-                    <dd class="col-8">{{ registro.objeto_id }}</dd>
-                    
-                    <dt class="col-4">Usuário</dt>
-                    <dd class="col-8">{{ registro.usuario.get_full_name|default:registro.usuario }}</dd>
-                    
-                    <dt class="col-4">IP</dt>
-                    <dd class="col-8"><code>{{ registro.ip_address }}</code></dd>
-                    
-                    <dt class="col-4">User Agent</dt>
-                    <dd class="col-8"><small class="text-muted">{{ registro.user_agent|truncatechars:50 }}</small></dd>
-                </dl>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Hash Chain -->
-    <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header">
-                <i class="bi bi-link-45deg me-2"></i>Cadeia de Hash
-            </div>
-            <div class="card-body">
-                <dl class="row mb-0">
-                    <dt class="col-4">Hash Atual</dt>
-                    <dd class="col-8">
-                        <code class="small" style="word-break: break-all;">{{ registro.hash_registro }}</code>
-                    </dd>
-                    
-                    <dt class="col-4">Hash Anterior</dt>
-                    <dd class="col-8">
-                        {% if registro.hash_anterior %}
-                        <code class="small" style="word-break: break-all;">{{ registro.hash_anterior }}</code>
+                        <span class="px-2 py-1 rounded text-xs font-bold uppercase bg-danger/10 text-danger border border-danger/20">Exclusão</span>
                         {% else %}
-                        <span class="text-muted">Primeiro registro</span>
+                        <span class="px-2 py-1 rounded text-xs font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">{{ registro.acao }}</span>
                         {% endif %}
-                    </dd>
-                    
-                    <dt class="col-4">Verificação</dt>
-                    <dd class="col-8">
-                        {% if registro.hash_valido %}
-                        <i class="bi bi-check-circle text-success me-1"></i>Hash verificado com sucesso
-                        {% else %}
-                        <i class="bi bi-x-circle text-danger me-1"></i>Hash não confere - possível adulteração
-                        {% endif %}
-                    </dd>
-                </dl>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Dados do Objeto -->
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <i class="bi bi-code-square me-2"></i>Dados do Objeto
-            </div>
-            <div class="card-body">
-                <pre class="bg-light p-3 rounded mb-0" style="max-height: 400px; overflow: auto;"><code>{{ registro.dados_json }}</code></pre>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Alterações (se UPDATE) -->
-    {% if registro.acao == 'UPDATE' and registro.alteracoes %}
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <i class="bi bi-arrow-left-right me-2"></i>Alterações Realizadas
-            </div>
-            <div class="card-body p-0">
-                <table class="table table-sm mb-0">
-                    <thead>
-                        <tr>
-                            <th>Campo</th>
-                            <th>Valor Anterior</th>
-                            <th>Novo Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for campo, valores in registro.alteracoes.items %}
-                        <tr>
-                            <td><code>{{ campo }}</code></td>
-                            <td class="text-danger">{{ valores.antigo }}</td>
-                            <td class="text-success">{{ valores.novo }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-</div>
+                    </div>
+                </div>
 
-<!-- Navegação -->
-<div class="d-flex justify-content-between mt-4">
-    <a href="{% url 'auditoria:list' %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>Voltar
-    </a>
-    <div>
-        {% if registro_anterior %}
-        <a href="{% url 'auditoria:detail' registro_anterior.pk %}" class="btn btn-outline-primary">
-            <i class="bi bi-chevron-left"></i> Anterior
-        </a>
+                <div class="grid grid-cols-3 gap-4 border-t border-slate-100 dark:border-border-dark pt-4">
+                    <div class="text-sm font-medium text-slate-500 dark:text-slate-400">Tabela</div>
+                    <div class="col-span-2 text-sm font-mono text-primary">{{ registro.tabela }}</div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 border-t border-slate-100 dark:border-border-dark pt-4">
+                    <div class="text-sm font-medium text-slate-500 dark:text-slate-400">ID do Registro</div>
+                    <div class="col-span-2 text-sm font-mono text-slate-600 dark:text-slate-300">{{ registro.registro_id }}</div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 border-t border-slate-100 dark:border-border-dark pt-4">
+                    <div class="text-sm font-medium text-slate-500 dark:text-slate-400">Usuário</div>
+                    <div class="col-span-2 text-sm">{{ registro.usuario.get_full_name|default:registro.usuario }}</div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 border-t border-slate-100 dark:border-border-dark pt-4">
+                    <div class="text-sm font-medium text-slate-500 dark:text-slate-400">IP / Agent</div>
+                    <div class="col-span-2 space-y-1">
+                        <div class="text-xs font-mono bg-slate-100 dark:bg-background-dark px-2 py-1 rounded w-fit">{{ registro.ip_address }}</div>
+                        <div class="text-xs text-slate-400 truncate" title="{{ registro.user_agent }}">{{ registro.user_agent|truncatechars:50 }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cadeia de Hash -->
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm h-fit">
+            <div class="p-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2 font-bold text-lg">
+                <span class="material-symbols-outlined text-slate-400">link</span>
+                Cadeia de Integridade
+            </div>
+            <div class="p-6 space-y-6">
+                <div>
+                    <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Hash do Registro (SHA-256)</div>
+                    <div class="bg-slate-50 dark:bg-background-dark p-3 rounded-lg border border-slate-200 dark:border-border-dark font-mono text-xs break-all text-slate-600 dark:text-slate-300">
+                        {{ registro.hash_registro }}
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <div class="absolute left-6 -top-4 h-4 w-0.5 bg-slate-300 dark:bg-border-dark"></div>
+                    <div class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Hash Anterior</div>
+                    {% if registro.hash_anterior %}
+                    <div class="bg-slate-50 dark:bg-background-dark p-3 rounded-lg border border-slate-200 dark:border-border-dark font-mono text-xs break-all text-slate-400">
+                        {{ registro.hash_anterior }}
+                    </div>
+                    {% else %}
+                    <div class="text-sm text-slate-400 italic flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">start</span> Este é o registro gênesis (primeiro da cadeia).
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dados JSON -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Dados Antes -->
+        {% if registro.dados_antes %}
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+            <div class="p-4 border-b border-slate-200 dark:border-border-dark flex items-center justify-between font-bold text-lg">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-slate-400">history</span>
+                    Estado Anterior
+                </div>
+            </div>
+            <div class="p-0">
+                <pre class="text-xs font-mono p-4 overflow-auto max-h-96 bg-slate-50 dark:bg-background-dark/50 text-slate-600 dark:text-slate-300">{{ registro.dados_antes|pprint }}</pre>
+            </div>
+        </div>
         {% endif %}
-        {% if registro_proximo %}
-        <a href="{% url 'auditoria:detail' registro_proximo.pk %}" class="btn btn-outline-primary">
-            Próximo <i class="bi bi-chevron-right"></i>
-        </a>
+
+        <!-- Dados Depois -->
+        {% if registro.dados_depois %}
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+            <div class="p-4 border-b border-slate-200 dark:border-border-dark flex items-center justify-between font-bold text-lg">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">update</span>
+                    Estado Novo
+                </div>
+            </div>
+            <div class="p-0">
+                <pre class="text-xs font-mono p-4 overflow-auto max-h-96 bg-slate-50 dark:bg-background-dark/50 text-slate-600 dark:text-slate-300">{{ registro.dados_depois|pprint }}</pre>
+            </div>
+        </div>
         {% endif %}
+    </div>
+
+    <!-- Navegação -->
+    <div class="flex items-center justify-between pt-6 border-t border-slate-200 dark:border-border-dark">
+        <a href="{% url 'auditoria:list' %}" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-background-dark flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-sm">arrow_back</span> Voltar
+        </a>
     </div>
 </div>
 {% endblock %}
