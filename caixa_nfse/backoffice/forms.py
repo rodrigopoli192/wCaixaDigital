@@ -135,3 +135,29 @@ class TenantUserForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+from caixa_nfse.backoffice.models import Rotina, Sistema
+
+
+class SistemaForm(forms.ModelForm):
+    class Meta:
+        model = Sistema
+        fields = ["nome", "ativo"]
+
+
+class RotinaForm(forms.ModelForm):
+    class Meta:
+        model = Rotina
+        fields = ["nome", "descricao", "sql_content", "ativo"]
+        widgets = {
+            "descricao": forms.Textarea(attrs={"rows": 2}),
+            "sql_content": forms.Textarea(
+                attrs={
+                    "rows": 10,
+                    "class": "font-mono text-sm",
+                    "spellcheck": "false",
+                    "placeholder": "SELECT * FROM ...",
+                }
+            ),
+        }

@@ -165,3 +165,131 @@ class TenantUserUpdateView(LoginRequiredMixin, PlatformAdminRequiredMixin, Updat
             + str(reverse_lazy("backoffice:tenant_edit", kwargs={"pk": self.kwargs["tenant_pk"]}))
             + '" hx-target="body" hx-swap="outerHTML"></div>'
         )
+
+
+class SistemaListView(LoginRequiredMixin, PlatformAdminRequiredMixin, ListView):
+    """
+    List all registered external Systems.
+    """
+
+    model = None  # Loaded dynamically to avoid circular import quirks
+    template_name = "backoffice/sistema_list.html"
+    context_object_name = "sistemas"
+    ordering = ["nome"]
+
+    def get_queryset(self):
+        from caixa_nfse.backoffice.models import Sistema
+
+        return Sistema.objects.all()
+
+
+class SistemaCreateView(LoginRequiredMixin, PlatformAdminRequiredMixin, CreateView):
+    template_name = "backoffice/partials/sistema_form.html"
+    success_url = reverse_lazy("backoffice:sistema_list")
+
+    def get_form_class(self):
+        from caixa_nfse.backoffice.forms import SistemaForm
+
+        return SistemaForm
+
+    def form_valid(self, form):
+        form.save()
+        from django.http import HttpResponse
+
+        # HTMX Refresh of the list
+        return HttpResponse(
+            '<script>window.location.href = "' + str(self.success_url) + '"</script>'
+        )
+
+
+class SistemaUpdateView(LoginRequiredMixin, PlatformAdminRequiredMixin, UpdateView):
+    """
+    Update Sistema and List its Routines.
+    """
+
+    model = None
+    template_name = "backoffice/sistema_update.html"
+    context_object_name = "sistema"
+    success_url = reverse_lazy("backoffice:sistema_list")
+
+    def get_queryset(self):
+        from caixa_nfse.backoffice.models import Sistema
+
+        return Sistema.objects.all()
+
+    def get_form_class(self):
+        from caixa_nfse.backoffice.forms import SistemaForm
+
+        return SistemaForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["rotinas"] = self.object.rotinas.all()
+        return context
+
+
+class SistemaDeleteView(LoginRequiredMixin, PlatformAdminRequiredMixin, DeleteView):
+    model = None
+    template_name = "backoffice/partials/sistema_confirm_delete.html"
+    success_url = reverse_lazy("backoffice:sistema_list")
+
+    def get_queryset(self):
+        from caixa_nfse.backoffice.models import Sistema
+
+        return Sistema.objects.all()
+
+
+class RotinaCreateView(LoginRequiredMixin, PlatformAdminRequiredMixin, CreateView):
+    template_name = "backoffice/partials/rotina_form.html"
+
+    def get_form_class(self):
+        from caixa_nfse.backoffice.forms import RotinaForm
+
+        return RotinaForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from caixa_nfse.backoffice.models import Sistema
+
+        context["sistema"] = Sistema.objects.get(pk=self.kwargs["sistema_pk"])
+        return context
+
+    def form_valid(self, form):
+        form.instance.sistema_id = self.kwargs["sistema_pk"]
+        form.save()
+        from django.http import HttpResponse
+
+        # Refresh the Sistema Update Page (which lists routines)
+        return HttpResponse("<script>window.location.reload()</script>")
+
+
+class RotinaUpdateView(LoginRequiredMixin, PlatformAdminRequiredMixin, UpdateView):
+    template_name = "backoffice/partials/rotina_form.html"
+
+    def get_queryset(self):
+        from caixa_nfse.backoffice.models import Rotina
+
+        return Rotina.objects.all()
+
+    def get_form_class(self):
+        from caixa_nfse.backoffice.forms import RotinaForm
+
+        return RotinaForm
+
+    def form_valid(self, form):
+        form.save()
+        from django.http import HttpResponse
+
+        return HttpResponse("<script>window.location.reload()</script>")
+
+
+class RotinaDeleteView(LoginRequiredMixin, PlatformAdminRequiredMixin, DeleteView):
+    template_name = "backoffice/partials/rotina_confirm_delete.html"
+
+    def get_queryset(self):
+        from caixa_nfse.backoffice.models import Rotina
+
+        return Rotina.objects.all()
+
+    def get_success_url(self):
+        return reverse_lazy("backoffice:sistema_edit", kwargs={"pk": self.object.sistema.pk})

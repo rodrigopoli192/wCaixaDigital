@@ -20,4 +20,25 @@ urlpatterns = [
         views.TenantUserUpdateView.as_view(),
         name="tenant_user_edit",
     ),
+    # Sistemas
+    path("sistemas/", views.SistemaListView.as_view(), name="sistema_list"),
+    path("sistemas/new/", views.SistemaCreateView.as_view(), name="sistema_add"),
+    path("sistemas/<int:pk>/edit/", views.SistemaUpdateView.as_view(), name="sistema_edit"),
+    path(
+        "sistemas/<int:pk>/delete/",
+        views.SistemaDeleteView.as_view(),
+        name="sistema_delete",
+    ),
+    # Rotinas
+    path(
+        "sistemas/<int:sistema_pk>/rotinas/new/",
+        views.RotinaCreateView.as_view(),
+        name="rotina_add",
+    ),
+    path("rotinas/<int:pk>/edit/", views.RotinaUpdateView.as_view(), name="rotina_edit"),
+    path(
+        "rotinas/<int:pk>/delete/",
+        views.RotinaDeleteView.as_view(),
+        name="rotina_delete",
+    ),
 ]
