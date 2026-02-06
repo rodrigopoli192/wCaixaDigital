@@ -2,6 +2,7 @@
 Core views.
 """
 
+import socket
 from decimal import Decimal
 
 from django.contrib import messages
@@ -700,3 +701,167 @@ class UserPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
         messages.success(self.request, "Senha alterada com sucesso!")
         response["HX-Trigger"] = "passwordChanged"  # You can listen to this if needed
         return response
+
+
+from django.views import View
+
+
+class ConexaoExternaTestView(View):
+    """
+    Test connection parameters provided in the form.
+    Checks TCP reachability and Authentication if driver is available.
+    """
+
+    def post(self, request, *args, **kwargs):
+        data = request.POST
+        sistema = data.get("sistema")
+        tipo = data.get("tipo_conexao")
+        host = data.get("host")
+        port = data.get("porta")
+        database = data.get("database")
+        user = data.get("usuario")
+        password = data.get("senha")
+
+        logs = []
+
+        def log(msg, type="info"):
+            timestamp = timezone.now().strftime("%H:%M:%S")
+            logs.append({"time": timestamp, "msg": msg, "type": type})
+
+        log(f"Iniciando teste de conexão para {sistema}...", "info")
+        log(f"Target: {host}:{port} ({tipo})", "info")
+
+        if not all([host, port, user, password]):
+            log("ERRO: Campos obrigatórios faltando.", "error")
+            return JsonResponse(
+                {"status": "error", "message": "Preencha todos os campos.", "logs": logs}
+            )
+
+        try:
+            port = int(port)
+        except ValueError:
+            log(f"ERRO: Porta '{port}' inválida.", "error")
+            return JsonResponse({"status": "error", "message": "Porta inválida.", "logs": logs})
+
+        # 1. TCP Connectivity Check
+        log(f"Tentando handshake TCP em {host}:{port}...", "info")
+        try:
+            start_time = timezone.now()
+            sock = socket.create_connection((host, port), timeout=3)
+            sock.close()
+            duration = (timezone.now() - start_time).total_seconds() * 1000
+            log(f"SUCESSO: Porta TCP acessível ({duration:.0f}ms).", "success")
+        except OSError as e:
+            log(f"FALHA TCP: {str(e)}", "error")
+            log("Verifique Firewall, VPN ou se o serviço está ativo.", "warning")
+            return JsonResponse(
+                {"status": "error", "message": f"Falha de Conexão TCP: {str(e)}", "logs": logs}
+            )
+
+        # 2. Driver-Specific Checks
+        details = "Porta acessível."
+
+        # PostgreSQL
+        if tipo == "POSTGRES":
+            log("Iniciando autenticação PostgreSQL (Driver: psycopg)...", "info")
+            try:
+                import psycopg
+
+                conn_str = f"host={host} port={port} dbname={database} user={user} password={password} connect_timeout=3"
+                with psycopg.connect(conn_str) as conn:
+                    with conn.cursor() as cur:
+                        cur.execute("SELECT version()")
+                        version = cur.fetchone()[0]
+                        log(f"Conectado! Versão: {version}", "success")
+                details += " Autenticação OK."
+                log("Teste PostgreSQL concluído com êxito.", "success")
+            except ImportError:
+                log(
+                    "AVISO: Driver 'psycopg' não instalado. Teste de autenticação pulado.",
+                    "warning",
+                )
+            except Exception as e:
+                log(f"ERRO de Autenticação: {str(e)}", "error")
+                return JsonResponse(
+                    {
+                        "status": "error",
+                        "message": f"Porta OK, mas falha na autenticação: {str(e)}",
+                        "logs": logs,
+                    }
+                )
+
+        # Firebird
+        elif tipo == "FIREBIRD":
+            log("Iniciando autenticação Firebird (Driver: fdb)...", "info")
+            try:
+                import fdb
+
+                conn = fdb.connect(
+                    host=host,
+                    port=port,
+                    database=database,
+                    user=user,
+                    password=password,
+                    charset=data.get("charset", "WIN1252"),
+                )
+                db_info = conn.db_info(fdb.isc_info_ods_version)
+                conn.close()
+                log(f"Conectado! ODS Version: {db_info}", "success")
+                details += " Autenticação OK."
+            except ImportError:
+                log("AVISO: Driver 'fdb' não instalado. Teste de autenticação pulado.", "warning")
+            except Exception as e:
+                log(f"ERRO de Autenticação: {str(e)}", "error")
+                return JsonResponse(
+                    {
+                        "status": "error",
+                        "message": f"Porta OK, mas falha na autenticação: {str(e)}",
+                        "logs": logs,
+                    }
+                )
+
+        # SQL Server
+        elif tipo == "MSSQL":
+            log("Iniciando autenticação SQL Server...", "info")
+            drivers_found = False
+            try:
+                import pymssql
+
+                log("Tentando driver 'pymssql'...", "info")
+                conn = pymssql.connect(
+                    server=host,
+                    port=port,
+                    user=user,
+                    password=password,
+                    database=database,
+                    timeout=3,
+                )
+
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT @@VERSION")
+                    row = cursor.fetchone()
+                    if row:
+                        ver_str = str(row[0]).split("\\n")[0]
+                        log(f"Conectado! Versão: {ver_str}", "success")
+
+                conn.close()
+                details += " Autenticação OK."
+                drivers_found = True
+            except ImportError:
+                log("Driver 'pymssql' não encontrado.", "warning")
+            except Exception as e:
+                log(f"ERRO pymssql: {str(e)}", "error")
+                return JsonResponse(
+                    {
+                        "status": "error",
+                        "message": f"Porta OK, mas falha na autenticação: {str(e)}",
+                        "logs": logs,
+                    }
+                )
+
+            if not drivers_found:
+                log("Nenhum driver MSSQL (pymssql/pyodbc) disponível.", "warning")
+
+        return JsonResponse(
+            {"status": "success", "message": f"Conexão Bem-Sucedida! {details}", "logs": logs}
+        )

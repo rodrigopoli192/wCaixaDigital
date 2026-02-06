@@ -75,4 +75,9 @@ urlpatterns = [
         views.ConexaoExternaDeleteView.as_view(),
         name="settings_conexao_delete",
     ),
+    path(
+        "settings/conexoes/test/",
+        views.ConexaoExternaTestView.as_view(),
+        name="settings_conexao_test",
+    ),
 ]
