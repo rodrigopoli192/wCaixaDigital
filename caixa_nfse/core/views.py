@@ -13,7 +13,7 @@ from django.contrib.auth.views import PasswordChangeView
 from django.db import models
 from django.db.models import Q, Sum
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
@@ -667,6 +667,38 @@ class ConexaoExternaDeleteView(LoginRequiredMixin, TenantAdminRequiredMixin, Vie
             conexao.save(update_fields=["ativo", "updated_by", "updated_at"])
             return JsonResponse({"status": "success"}, status=200)
         return JsonResponse({"status": "error", "message": "Não encontrado"}, status=404)
+
+
+class RotinasPorSistemaView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
+    """
+    Returns a partial list of Rutines for a specific System.
+    """
+
+    def get(self, request):
+        sistema_id = request.GET.get("sistema")
+        conexao_id = request.GET.get("conexao_id")
+        rotinas_ids = []
+
+        if conexao_id:
+            try:
+                conexao = ConexaoExterna.objects.get(pk=conexao_id, tenant=request.user.tenant)
+                rotinas_ids = list(conexao.rotinas.values_list("pk", flat=True))
+            except ConexaoExterna.DoesNotExist:
+                pass
+
+        if not sistema_id:
+            return HttpResponse("")
+
+        # Dynamic import to avoid circular dependency risks
+        from caixa_nfse.backoffice.models import Rotina
+
+        rotinas = Rotina.objects.filter(sistema_id=sistema_id, ativo=True)
+
+        return render(
+            request,
+            "core/partials/rotinas_list.html",
+            {"rotinas": rotinas, "selected_ids": rotinas_ids},
+        )
 
 
 class UserProfileView(LoginRequiredMixin, UpdateView):

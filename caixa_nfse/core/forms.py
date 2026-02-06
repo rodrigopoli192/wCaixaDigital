@@ -55,6 +55,7 @@ class ConexaoExternaForm(forms.ModelForm):
             "senha",
             "charset",
             "instancia",
+            "rotinas",
             "ativo",
         ]
         widgets = {

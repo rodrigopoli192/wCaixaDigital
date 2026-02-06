@@ -80,4 +80,9 @@ urlpatterns = [
         views.ConexaoExternaTestView.as_view(),
         name="settings_conexao_test",
     ),
+    path(
+        "api/rotinas-por-sistema/",
+        views.RotinasPorSistemaView.as_view(),
+        name="api_rotinas_por_sistema",
+    ),
 ]

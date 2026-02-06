@@ -432,6 +432,14 @@ class ConexaoExterna(TenantAwareModel):
         blank=True,
         help_text=_("Instância do SQL Server (opcional)"),
     )
+
+    rotinas = models.ManyToManyField(
+        "backoffice.Rotina",
+        verbose_name=_("rotinas disponíveis"),
+        blank=True,
+        related_name="conexoes",
+    )
+
     ativo = models.BooleanField(_("ativo"), default=True)
 
     class Meta:

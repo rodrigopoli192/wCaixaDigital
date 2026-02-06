@@ -23,134 +23,152 @@
             {% csrf_token %}
             
 
-            <div class="p-8 space-y-8">
-                {% if form.non_field_errors %}
-                <div class="p-4 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-lg flex items-start gap-3">
-                    <span class="material-symbols-outlined mt-0.5">error</span>
-                    <div>{{ form.non_field_errors }}</div>
-                </div>
-                {% endif %}
+            <div class="p-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                <!-- Coluna Esquerda: Dados de Conexão -->
+                <div class="space-y-8">
+                    {% if form.non_field_errors %}
+                    <div class="p-4 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-lg flex items-start gap-3">
+                        <span class="material-symbols-outlined mt-0.5">error</span>
+                        <div>{{ form.non_field_errors }}</div>
+                    </div>
+                    {% endif %}
 
-                <!-- Sistema e Tipo -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Sistema Integrado</label>
-                        <div class="relative">
-                            {% render_field form.sistema class="w-full appearance-none bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none" %}
-                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">arrow_drop_down</span>
-                        </div>
-                        {% if form.sistema.errors %}
-                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.sistema.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Tipo de Banco</label>
-                        <div class="relative">
-                            {% render_field form.tipo_conexao class="w-full appearance-none bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none" %}
-                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">arrow_drop_down</span>
-                        </div>
-                        {% if form.tipo_conexao.errors %}
-                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.tipo_conexao.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="relative py-2">
-                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                        <div class="w-full border-t border-slate-200 dark:border-border-dark"></div>
-                    </div>
-                    <div class="relative flex justify-center">
-                        <span class="px-2 bg-white dark:bg-surface-dark text-xs font-medium text-slate-400 uppercase tracking-wider">Endereço do Servidor</span>
-                    </div>
-                </div>
-
-                <!-- Host, Porta, Banco -->
-                <div class="grid grid-cols-12 gap-6">
-                    <div class="col-span-12 md:col-span-8 space-y-2">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Host (IP ou Servidor)</label>
-                        {% render_field form.host class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="Ex: 192.168.1.100" %}
-                        {% if form.host.errors %}
-                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.host.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div class="col-span-12 md:col-span-4 space-y-2">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Porta</label>
-                        {% render_field form.porta class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="Ex: 3050" %}
-                        {% if form.porta.errors %}
-                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.porta.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div class="col-span-12 space-y-2">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Database (Nome ou Caminho)</label>
-                        {% render_field form.database class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="Ex: C:\Dados\SISTEMA.FDB ou nome_do_banco" %}
-                        <p class="text-[10px] text-slate-500 ml-1">Para Firebird, informe o caminho completo do arquivo .FDB no servidor.</p>
-                        {% if form.database.errors %}
-                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.database.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="relative py-2">
-                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                        <div class="w-full border-t border-slate-200 dark:border-border-dark"></div>
-                    </div>
-                    <div class="relative flex justify-center">
-                        <span class="px-2 bg-white dark:bg-surface-dark text-xs font-medium text-slate-400 uppercase tracking-wider">Autenticação</span>
-                    </div>
-                </div>
-
-                <!-- Autenticação -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Usuário</label>
-                        {% render_field form.usuario class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" %}
-                        {% if form.usuario.errors %}
-                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.usuario.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Senha</label>
-                        {% render_field form.senha class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" %}
-                        {% if form.senha.errors %}
-                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.senha.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Avançado (Collapsible) -->
-                <div x-data="{ expanded: false }" class="border border-slate-200 dark:border-border-dark rounded-lg bg-slate-50/50 dark:bg-background-dark/30">
-                    <button type="button" @click="expanded = !expanded" class="w-full flex items-center justify-between p-4 text-left">
-                        <div class="flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                            <span class="material-symbols-outlined text-lg">settings</span>
-                            Configurações Avançadas
-                        </div>
-                        <span class="material-symbols-outlined text-slate-400 transition-transform duration-200" :class="expanded ? 'rotate-180' : ''">expand_more</span>
-                    </button>
-                    
-                    <div x-show="expanded" class="p-4 pt-0 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-200 dark:border-border-dark mt-2">
-                        <div class="space-y-2 mt-4">
-                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Charset</label>
-                            {% render_field form.charset class="w-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="WIN1252" %}
+                    <!-- Sistema e Tipo -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Sistema Integrado</label>
+                            <div class="relative">
+                                {% render_field form.sistema class="w-full appearance-none bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none" hx-get="/core/api/rotinas-por-sistema/" hx-target="#rotinas-container" hx-trigger="change" %}
+                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">arrow_drop_down</span>
+                            </div>
+                            {% if form.sistema.errors %}
+                            <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.sistema.errors.0 }}</p>
+                            {% endif %}
                         </div>
 
-                        <div class="space-y-2 mt-4">
-                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Instância (SQL Server)</label>
-                            {% render_field form.instancia class="w-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" %}
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Tipo de Banco</label>
+                            <div class="relative">
+                                {% render_field form.tipo_conexao class="w-full appearance-none bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none" %}
+                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">arrow_drop_down</span>
+                            </div>
+                            {% if form.tipo_conexao.errors %}
+                            <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.tipo_conexao.errors.0 }}</p>
+                            {% endif %}
                         </div>
+                    </div>
+
+                    <div class="relative py-2">
+                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                            <div class="w-full border-t border-slate-200 dark:border-border-dark"></div>
+                        </div>
+                        <div class="relative flex justify-center">
+                            <span class="px-2 bg-white dark:bg-surface-dark text-xs font-medium text-slate-400 uppercase tracking-wider">Endereço do Servidor</span>
+                        </div>
+                    </div>
+
+                    <!-- Host, Porta, Banco -->
+                    <div class="grid grid-cols-12 gap-6">
+                        <div class="col-span-12 md:col-span-8 space-y-2">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Host (IP ou Servidor)</label>
+                            {% render_field form.host class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="Ex: 192.168.1.100" %}
+                            {% if form.host.errors %}
+                            <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.host.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-span-12 md:col-span-4 space-y-2">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Porta</label>
+                            {% render_field form.porta class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="Ex: 3050" %}
+                            {% if form.porta.errors %}
+                            <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.porta.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-span-12 space-y-2">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Database (Nome ou Caminho)</label>
+                            {% render_field form.database class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="Ex: C:\Dados\SISTEMA.FDB ou nome_do_banco" %}
+                            <p class="text-[10px] text-slate-500 ml-1">Para Firebird, informe o caminho completo do arquivo .FDB no servidor.</p>
+                            {% if form.database.errors %}
+                            <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.database.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="relative py-2">
+                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                            <div class="w-full border-t border-slate-200 dark:border-border-dark"></div>
+                        </div>
+                        <div class="relative flex justify-center">
+                            <span class="px-2 bg-white dark:bg-surface-dark text-xs font-medium text-slate-400 uppercase tracking-wider">Autenticação</span>
+                        </div>
+                    </div>
+
+                    <!-- Autenticação -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Usuário</label>
+                            {% render_field form.usuario class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" %}
+                            {% if form.usuario.errors %}
+                            <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.usuario.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Senha</label>
+                            {% render_field form.senha class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" %}
+                            {% if form.senha.errors %}
+                            <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.senha.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Avançado (Collapsible) -->
+                    <div x-data="{ expanded: false }" class="border border-slate-200 dark:border-border-dark rounded-lg bg-slate-50/50 dark:bg-background-dark/30">
+                        <button type="button" @click="expanded = !expanded" class="w-full flex items-center justify-between p-4 text-left">
+                            <div class="flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                <span class="material-symbols-outlined text-lg">settings</span>
+                                Configurações Avançadas
+                            </div>
+                            <span class="material-symbols-outlined text-slate-400 transition-transform duration-200" :class="expanded ? 'rotate-180' : ''">expand_more</span>
+                        </button>
+                        
+                        <div x-show="expanded" class="p-4 pt-0 grid grid-cols-1 gap-6 border-t border-slate-200 dark:border-border-dark mt-2">
+                            <div class="space-y-2 mt-4">
+                                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Charset</label>
+                                {% render_field form.charset class="w-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="WIN1252" %}
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Instância (SQL Server)</label>
+                                {% render_field form.instancia class="w-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="flex items-center gap-3 p-4 rounded-lg bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            {% render_field form.ativo class="sr-only peer" %}
+                            <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                        <span class="text-sm font-bold text-slate-700 dark:text-white">Conexão Ativa</span>
                     </div>
                 </div>
 
-                <!-- Status -->
-                <div class="flex items-center gap-3 p-4 rounded-lg bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark">
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        {% render_field form.ativo class="sr-only peer" %}
-                        <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                    </label>
-                    <span class="text-sm font-bold text-slate-700 dark:text-white">Conexão Ativa</span>
+                <!-- Coluna Direita: Rotinas e Seleção -->
+                <div class="space-y-6">
+                     <!-- Container de Rotinas -->
+                     <div id="rotinas-container" 
+                          hx-get="{% url 'core:api_rotinas_por_sistema' %}?sistema={{ form.sistema.value|default:'' }}&conexao_id={{ object.pk|default:'' }}"
+                          hx-trigger="load"
+                          class="bg-white dark:bg-surface-dark min-h-[200px] flex flex-col">
+                        <!-- O conteúdo será carregado via HTMX -->
+                        <div class="flex flex-col items-center justify-center p-8 text-slate-400 animate-pulse">
+                            <span class="material-symbols-outlined text-3xl mb-2">sync_alt</span>
+                            <p class="text-xs">Carregando rotinas...</p>
+                        </div>
+                     </div>
                 </div>
             </div>
 
