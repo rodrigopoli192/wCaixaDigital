@@ -269,6 +269,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "saldo_atual": total_entradas - total_saidas,
             "todos_caixas": todos_caixas if not abertura_atual else [],
             "historico_aberturas": historico_aberturas,
+            "hoje": timezone.now().date(),
         }
 
 

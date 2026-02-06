@@ -7,18 +7,13 @@
 <div class="p-6 w-full space-y-6" x-data="{ open: false }">
 
     <!-- Header -->
+    <!-- Header Simplificado -->
     <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
-            <div class="size-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                <span class="material-symbols-outlined text-primary text-2xl">point_of_sale</span>
-            </div>
-            <div>
-                <h3 class="text-2xl font-bold tracking-tight">{{ page_title }}</h3>
-                <p class="text-slate-500 dark:text-slate-400 text-sm">Olá, {{ request.user.first_name|default:request.user.email }}</p>
-            </div>
+        <div>
+            <p class="text-slate-500 dark:text-slate-400 text-sm">Olá, <span class="font-bold text-slate-700 dark:text-slate-200">{{ request.user.first_name|default:request.user.email }}</span></p>
         </div>
         
-        <a href="{% url 'core:logout' %}" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-background-dark flex items-center gap-2 transition-colors">
+        <a href="{% url 'core:logout' %}" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-background-dark flex items-center gap-2 transition-colors text-sm">
             <span class="material-symbols-outlined text-sm">logout</span>
             Sair
         </a>
@@ -41,6 +36,12 @@
                     <span class="size-2 rounded-full bg-emerald-400 animate-pulse ml-2"></span>
                 </div>
                 <p class="text-sm text-slate-500">Terminal em operação desde às <span class="text-primary font-semibold">{{ abertura_atual.data_hora|date:"H:i" }}</span></p>
+                {% if abertura_atual and not abertura_atual.is_operacional_hoje %}
+                <div class="mt-2 flex items-center gap-2 text-warning font-bold uppercase text-xs">
+                    <span class="material-symbols-outlined text-sm">warning</span>
+                    Abertura Vencida - Bloqueado
+                </div>
+                {% endif %}
             </div>
         </div>
         
@@ -114,32 +115,46 @@
     
     <!-- Botões de Ação -->
     <div class="flex flex-wrap items-center justify-center gap-4">
-        <a href="#" 
-            hx-get="{% url 'caixa:novo_movimento' abertura_atual.pk %}"
-            hx-target="#modal-content"
-            hx-trigger="click"
-            hx-swap="innerHTML"
-            @click.prevent="open = true"
-            class="bg-primary hover:bg-orange-400 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/20">
-            <span class="material-symbols-outlined">shopping_cart</span>
-            Registrar Venda
-        </a>
-        {% if request.user.pode_emitir_nfse %}
-        <a href="{% url 'nfse:create' %}" class="bg-transparent hover:bg-primary/10 text-primary border-2 border-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
-            <span class="material-symbols-outlined">description</span>
-            Emitir NFS-e
-        </a>
+        {% if abertura_atual.is_operacional_hoje %}
+            <a href="#" 
+                hx-get="{% url 'caixa:novo_movimento' abertura_atual.pk %}"
+                hx-target="#modal-content"
+                hx-trigger="click"
+                hx-swap="innerHTML"
+                @click.prevent="open = true"
+                class="bg-primary hover:bg-orange-400 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined">shopping_cart</span>
+                Registrar Venda
+            </a>
+            {% if request.user.pode_emitir_nfse %}
+            <a href="{% url 'nfse:create' %}" class="bg-transparent hover:bg-primary/10 text-primary border-2 border-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined">description</span>
+                Emitir NFS-e
+            </a>
+            {% endif %}
+            <a href="#" 
+                hx-get="{% url 'caixa:novo_movimento' abertura_atual.pk %}?tipo=sangria"
+                hx-target="#modal-content"
+                hx-trigger="click"
+                hx-swap="innerHTML"
+                @click.prevent="open = true"
+                class="bg-transparent hover:bg-slate-700/50 text-slate-300 border border-border-dark px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined">diamond</span>
+                Justificar Sangria/Suprimento
+            </a>
+        {% else %}
+            <div class="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-100 dark:bg-background-dark border border-slate-200 dark:border-border-dark w-full max-w-lg">
+                <div class="flex items-center gap-2 text-warning font-bold">
+                    <span class="material-symbols-outlined">lock_clock</span>
+                    <span>Caixa Bloqueado para Lançamentos</span>
+                </div>
+                <p class="text-sm text-slate-500 text-center">
+                    Este caixa foi aberto em <strong>{{ abertura_atual.data_hora|date:"d/m/Y" }}</strong>. 
+                    Por segurança, não são permitidos novos lançamentos em datas retroativas.
+                    <br>Realize o fechamento para iniciar um novo período.
+                </p>
+            </div>
         {% endif %}
-        <a href="#" 
-            hx-get="{% url 'caixa:novo_movimento' abertura_atual.pk %}?tipo=sangria"
-            hx-target="#modal-content"
-            hx-trigger="click"
-            hx-swap="innerHTML"
-            @click.prevent="open = true"
-            class="bg-transparent hover:bg-slate-700/50 text-slate-300 border border-border-dark px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
-            <span class="material-symbols-outlined">diamond</span>
-            Justificar Sangria/Suprimento
-        </a>
     </div>
     
     <!-- Layout 2 Colunas: Movimentações + Histórico/Info -->

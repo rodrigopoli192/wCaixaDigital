@@ -8,6 +8,7 @@ from django.db import transaction
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
@@ -47,6 +48,7 @@ class CaixaListView(LoginRequiredMixin, TenantMixin, SingleTableMixin, FilterVie
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Caixas"
+        context["hoje"] = timezone.now().date()
         return context
 
 
@@ -99,6 +101,7 @@ class CaixaDetailView(LoginRequiredMixin, TenantMixin, DetailView):
         context["page_title"] = f"Caixa {self.object.identificador}"
         context["abertura_atual"] = self.object.aberturas.filter(fechado=False).first()
         context["ultimas_aberturas"] = self.object.aberturas.all()[:10]
+        context["hoje"] = timezone.now().date()
         return context
 
 

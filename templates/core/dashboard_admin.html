@@ -93,7 +93,7 @@
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
                         {% for item in caixas_lista %}
-                        <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors {% if item.caixa.status == 'ABERTO' and item.abertura_ativa and item.abertura_ativa.data_hora.date < hoje %}bg-warning/5 border-l-2 border-warning{% endif %}">
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="size-9 rounded-lg bg-slate-100 dark:bg-background-dark flex items-center justify-center">
@@ -107,7 +107,16 @@
                             </td>
                             <td class="px-6 py-4">
                                 {% if item.caixa.status == 'ABERTO' %}
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Aberto</span>
+                                    {% if item.abertura_ativa and item.abertura_ativa.data_hora.date < hoje %}
+                                    <div class="flex flex-col gap-1">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">
+                                            <span class="material-symbols-outlined text-[10px]">warning</span>
+                                            Aberto Anteriormente
+                                        </span>
+                                    </div>
+                                    {% else %}
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Aberto</span>
+                                    {% endif %}
                                 {% elif item.caixa.status == 'BLOQUEADO' %}
                                 <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">Bloqueado</span>
                                 {% else %}
@@ -166,16 +175,23 @@
                             </td>
                             <td class="px-6 py-4 text-center">
                                 {% if item.abertura_ativa %}
-                                <a href="#" 
-                                    hx-get="{% url 'caixa:novo_movimento' item.abertura_ativa.pk %}"
-                                    hx-target="#modal-content"
-                                    hx-trigger="click"
-                                    hx-swap="innerHTML"
-                                    @click.prevent="open = true"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold transition-all">
-                                    <span class="material-symbols-outlined text-sm">add</span>
-                                    Lançamento
-                                </a>
+                                    {% if item.abertura_ativa.data_hora.date < hoje %}
+                                    <div class="flex items-center justify-center gap-2" title="Feche o caixa para regularizar">
+                                        <span class="material-symbols-outlined text-warning text-lg">lock_clock</span>
+                                        <span class="text-xs font-medium text-slate-500">Bloqueado p/ Lançamentos</span>
+                                    </div>
+                                    {% else %}
+                                    <a href="#" 
+                                        hx-get="{% url 'caixa:novo_movimento' item.abertura_ativa.pk %}"
+                                        hx-target="#modal-content"
+                                        hx-trigger="click"
+                                        hx-swap="innerHTML"
+                                        @click.prevent="open = true"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold transition-all">
+                                        <span class="material-symbols-outlined text-sm">add</span>
+                                        Lançamento
+                                    </a>
+                                    {% endif %}
                                 {% else %}
                                 <span class="text-slate-400">—</span>
                                 {% endif %}
