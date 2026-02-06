@@ -28,6 +28,9 @@ class Rotina(models.Model):
     nome = models.CharField(max_length=100)
     descricao = models.TextField(blank=True, verbose_name="Descrição")
     sql_content = models.TextField(verbose_name="Conteúdo SQL")
+    sql_content_extra = models.TextField(
+        blank=True, null=True, verbose_name="Conteúdo SQL Adicional (Opcional)"
+    )
     ativo = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

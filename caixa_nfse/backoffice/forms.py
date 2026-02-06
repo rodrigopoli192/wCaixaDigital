@@ -149,7 +149,7 @@ class SistemaForm(forms.ModelForm):
 class RotinaForm(forms.ModelForm):
     class Meta:
         model = Rotina
-        fields = ["nome", "descricao", "sql_content", "ativo"]
+        fields = ["nome", "descricao", "sql_content", "sql_content_extra", "ativo"]
         widgets = {
             "descricao": forms.Textarea(attrs={"rows": 2}),
             "sql_content": forms.Textarea(
@@ -158,6 +158,14 @@ class RotinaForm(forms.ModelForm):
                     "class": "font-mono text-sm",
                     "spellcheck": "false",
                     "placeholder": "SELECT * FROM ...",
+                }
+            ),
+            "sql_content_extra": forms.Textarea(
+                attrs={
+                    "rows": 10,
+                    "class": "font-mono text-sm",
+                    "spellcheck": "false",
+                    "placeholder": "-- SQL Adicional (Opcional)\nUPDATE ...",
                 }
             ),
         }

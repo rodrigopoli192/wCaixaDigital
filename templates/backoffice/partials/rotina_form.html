@@ -55,14 +55,27 @@
                 </div>
 
                 <!-- Editor SQL -->
-                <div class="md:col-span-3 space-y-1.5 flex flex-col h-full">
-                    <label class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex justify-between">
-                        Conteúdo SQL
-                        <span class="text-xs normal-case font-normal text-slate-400">Use sintaxe padrão (SELECT, UPDATE, etc)</span>
-                    </label>
-                    <div class="flex-1 relative">
-                        {% render_field form.sql_content class="w-full h-full min-h-[300px] bg-[#1e1e1e] text-slate-300 font-mono text-sm border border-slate-700 rounded-lg p-4 focus:border-primary focus:ring-1 focus:ring-primary outline-none custom-scrollbar leading-relaxed" spellcheck="false" %}
-                        {% if form.sql_content.errors %}<p class="text-xs text-red-500 mt-1">{{ form.sql_content.errors.0 }}</p>{% endif %}
+                <div class="md:col-span-3 space-y-4 flex flex-col h-full">
+                    <div class="flex-1 flex flex-col space-y-1.5 min-h-[300px]">
+                        <label class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex justify-between">
+                            Conteúdo SQL
+                            <span class="text-xs normal-case font-normal text-slate-400">Use sintaxe padrão (SELECT, UPDATE, etc)</span>
+                        </label>
+                        <div class="flex-1 relative">
+                            {% render_field form.sql_content class="w-full h-full bg-[#1e1e1e] text-slate-300 font-mono text-sm border border-slate-700 rounded-lg p-4 focus:border-primary focus:ring-1 focus:ring-primary outline-none custom-scrollbar leading-relaxed" spellcheck="false" %}
+                            {% if form.sql_content.errors %}<p class="text-xs text-red-500 mt-1">{{ form.sql_content.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="flex-1 flex flex-col space-y-1.5 min-h-[200px]">
+                        <label class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex justify-between">
+                            Conteúdo SQL Adicional
+                            <span class="text-xs normal-case font-normal text-slate-400">Opcional</span>
+                        </label>
+                        <div class="flex-1 relative">
+                            {% render_field form.sql_content_extra class="w-full h-full bg-[#1e1e1e] text-slate-300 font-mono text-sm border border-slate-700 rounded-lg p-4 focus:border-primary focus:ring-1 focus:ring-primary outline-none custom-scrollbar leading-relaxed" spellcheck="false" %}
+                            {% if form.sql_content_extra.errors %}<p class="text-xs text-red-500 mt-1">{{ form.sql_content_extra.errors.0 }}</p>{% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
