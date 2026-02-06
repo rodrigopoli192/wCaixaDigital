@@ -23,14 +23,14 @@
     <!-- Caixa Aberto - Novo Design -->
     
     <!-- Header Principal -->
-    <div class="bg-surface-dark rounded-2xl border border-border-dark p-5 flex items-center justify-between">
+    <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark p-5 flex items-center justify-between shadow-sm dark:shadow-none">
         <div class="flex items-center gap-4">
             <div class="size-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
                 <span class="material-symbols-outlined text-primary text-2xl">point_of_sale</span>
             </div>
             <div>
                 <div class="flex items-center gap-2">
-                    <h3 class="text-xl font-bold text-white">Meu Caixa</h3>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">Meu Caixa</h3>
                     <span class="text-slate-500">—</span>
                     <span class="text-slate-400">{{ caixa_atual.identificador }}</span>
                     <span class="size-2 rounded-full bg-emerald-400 animate-pulse ml-2"></span>
@@ -69,21 +69,21 @@
     <!-- KPI Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Saldo Inicial -->
-        <div class="bg-surface-dark rounded-2xl border border-border-dark p-5">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark p-5 shadow-sm dark:shadow-none">
             <div class="flex items-start justify-between mb-4">
-                <div class="size-10 rounded-xl bg-slate-700/50 flex items-center justify-center">
+                <div class="size-10 rounded-xl bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
                     <span class="material-symbols-outlined text-slate-400">login</span>
                 </div>
                 <span class="text-[10px] uppercase tracking-wider text-slate-500">Saldo Inicial</span>
             </div>
-            <p class="text-3xl font-bold text-white">R$ {{ abertura_atual.saldo_abertura|floatformat:2 }}</p>
+            <p class="text-3xl font-bold text-slate-900 dark:text-white">R$ {{ abertura_atual.saldo_abertura|floatformat:2 }}</p>
             <p class="text-xs text-slate-500 mt-1">Valor de abertura do terminal</p>
         </div>
         
         <!-- Fluxo de Caixa -->
-        <div class="bg-surface-dark rounded-2xl border border-border-dark p-5">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark p-5 shadow-sm dark:shadow-none">
             <div class="flex items-start justify-between mb-4">
-                <div class="size-10 rounded-xl bg-slate-700/50 flex items-center justify-center">
+                <div class="size-10 rounded-xl bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
                     <span class="material-symbols-outlined text-slate-400">swap_vert</span>
                 </div>
                 <span class="text-[10px] uppercase tracking-wider text-slate-500">Fluxo de Caixa</span>
@@ -98,7 +98,7 @@
         </div>
         
         <!-- Saldo Atual -->
-        <div class="bg-surface-dark rounded-2xl border-2 border-primary/30 p-5 relative overflow-hidden">
+        <div class="bg-white dark:bg-surface-dark rounded-2xl border-2 border-primary/30 p-5 relative overflow-hidden shadow-sm dark:shadow-none">
             <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
             <div class="relative">
                 <div class="flex items-start justify-between mb-4">
@@ -161,11 +161,11 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Movimentações do Caixa (2/3) -->
-        <div class="lg:col-span-2 bg-surface-dark rounded-2xl border border-border-dark overflow-hidden">
+        <div class="lg:col-span-2 bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm dark:shadow-none">
             <div class="px-6 py-4 border-b border-border-dark flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">schedule</span>
-                    <h4 class="font-bold text-white">Movimentações do Caixa</h4>
+                    <h4 class="font-bold text-slate-900 dark:text-white">Movimentações do Caixa</h4>
                 </div>
                 <a href="{% url 'caixa:lista_movimentos' abertura_atual.pk %}" class="text-sm text-primary hover:text-orange-400 flex items-center gap-1 transition-colors">
                     Ver Todos
@@ -188,29 +188,29 @@
         <div class="space-y-6">
             
             <!-- Meu Histórico -->
-            <div class="bg-surface-dark rounded-2xl border border-border-dark overflow-hidden">
-                <div class="px-5 py-4 border-b border-border-dark flex items-center gap-2">
+            <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm dark:shadow-none">
+                <div class="px-5 py-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2">
                     <span class="material-symbols-outlined text-slate-400">trending_up</span>
-                    <h4 class="font-bold text-white">Meu Histórico</h4>
+                    <h4 class="font-bold text-slate-900 dark:text-white">Meu Histórico</h4>
                 </div>
-                <div class="divide-y divide-border-dark">
+                <div class="divide-y divide-slate-100 dark:divide-border-dark">
                     {% for abertura in historico_aberturas %}
                     <div class="px-5 py-3 flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="size-9 rounded-lg bg-slate-700/50 flex items-center justify-center">
+                            <div class="size-9 rounded-lg bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
                                 <span class="material-symbols-outlined text-slate-500 text-lg">laptop_mac</span>
                             </div>
                             <div>
-                                <p class="font-semibold text-white text-sm">{{ abertura.caixa.identificador }}</p>
+                                <p class="font-semibold text-slate-900 dark:text-white text-sm">{{ abertura.caixa.identificador }}</p>
                                 <p class="text-xs text-slate-500">{{ abertura.data_hora|date:"d/m/Y H:i" }}</p>
                             </div>
                         </div>
                         {% if abertura.fechado %}
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-700/50 text-slate-400 border border-border-dark">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-red-600 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">
                             Fechado
                         </span>
                         {% else %}
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-100 text-emerald-600 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
                             Aberto
                         </span>
                         {% endif %}
@@ -225,8 +225,8 @@
             </div>
             
             <!-- Informações do Terminal -->
-            <div class="bg-surface-dark rounded-2xl border border-border-dark overflow-hidden">
-                <div class="px-5 py-4 border-b border-border-dark">
+            <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm dark:shadow-none">
+                <div class="px-5 py-4 border-b border-slate-200 dark:border-border-dark">
                     <p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Informações do Terminal</p>
                 </div>
                 <div class="p-5 space-y-3">
@@ -240,7 +240,7 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-sm text-slate-500">Tipo</span>
-                        <span class="text-sm text-slate-300">{{ caixa_atual.get_tipo_display }}</span>
+                        <span class="text-sm text-slate-700 dark:text-slate-300">{{ caixa_atual.get_tipo_display }}</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-sm text-slate-500">Fundo de Troco</span>
@@ -266,16 +266,16 @@
         </div>
         
         <!-- Título principal -->
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-3 text-center">Pronto para iniciar?</h1>
+        <h1 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-3 text-center">Pronto para iniciar?</h1>
         <p class="text-slate-400 mb-10 text-center max-w-lg">Seu ambiente do Caixa integrado está pronto. Selecione um dos caixas disponíveis abaixo para começar a operar.</p>
         
         {% if todos_caixas %}
         <!-- Container Card com Gradiente -->
-        <div class="p-8 rounded-3xl bg-gradient-to-br from-[#1f1f22] via-[#1a1a1c] to-[#1f1f22] border border-slate-800/50 shadow-2xl shadow-black/20 max-w-5xl w-full">
+        <div class="p-8 rounded-3xl bg-white dark:bg-gradient-to-br dark:from-[#1f1f22] dark:via-[#1a1a1c] dark:to-[#1f1f22] border border-slate-200 dark:border-slate-800/50 shadow-2xl shadow-slate-200 dark:shadow-black/20 max-w-5xl w-full">
             <!-- Grid de Caixas -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for caixa in todos_caixas %}
-            <div class="relative p-6 rounded-2xl bg-[#2B2C30] border border-slate-800 group hover:border-orange-500/30 transition-all duration-300">
+            <div class="relative p-6 rounded-2xl bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-slate-800 group hover:border-orange-500/30 transition-all duration-300 hover:bg-white dark:hover:bg-[#2B2C30] hover:shadow-lg dark:hover:shadow-none">
                 
                 <!-- Badge Status -->
                 <div class="absolute top-4 right-4">
@@ -303,24 +303,24 @@
                 </div>
                 
                 <!-- Info -->
-                <h3 class="text-xl font-bold text-white mb-1">{{ caixa.identificador }}</h3>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">{{ caixa.identificador }}</h3>
                 <p class="text-sm text-slate-500 mb-4">{{ caixa.get_tipo_display }}</p>
                 
                 <!-- Meta -->
                 <div class="space-y-2 text-sm mb-6">
                     {% if caixa.status == 'ABERTO' and caixa.operador_atual %}
-                    <div class="flex justify-between text-slate-400">
+                    <div class="flex justify-between text-slate-600 dark:text-slate-400">
                         <span>Aberto por:</span>
-                        <span class="text-amber-400 font-medium">{{ caixa.operador_atual.get_full_name|default:caixa.operador_atual.email }}</span>
+                        <span class="text-amber-600 dark:text-amber-400 font-medium">{{ caixa.operador_atual.get_full_name|default:caixa.operador_atual.email }}</span>
                     </div>
                     {% endif %}
-                    <div class="flex justify-between text-slate-400">
+                    <div class="flex justify-between text-slate-600 dark:text-slate-400">
                         <span>Último Fechamento:</span>
-                        <span class="text-slate-300 font-medium">{% if caixa.ultimo_fechamento %}{{ caixa.ultimo_fechamento|date:"d/m, H:i" }}{% else %}--{% endif %}</span>
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">{% if caixa.ultimo_fechamento %}{{ caixa.ultimo_fechamento|date:"d/m, H:i" }}{% else %}--{% endif %}</span>
                     </div>
-                    <div class="flex justify-between text-slate-400">
+                    <div class="flex justify-between text-slate-600 dark:text-slate-400">
                         <span>Tipo de Caixa:</span>
-                        <span class="text-slate-300 font-medium">{{ caixa.get_tipo_display }}</span>
+                        <span class="text-slate-700 dark:text-slate-300 font-medium">{{ caixa.get_tipo_display }}</span>
                     </div>
                 </div>
                 
@@ -337,7 +337,7 @@
                     Abrir Caixa
                 </a>
                 {% else %}
-                <button disabled class="w-full py-3.5 rounded-xl bg-slate-700 text-slate-400 font-bold flex items-center justify-center gap-2 cursor-not-allowed">
+                <button disabled class="w-full py-3.5 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-bold flex items-center justify-center gap-2 cursor-not-allowed">
                     <span class="material-symbols-outlined">block</span>
                     Indisponível
                 </button>
@@ -362,12 +362,12 @@
         
         {% else %}
         <!-- Sem caixas disponíveis -->
-        <div class="p-6 rounded-2xl bg-[#2B2C30] border border-slate-800 max-w-md w-full text-center">
-            <div class="size-16 rounded-full bg-slate-700/50 flex items-center justify-center mx-auto mb-4">
+        <div class="p-6 rounded-2xl bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-slate-800 max-w-md w-full text-center shadow-lg dark:shadow-none">
+            <div class="size-16 rounded-full bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center mx-auto mb-4">
                 <span class="material-symbols-outlined text-slate-500 text-3xl">inbox</span>
             </div>
-            <h3 class="text-lg font-bold text-white mb-2">Nenhum terminal disponível</h3>
-            <p class="text-slate-400 text-sm">Entre em contato com o administrador do sistema para configurar os terminais.</p>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Nenhum terminal disponível</h3>
+            <p class="text-slate-500 text-sm">Entre em contato com o administrador do sistema para configurar os terminais.</p>
         </div>
         {% endif %}
     </div>
