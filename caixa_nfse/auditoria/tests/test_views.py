@@ -51,12 +51,32 @@ class TestAuditoriaViews:
 
     def test_list_filters(self):
         url = reverse("auditoria:list")
+
+        # Filter by User matches
         response = self.client.get(url, {"usuario": self.user.id})
         assert response.status_code == 200
         assert self.registro in response.context["registros"]
 
-        # Filter no match
+        # Filter no match (table)
         response = self.client.get(url, {"tabela": "NONEXISTENT"})
+        assert response.status_code == 200
+        assert len(response.context["registros"]) == 0
+
+        # Filter by Action match
+        self.registro.acao = "LOGIN"
+        self.registro.save()
+        response = self.client.get(url, {"acao": "LOGIN"})
+        assert response.status_code == 200
+        assert self.registro in response.context["registros"]
+
+        # Filter by Date Range match
+        data_hj = self.registro.data_hora.date().isoformat()
+        response = self.client.get(url, {"data_inicio": data_hj, "data_fim": data_hj})
+        assert response.status_code == 200
+        assert self.registro in response.context["registros"]
+
+        # Filter by Date Range NO match
+        response = self.client.get(url, {"data_inicio": "2000-01-01", "data_fim": "2000-01-01"})
         assert response.status_code == 200
         assert len(response.context["registros"]) == 0
 

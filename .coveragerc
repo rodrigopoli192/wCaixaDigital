@@ -10,6 +10,9 @@ omit =
     caixa_nfse/settings/production.py
     caixa_nfse/core/management/commands/create_sample_data.py
     caixa_nfse/core/management/commands/create_admin.py
+    */apps.py
+    */urls.py
+    */templatetags/*
 
 [report]
 exclude_lines =

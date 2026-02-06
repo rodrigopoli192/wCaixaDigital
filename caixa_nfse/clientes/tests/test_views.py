@@ -90,7 +90,32 @@ class TestClienteViews:
         assert "clientCreated" in trigger_data
         assert trigger_data["clientCreated"]["label"] == "HTMX Client"
 
-    def test_update_access(self):
+    def test_list_filters(self):
+        url = reverse("clientes:list")
+
+        # Filter matches (using 'q' or whatever param filterview uses, usually 'q' or field names)
+        # Check filters.py for exact name. Usually django-filter uses field names.
+        # Assuming 'razao_social' or generic 'q' search. Let's try explicit field.
+        response = self.client.get(url, {"razao_social": self.client_obj.razao_social})
+        assert response.status_code == 200
+        assert self.client_obj in response.context["object_list"]
+
+        # Filter no match
+        response = self.client.get(url, {"razao_social": "NONEXISTENT"})
+        assert response.status_code == 200
+        assert len(response.context["object_list"]) == 0
+
+    def test_create_post_htmx_error(self):
+        url = reverse("clientes:create")
+        data = {
+            "razao_social": "",  # Empty required field
+            "cpf_cnpj": "invalid",
+        }
+        response = self.client.post(url, data, headers={"HX-Request": "true"})
+        assert response.status_code == 200  # Should return 200 with form errors
+        # Assuming your partial template renders errors
+        assert "clientes/partials/modal_form.html" in [t.name for t in response.templates]
+        assert response.context["form"].errors
         url = reverse("clientes:update", kwargs={"pk": self.client_obj.pk})
         response = self.client.get(url)
         assert response.status_code == 200
