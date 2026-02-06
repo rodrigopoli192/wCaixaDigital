@@ -1,0 +1,256 @@
+{% extends "base_dark.html" %}
+{% load widget_tweaks %}
+
+{% block page_title %}{{ form_title }} - Configurações{% endblock %}
+
+{% block content %}
+<div class="p-8 space-y-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ form_title }}</h1>
+            <p class="text-slate-500 mt-1">Configure os detalhes de conexão com o banco de dados externo</p>
+        </div>
+        <a href="{% url 'core:settings' %}?tab=conexoes" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Voltar para Lista
+        </a>
+    </div>
+
+    <!-- Form Container -->
+    <div class="w-full">
+        <form method="post" class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm h-full flex flex-col">
+            {% csrf_token %}
+            
+
+            <div class="p-8 space-y-8">
+                {% if form.non_field_errors %}
+                <div class="p-4 text-sm text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-lg flex items-start gap-3">
+                    <span class="material-symbols-outlined mt-0.5">error</span>
+                    <div>{{ form.non_field_errors }}</div>
+                </div>
+                {% endif %}
+
+                <!-- Sistema e Tipo -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Sistema Integrado</label>
+                        <div class="relative">
+                            {% render_field form.sistema class="w-full appearance-none bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none" %}
+                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">arrow_drop_down</span>
+                        </div>
+                        {% if form.sistema.errors %}
+                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.sistema.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Tipo de Banco</label>
+                        <div class="relative">
+                            {% render_field form.tipo_conexao class="w-full appearance-none bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none" %}
+                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">arrow_drop_down</span>
+                        </div>
+                        {% if form.tipo_conexao.errors %}
+                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.tipo_conexao.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="relative py-2">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-t border-slate-200 dark:border-border-dark"></div>
+                    </div>
+                    <div class="relative flex justify-center">
+                        <span class="px-2 bg-white dark:bg-surface-dark text-xs font-medium text-slate-400 uppercase tracking-wider">Endereço do Servidor</span>
+                    </div>
+                </div>
+
+                <!-- Host, Porta, Banco -->
+                <div class="grid grid-cols-12 gap-6">
+                    <div class="col-span-12 md:col-span-8 space-y-2">
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Host (IP ou Servidor)</label>
+                        {% render_field form.host class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="Ex: 192.168.1.100" %}
+                        {% if form.host.errors %}
+                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.host.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-span-12 md:col-span-4 space-y-2">
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Porta</label>
+                        {% render_field form.porta class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="Ex: 3050" %}
+                        {% if form.porta.errors %}
+                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.porta.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-span-12 space-y-2">
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Database (Nome ou Caminho)</label>
+                        {% render_field form.database class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="Ex: C:\Dados\SISTEMA.FDB ou nome_do_banco" %}
+                        <p class="text-[10px] text-slate-500 ml-1">Para Firebird, informe o caminho completo do arquivo .FDB no servidor.</p>
+                        {% if form.database.errors %}
+                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.database.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="relative py-2">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-t border-slate-200 dark:border-border-dark"></div>
+                    </div>
+                    <div class="relative flex justify-center">
+                        <span class="px-2 bg-white dark:bg-surface-dark text-xs font-medium text-slate-400 uppercase tracking-wider">Autenticação</span>
+                    </div>
+                </div>
+
+                <!-- Autenticação -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Usuário</label>
+                        {% render_field form.usuario class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" %}
+                        {% if form.usuario.errors %}
+                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.usuario.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Senha</label>
+                        {% render_field form.senha class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" %}
+                        {% if form.senha.errors %}
+                        <p class="text-xs text-red-500 mt-1 ml-1 font-medium">{{ form.senha.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Avançado (Collapsible) -->
+                <div x-data="{ expanded: false }" class="border border-slate-200 dark:border-border-dark rounded-lg bg-slate-50/50 dark:bg-background-dark/30">
+                    <button type="button" @click="expanded = !expanded" class="w-full flex items-center justify-between p-4 text-left">
+                        <div class="flex items-center gap-2 text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            <span class="material-symbols-outlined text-lg">settings</span>
+                            Configurações Avançadas
+                        </div>
+                        <span class="material-symbols-outlined text-slate-400 transition-transform duration-200" :class="expanded ? 'rotate-180' : ''">expand_more</span>
+                    </button>
+                    
+                    <div x-show="expanded" class="p-4 pt-0 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-200 dark:border-border-dark mt-2">
+                        <div class="space-y-2 mt-4">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Charset</label>
+                            {% render_field form.charset class="w-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" placeholder="WIN1252" %}
+                        </div>
+
+                        <div class="space-y-2 mt-4">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Instância (SQL Server)</label>
+                            {% render_field form.instancia class="w-full bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono" %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="flex items-center gap-3 p-4 rounded-lg bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        {% render_field form.ativo class="sr-only peer" %}
+                        <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                    <span class="text-sm font-bold text-slate-700 dark:text-white">Conexão Ativa</span>
+                </div>
+            </div>
+
+            <!-- Feedback de Teste -->
+            <div id="test-feedback" class="px-8 pb-4 hidden animate-fade-in"></div>
+
+            <!-- Footer Buttons -->
+            <div class="px-8 py-6 border-t border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50 flex flex-col md:flex-row justify-between items-center gap-4">
+                 <button type="button" 
+                    hx-post="{% url 'core:settings_conexao_test' %}"
+                    hx-include="closest form"
+                    hx-trigger="click"
+                    hx-swap="none"
+                    class="w-full md:w-auto px-6 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-300 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+                    <span class="material-symbols-outlined text-lg">wifi_tethering</span>
+                    Testar Conexão
+                </button>
+                
+                <div class="flex w-full md:w-auto gap-3">
+                    <a href="{% url 'core:settings' %}?tab=conexoes" class="flex-1 md:flex-none px-6 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors text-center">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="flex-1 md:flex-none inline-flex justify-center items-center px-8 py-2.5 bg-primary hover:bg-orange-600 text-white text-sm font-bold rounded-lg shadow-lg shadow-primary/20 transition-all transform active:scale-95">
+                        <span class="material-symbols-outlined text-lg mr-2">save</span>
+                        Salvar Conexão
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        if(evt.detail.xhr.response && (evt.detail.successful || evt.detail.failed)) {
+            try {
+                // Parse apenas se for JSON (teste de conexão retorna JSON, form submit normal vai reloadar)
+                if (evt.detail.xhr.getResponseHeader('Content-Type').includes('application/json')) {
+                    const data = JSON.parse(evt.detail.xhr.response);
+                    
+                    // Cenario 1: Teste de Conexão (HTMX)
+                    if(evt.detail.requestConfig.path.includes('/conexoes/test/')) {
+                        const feedback = document.getElementById('test-feedback');
+                        if(feedback) {
+                            feedback.classList.remove('hidden');
+                            
+                            let logHtml = '';
+                            if(data.logs && data.logs.length > 0) {
+                                logHtml = `
+                                    <div class="mt-4 bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
+                                        <button type="button" onclick="this.nextElementSibling.classList.toggle('hidden')" class="w-full px-4 py-2 text-xs text-slate-400 font-mono flex justify-between items-center hover:bg-slate-800 transition-colors">
+                                            <span>> Ver Detalhes Técnico (Logs)</span>
+                                            <span class="material-symbols-outlined text-sm">expand_more</span>
+                                        </button>
+                                        <div class="hidden p-4 overflow-y-auto max-h-64 custom-scrollbar font-mono text-xs space-y-1">
+                                `;
+                                
+                                data.logs.forEach(log => {
+                                    let color = 'text-slate-400';
+                                    if(log.type === 'error') color = 'text-red-400 font-bold';
+                                    if(log.type === 'success') color = 'text-emerald-400 font-bold';
+                                    if(log.type === 'warning') color = 'text-amber-400';
+                                    
+                                    logHtml += `<div class="flex gap-3">
+                                        <span class="text-slate-600 select-none w-16">[${log.time}]</span>
+                                        <span class="${color} flex-1 break-all">${log.msg}</span>
+                                    </div>`;
+                                });
+                                
+                                logHtml += `</div></div>`;
+                            }
+
+                            if(data.status === 'success') {
+                                feedback.innerHTML = `
+                                    <div class="p-4 text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-900/20 rounded-lg flex items-start gap-3 animate-fade-in shadow-sm">
+                                        <span class="material-symbols-outlined mt-0.5">check_circle</span>
+                                        <div>
+                                            <span class="font-bold">Sucesso!</span>
+                                            <div class="text-xs opacity-90 mt-1">${data.message}</div>
+                                        </div>
+                                    </div>
+                                    ${logHtml}
+                                `;
+                            } else {
+                                feedback.innerHTML = `
+                                    <div class="p-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/20 rounded-lg flex items-start gap-3 animate-fade-in shadow-sm">
+                                        <span class="material-symbols-outlined mt-0.5">error</span>
+                                        <div>
+                                            <span class="font-bold">Falha na Conexão</span>
+                                            <div class="text-xs opacity-90 mt-1">${data.message}</div>
+                                        </div>
+                                    </div>
+                                    ${logHtml}
+                                `;
+                            }
+                        }
+                    }
+                }
+            } catch(e) { }
+        }
+    });
+</script>
+{% endblock %}

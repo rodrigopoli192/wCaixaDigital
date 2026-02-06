@@ -378,7 +378,7 @@ class SettingsView(LoginRequiredMixin, TenantAdminRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Configurações da Loja"
-        context["active_tab"] = "users"  # Default tab
+        context["active_tab"] = self.request.GET.get("tab", "users")  # Dynamic tab
         return context
 
 
@@ -605,7 +605,10 @@ class ConexaoExternaCreateView(LoginRequiredMixin, TenantAdminRequiredMixin, Cre
 
     model = ConexaoExterna
     form_class = ConexaoExternaForm
-    template_name = "core/partials/settings_conexao_form.html"
+    template_name = "core/settings_conexao_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy("core:settings") + "?tab=conexoes"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -618,7 +621,8 @@ class ConexaoExternaCreateView(LoginRequiredMixin, TenantAdminRequiredMixin, Cre
         conexao.tenant = self.request.user.tenant
         conexao.created_by = self.request.user
         conexao.save()
-        return JsonResponse({"status": "success"}, status=200)
+        messages.success(self.request, "Conexão criada com sucesso!")
+        return super().form_valid(form)
 
 
 class ConexaoExternaUpdateView(LoginRequiredMixin, TenantAdminRequiredMixin, UpdateView):
@@ -628,7 +632,10 @@ class ConexaoExternaUpdateView(LoginRequiredMixin, TenantAdminRequiredMixin, Upd
 
     model = ConexaoExterna
     form_class = ConexaoExternaForm
-    template_name = "core/partials/settings_conexao_form.html"
+    template_name = "core/settings_conexao_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy("core:settings") + "?tab=conexoes"
 
     def get_queryset(self):
         return ConexaoExterna.objects.filter(tenant=self.request.user.tenant)
@@ -643,7 +650,8 @@ class ConexaoExternaUpdateView(LoginRequiredMixin, TenantAdminRequiredMixin, Upd
         self.object = form.save()
         self.object.updated_by = self.request.user
         self.object.save(update_fields=["updated_by", "updated_at"])
-        return JsonResponse({"status": "success"}, status=200)
+        messages.success(self.request, "Conexão atualizada com sucesso!")
+        return super().form_valid(form)
 
 
 class ConexaoExternaDeleteView(LoginRequiredMixin, TenantAdminRequiredMixin, View):

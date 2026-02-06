@@ -1,7 +1,7 @@
 {% extends "base_dark.html" %}
 
 {% block content %}
-<div class="p-6 w-full space-y-6" x-data="{ activeTab: 'users' }">
+<div class="p-6 w-full space-y-6" x-data="{ activeTab: '{{ active_tab|default:'users' }}' }">
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
@@ -65,8 +65,11 @@
         <!-- Main Content Area -->
         <div class="lg:col-span-9">
             <div id="settings-content" class="bg-[#2B2C30] rounded-xl border border-[#2d3544] overflow-hidden min-h-[600px]">
-                <!-- Load User List via HTMX immediately -->
-                <div hx-get="{% url 'core:settings_users_list' %}" hx-trigger="load" hx-swap="innerHTML">
+                <!-- Load Initial Tab Content -->
+                <div 
+                    hx-get="{% if active_tab == 'pagamento' %}{% url 'core:settings_formas_pagamento_list' %}{% elif active_tab == 'conexoes' %}{% url 'core:settings_conexoes_list' %}{% else %}{% url 'core:settings_users_list' %}{% endif %}" 
+                    hx-trigger="load" 
+                    hx-swap="innerHTML">
                     <div class="p-12 flex flex-col items-center justify-center text-slate-500 animate-pulse">
                         <span class="material-symbols-outlined text-4xl mb-4">sync</span>
                         <p>Carregando...</p>

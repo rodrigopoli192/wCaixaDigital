@@ -64,7 +64,7 @@ class TestAllExports:
         url = reverse(view_name)
         with unittest.mock.patch("caixa_nfse.relatorios.views.ExportService.to_pdf") as mock_pdf:
             mock_pdf.return_value = "PDF_CONTENT"
-            response = self.client.get(url, {"export": "pdf"})
+            self.client.get(url, {"export": "pdf"})
             assert mock_pdf.called
             # Ensure get_export_data was called by checking call args if possible,
             # or just rely on coverage.
@@ -89,7 +89,7 @@ class TestAllExports:
         url = reverse(view_name)
         with unittest.mock.patch("caixa_nfse.relatorios.views.ExportService.to_xlsx") as mock_xlsx:
             mock_xlsx.return_value = "XLSX_CONTENT"
-            response = self.client.get(url, {"export": "xlsx"})
+            self.client.get(url, {"export": "xlsx"})
             assert mock_xlsx.called
             call_kwargs = mock_xlsx.call_args[1]
             rows = call_kwargs.get("rows", [])

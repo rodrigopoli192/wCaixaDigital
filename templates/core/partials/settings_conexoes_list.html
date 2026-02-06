@@ -5,14 +5,11 @@
             <p class="text-slate-400 text-sm mt-1">Gerencie as conexões com bancos de dados externos.</p>
         </div>
         
-        <button 
-            hx-get="{% url 'core:settings_conexao_add' %}"
-            hx-target="#modal-container"
-            hx-swap="innerHTML"
-            class="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold transition-all shadow-lg shadow-orange-500/20">
+        <a href="{% url 'core:settings_conexao_add' %}"
+           class="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold transition-all shadow-lg shadow-orange-500/20">
             <span class="material-symbols-outlined">add_link</span>
             Nova Conexão
-        </button>
+        </a>
     </div>
 
     <div class="overflow-x-auto rounded-lg border border-[#2d3544]">
@@ -74,14 +71,11 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button 
-                                hx-get="{% url 'core:settings_conexao_edit' conexao.pk %}" 
-                                hx-target="#modal-container" 
-                                hx-swap="innerHTML"
-                                class="p-2 text-slate-400 hover:text-white hover:bg-[#212224] rounded-lg transition-all" 
-                                title="Editar">
+                            <a href="{% url 'core:settings_conexao_edit' conexao.pk %}"
+                               class="p-2 text-slate-400 hover:text-white hover:bg-[#212224] rounded-lg transition-all" 
+                               title="Editar">
                                 <span class="material-symbols-outlined text-lg">edit</span>
-                            </button>
+                            </a>
                             {% if conexao.ativo %}
                             <button 
                                 hx-post="{% url 'core:settings_conexao_delete' conexao.pk %}"
@@ -103,13 +97,10 @@
                                 <span class="material-symbols-outlined text-2xl opacity-50">link_off</span>
                             </div>
                             <p class="font-medium">Nenhuma conexão cadastrada</p>
-                            <button 
-                                hx-get="{% url 'core:settings_conexao_add' %}"
-                                hx-target="#modal-container"
-                                hx-swap="innerHTML"
-                                class="text-orange-500 hover:text-orange-400 text-sm font-bold hover:underline">
+                            <a href="{% url 'core:settings_conexao_add' %}"
+                               class="text-orange-500 hover:text-orange-400 text-sm font-bold hover:underline">
                                 Cadastrar primeira conexão
-                            </button>
+                            </a>
                         </div>
                     </td>
                 </tr>

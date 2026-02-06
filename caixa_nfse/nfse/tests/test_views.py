@@ -97,7 +97,7 @@ class TestNFSeViews:
         response = self.client.post(url)
         assert response.status_code == 302
         # Should redirect back to detail and show error, task not called
-        with unittest.mock.patch("caixa_nfse.nfse.views.enviar_nfse") as mock_task:
+        with unittest.mock.patch("caixa_nfse.nfse.views.enviar_nfse"):
             # Just to be safe, though not called
             pass
 

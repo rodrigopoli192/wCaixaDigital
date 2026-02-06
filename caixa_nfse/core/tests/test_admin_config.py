@@ -24,7 +24,7 @@ class TestAdminConfig:
         """
         registry = admin.site._registry
 
-        for model, model_admin in registry.items():
+        for model, _model_admin in registry.items():
             # Generate URL for the model's change list
             app_label = model._meta.app_label
             model_name = model._meta.model_name
