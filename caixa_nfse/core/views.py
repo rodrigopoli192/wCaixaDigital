@@ -18,8 +18,8 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, ListView, TemplateView, UpdateView
 
-from .forms import FormaPagamentoForm
-from .models import FormaPagamento
+from .forms import ConexaoExternaForm, FormaPagamentoForm
+from .models import ConexaoExterna, FormaPagamento
 
 User = get_user_model()
 
@@ -574,6 +574,88 @@ class FormaPagamentoDeleteView(LoginRequiredMixin, TenantAdminRequiredMixin, Vie
             forma.ativo = False
             forma.updated_by = request.user
             forma.save(update_fields=["ativo", "updated_by", "updated_at"])
+            return JsonResponse({"status": "success"}, status=200)
+            return JsonResponse({"status": "error", "message": "Não encontrado"}, status=404)
+
+
+# =============================================================================
+# Conexões Externas Views
+# =============================================================================
+
+
+class ConexaoExternaListView(LoginRequiredMixin, TenantAdminRequiredMixin, ListView):
+    """
+    List external connections for the current tenant.
+    Designed for HTMX partial loading.
+    """
+
+    model = ConexaoExterna
+    template_name = "core/partials/settings_conexoes_list.html"
+    context_object_name = "conexoes"
+
+    def get_queryset(self):
+        return ConexaoExterna.objects.filter(tenant=self.request.user.tenant).order_by("sistema")
+
+
+class ConexaoExternaCreateView(LoginRequiredMixin, TenantAdminRequiredMixin, CreateView):
+    """
+    Create a new external connection linked to the current tenant.
+    """
+
+    model = ConexaoExterna
+    form_class = ConexaoExternaForm
+    template_name = "core/partials/settings_conexao_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["is_edit"] = False
+        context["form_title"] = "Nova Conexão"
+        return context
+
+    def form_valid(self, form):
+        conexao = form.save(commit=False)
+        conexao.tenant = self.request.user.tenant
+        conexao.created_by = self.request.user
+        conexao.save()
+        return JsonResponse({"status": "success"}, status=200)
+
+
+class ConexaoExternaUpdateView(LoginRequiredMixin, TenantAdminRequiredMixin, UpdateView):
+    """
+    Update an existing external connection.
+    """
+
+    model = ConexaoExterna
+    form_class = ConexaoExternaForm
+    template_name = "core/partials/settings_conexao_form.html"
+
+    def get_queryset(self):
+        return ConexaoExterna.objects.filter(tenant=self.request.user.tenant)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["is_edit"] = True
+        context["form_title"] = f"Editar {self.object.get_sistema_display()}"
+        return context
+
+    def form_valid(self, form):
+        self.object = form.save()
+        self.object.updated_by = self.request.user
+        self.object.save(update_fields=["updated_by", "updated_at"])
+        return JsonResponse({"status": "success"}, status=200)
+
+
+class ConexaoExternaDeleteView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
+    """
+    Delete an external connection (soft-delete).
+    """
+
+    def post(self, request, pk):
+        conexao = ConexaoExterna.objects.filter(pk=pk, tenant=request.user.tenant).first()
+        if conexao:
+            conexao.ativo = False
+            conexao.updated_by = request.user
+            conexao.save(update_fields=["ativo", "updated_by", "updated_at"])
             return JsonResponse({"status": "success"}, status=200)
         return JsonResponse({"status": "error", "message": "Não encontrado"}, status=404)
 

@@ -4,7 +4,7 @@ Core forms.
 
 from django import forms
 
-from .models import FormaPagamento
+from .models import ConexaoExterna, FormaPagamento
 
 
 class FormaPagamentoForm(forms.ModelForm):
@@ -38,3 +38,25 @@ class FormaPagamentoForm(forms.ModelForm):
         # Set ativo default to True for new records
         if not self.instance.pk:
             self.fields["ativo"].initial = True
+
+
+class ConexaoExternaForm(forms.ModelForm):
+    """Form para cadastro de conexões externas."""
+
+    class Meta:
+        model = ConexaoExterna
+        fields = [
+            "sistema",
+            "tipo_conexao",
+            "host",
+            "porta",
+            "database",
+            "usuario",
+            "senha",
+            "charset",
+            "instancia",
+            "ativo",
+        ]
+        widgets = {
+            "senha": forms.PasswordInput(render_value=True),
+        }

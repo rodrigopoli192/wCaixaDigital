@@ -386,6 +386,61 @@ class FormaPagamento(TenantAwareModel):
         return f"{self.nome} ({self.get_tipo_display()})"
 
 
+class ConexaoExterna(TenantAwareModel):
+    """
+    Cadastros de conexão com bancos de dados legados por tenant.
+    """
+
+    class Sistema(models.TextChoices):
+        REGISTRO_IMOVEIS = "RI", _("Registro de Imóveis")
+        NOTAS = "NOTAS", _("Notas")
+        PROTESTO = "PROTESTO", _("Protesto")
+        RTDPJ = "RTDPJ", _("RTDPJ")
+        RCPN = "RCPN", _("RCPN")
+
+    class TipoConexao(models.TextChoices):
+        FIREBIRD = "FIREBIRD", _("Firebird")
+        MSSQL = "MSSQL", _("MsSQL Server")
+        POSTGRES = "POSTGRES", _("PostgreSQL")
+
+    sistema = models.CharField(
+        _("sistema"),
+        max_length=20,
+        choices=Sistema.choices,
+    )
+    tipo_conexao = models.CharField(
+        _("tipo de conexão"),
+        max_length=20,
+        choices=TipoConexao.choices,
+    )
+    host = models.CharField(_("host"), max_length=255)
+    porta = models.PositiveIntegerField(_("porta"))
+    database = models.CharField(
+        _("banco de dados"),
+        max_length=255,
+        help_text=_("Nome do banco ou caminho do arquivo (Firebird)"),
+    )
+    usuario = models.CharField(_("usuário"), max_length=100)
+    senha = models.CharField(_("senha"), max_length=255)
+    charset = models.CharField(_("charset"), max_length=20, default="WIN1252")
+    instancia = models.CharField(
+        _("instância"),
+        max_length=100,
+        blank=True,
+        help_text=_("Instância do SQL Server (opcional)"),
+    )
+    ativo = models.BooleanField(_("ativo"), default=True)
+
+    class Meta:
+        verbose_name = _("conexão externa")
+        verbose_name_plural = _("conexões externas")
+        unique_together = [["tenant", "sistema"]]
+        ordering = ["sistema"]
+
+    def __str__(self):
+        return f"{self.get_sistema_display()} ({self.get_tipo_conexao_display()})"
+
+
 def generate_hash(data: dict[str, Any], previous_hash: str = "") -> str:
     """
     Generate SHA-256 hash for audit trail.

@@ -1,0 +1,120 @@
+<div class="p-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+            <h2 class="text-xl font-bold text-white tracking-tight">Dados de Conexão</h2>
+            <p class="text-slate-400 text-sm mt-1">Gerencie as conexões com bancos de dados externos.</p>
+        </div>
+        
+        <button 
+            hx-get="{% url 'core:settings_conexao_add' %}"
+            hx-target="#modal-container"
+            hx-swap="innerHTML"
+            class="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold transition-all shadow-lg shadow-orange-500/20">
+            <span class="material-symbols-outlined">add_link</span>
+            Nova Conexão
+        </button>
+    </div>
+
+    <div class="overflow-x-auto rounded-lg border border-[#2d3544]">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-[#212224] text-slate-400 text-xs font-bold uppercase tracking-wider">
+                    <th class="px-6 py-4">Sistema</th>
+                    <th class="px-6 py-4">Tipo</th>
+                    <th class="px-6 py-4">Host / Porta</th>
+                    <th class="px-6 py-4">Banco de Dados</th>
+                    <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4 text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-[#2d3544] bg-[#2B2C30]">
+                {% for conexao in conexoes %}
+                <tr class="hover:bg-[#323338] transition-colors group">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="size-10 rounded-lg bg-[#212224] flex items-center justify-center border border-[#2d3544]">
+                                <span class="material-symbols-outlined text-slate-400 group-hover:text-orange-500 transition-colors">
+                                    {% if conexao.sistema == 'RI' %}home_work
+                                    {% elif conexao.sistema == 'NOTAS' %}description
+                                    {% elif conexao.sistema == 'PROTESTO' %}gavel
+                                    {% else %}database{% endif %}
+                                </span>
+                            </div>
+                            <div>
+                                <p class="text-white font-bold">{{ conexao.get_sistema_display }}</p>
+                                <p class="text-xs text-slate-500">{{ conexao.created_at|date:"d/m/Y" }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-700 text-slate-300 border border-slate-600">
+                            {{ conexao.get_tipo_conexao_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="text-sm text-slate-300 font-mono">{{ conexao.host }}</p>
+                        <p class="text-xs text-slate-500">Porta: {{ conexao.porta }}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="text-sm text-slate-300 truncate max-w-[200px]" title="{{ conexao.database }}">{{ conexao.database }}</p>
+                        <p class="text-xs text-slate-500">User: {{ conexao.usuario }}</p>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if conexao.ativo %}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                            <span class="size-1.5 rounded-full bg-emerald-500"></span>
+                            Ativo
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                            <span class="size-1.5 rounded-full bg-slate-500"></span>
+                            Inativo
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                                hx-get="{% url 'core:settings_conexao_edit' conexao.pk %}" 
+                                hx-target="#modal-container" 
+                                hx-swap="innerHTML"
+                                class="p-2 text-slate-400 hover:text-white hover:bg-[#212224] rounded-lg transition-all" 
+                                title="Editar">
+                                <span class="material-symbols-outlined text-lg">edit</span>
+                            </button>
+                            {% if conexao.ativo %}
+                            <button 
+                                hx-post="{% url 'core:settings_conexao_delete' conexao.pk %}"
+                                hx-confirm="Tem certeza que deseja desativar esta conexão?"
+                                hx-target="#settings-content"
+                                class="p-2 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all" 
+                                title="Desativar">
+                                <span class="material-symbols-outlined text-lg">delete</span>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="size-12 rounded-full bg-[#212224] flex items-center justify-center">
+                                <span class="material-symbols-outlined text-2xl opacity-50">link_off</span>
+                            </div>
+                            <p class="font-medium">Nenhuma conexão cadastrada</p>
+                            <button 
+                                hx-get="{% url 'core:settings_conexao_add' %}"
+                                hx-target="#modal-container"
+                                hx-swap="innerHTML"
+                                class="text-orange-500 hover:text-orange-400 text-sm font-bold hover:underline">
+                                Cadastrar primeira conexão
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -54,4 +54,25 @@ urlpatterns = [
         views.FormaPagamentoDeleteView.as_view(),
         name="settings_forma_pagamento_delete",
     ),
+    # External Connections
+    path(
+        "settings/conexoes/",
+        views.ConexaoExternaListView.as_view(),
+        name="settings_conexoes_list",
+    ),
+    path(
+        "settings/conexoes/add/",
+        views.ConexaoExternaCreateView.as_view(),
+        name="settings_conexao_add",
+    ),
+    path(
+        "settings/conexoes/<pk>/edit/",
+        views.ConexaoExternaUpdateView.as_view(),
+        name="settings_conexao_edit",
+    ),
+    path(
+        "settings/conexoes/<pk>/delete/",
+        views.ConexaoExternaDeleteView.as_view(),
+        name="settings_conexao_delete",
+    ),
 ]

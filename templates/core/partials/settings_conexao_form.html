@@ -1,0 +1,325 @@
+{% load widget_tweaks %}
+
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in" x-data="{ open: true }" x-show="open">
+    <div class="fixed inset-0" @click="open = false"></div>
+    
+    <form hx-post="{{ request.path }}" hx-target="#modal-container" class="relative bg-[#2B2C30] text-slate-200 w-full max-w-2xl rounded-xl shadow-2xl border border-[#2d3544] overflow-hidden transform transition-all animate-scale-in">
+        <!-- Header -->
+        <div class="flex justify-between items-center px-6 py-4 border-b border-[#2d3544] bg-[#212224]">
+            <h3 class="text-lg font-bold text-white tracking-tight">{{ form_title }}</h3>
+            <button type="button" @click="open = false; $el.closest('#modal-container').innerHTML = ''" class="text-slate-400 hover:text-white transition-colors">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
+        </div>
+
+        <div class="p-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="p-4 text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <!-- Sistema e Tipo -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 ml-1">Sistema Integrado</label>
+                    <div class="relative">
+                        {% render_field form.sistema class="w-full appearance-none bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-xl">arrow_drop_down</span>
+                    </div>
+                    {% if form.sistema.errors %}
+                    <p class="text-xs text-red-500 mt-1">{{ form.sistema.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 ml-1">Tipo de Banco</label>
+                    <div class="relative">
+                        {% render_field form.tipo_conexao class="w-full appearance-none bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-xl">arrow_drop_down</span>
+                    </div>
+                    {% if form.tipo_conexao.errors %}
+                    <p class="text-xs text-red-500 mt-1">{{ form.tipo_conexao.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Host, Porta, Banco -->
+            <div class="grid grid-cols-12 gap-6">
+                <div class="col-span-12 md:col-span-8 space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 ml-1">Host (IP ou Servidor)</label>
+                    {% render_field form.host class="w-full bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="Ex: 192.168.1.100" %}
+                    {% if form.host.errors %}
+                    <p class="text-xs text-red-500 mt-1">{{ form.host.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="col-span-12 md:col-span-4 space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 ml-1">Porta</label>
+                    {% render_field form.porta class="w-full bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="Ex: 3050" %}
+                    {% if form.porta.errors %}
+                    <p class="text-xs text-red-500 mt-1">{{ form.porta.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="col-span-12 space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 ml-1">Database (Nome ou Caminho)</label>
+                    {% render_field form.database class="w-full bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="Ex: C:\Dados\SISTEMA.FDB ou nome_do_banco" %}
+                    <p class="text-[10px] text-slate-500">Para Firebird, informe o caminho completo do arquivo .FDB no servidor.</p>
+                    {% if form.database.errors %}
+                    <p class="text-xs text-red-500 mt-1">{{ form.database.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Autenticação -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 ml-1">Usuário</label>
+                    {% render_field form.usuario class="w-full bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                    {% if form.usuario.errors %}
+                    <p class="text-xs text-red-500 mt-1">{{ form.usuario.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 ml-1">Senha</label>
+                    <!-- Hack para renderizar senha: O django por segurança não renderiza, mas aqui é edição config -->
+                    {% render_field form.senha class="w-full bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                    {% if form.senha.errors %}
+                    <p class="text-xs text-red-500 mt-1">{{ form.senha.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Avançado -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-[#212224] rounded-lg border border-[#2d3544]">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 ml-1">Charset</label>
+                    {% render_field form.charset class="w-full bg-[#2B2C30] border border-[#2d3544] rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="WIN1252" %}
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-400 ml-1">Instância (SQL Server)</label>
+                    {% render_field form.instancia class="w-full bg-[#2B2C30] border border-[#2d3544] rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="flex items-center gap-3 p-4 rounded-lg bg-[#212224] border border-[#2d3544]">
+                <label class="relative inline-flex items-center cursor-pointer">
+                    {% render_field form.ativo class="sr-only peer" %}
+                    <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                </label>
+                <span class="text-sm font-bold text-white">Conexão Ativa</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 border-t border-[#2d3544] bg-[#212224] flex justify-end gap-3">
+            <button type="button" @click="open = false; $el.closest('#modal-container').innerHTML = ''" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">
+                Cancelar
+            </button>
+            <button type="submit" class="inline-flex justify-center items-center px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-lg shadow-lg shadow-orange-500/20 transition-all">
+                <span class="material-symbols-outlined text-lg mr-2">save</span>
+                Salvar Conexão
+            </button>
+        </div>
+    </form>
+</div>
+
+{% if form.errors %}
+<script>
+    // Se houver erros, garantimos que o modal permaneça aberto
+</script>
+{% else %}
+<script>
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        if(evt.detail.successful && evt.detail.xhr.response) {
+            try {
+                const data = JSON.parse(evt.detail.xhr.response);
+                if(data.status === 'success') {
+                    // Limpar container e atualizar lista
+                    document.getElementById('modal-container').innerHTML = '';
+                    const tabBtn = document.querySelector('button[hx-get*="settings/conexoes/"]'); 
+                    if(tabBtn) htmx.trigger(tabBtn, 'click'); 
+                }
+            } catch(e) { }
+        }
+    });
+</script>
+{% endif %}
+        <h3 class="text-lg font-bold text-white tracking-tight">{{ form_title }}</h3>
+        <button type="button" @click="open = false" class="text-slate-400 hover:text-white transition-colors">
+            <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+    </div>
+
+    <div class="p-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="p-4 text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <!-- Sistema e Tipo -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-400 ml-1">Sistema Integrado</label>
+                <div class="relative">
+                    {% render_field form.sistema class="w-full appearance-none bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-xl">arrow_drop_down</span>
+                </div>
+                {% if form.sistema.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.sistema.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-400 ml-1">Tipo de Banco</label>
+                <div class="relative">
+                    {% render_field form.tipo_conexao class="w-full appearance-none bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-xl">arrow_drop_down</span>
+                </div>
+                {% if form.tipo_conexao.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.tipo_conexao.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Host, Porta, Banco -->
+        <div class="grid grid-cols-12 gap-6">
+            <div class="col-span-12 md:col-span-8 space-y-1.5">
+                <label class="text-xs font-bold text-slate-400 ml-1">Host (IP ou Servidor)</label>
+                {% render_field form.host class="w-full bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="Ex: 192.168.1.100" %}
+                {% if form.host.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.host.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="col-span-12 md:col-span-4 space-y-1.5">
+                <label class="text-xs font-bold text-slate-400 ml-1">Porta</label>
+                {% render_field form.porta class="w-full bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="Ex: 3050" %}
+                {% if form.porta.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.porta.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="col-span-12 space-y-1.5">
+                <label class="text-xs font-bold text-slate-400 ml-1">Database (Nome ou Caminho)</label>
+                {% render_field form.database class="w-full bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="Ex: C:\Dados\SISTEMA.FDB ou nome_do_banco" %}
+                <p class="text-[10px] text-slate-500">Para Firebird, informe o caminho completo do arquivo .FDB no servidor.</p>
+                {% if form.database.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.database.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Autenticação -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-400 ml-1">Usuário</label>
+                {% render_field form.usuario class="w-full bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                {% if form.usuario.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.usuario.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-400 ml-1">Senha</label>
+                <!-- Hack para renderizar senha: O django por segurança não renderiza, mas aqui é edição config -->
+                {% render_field form.senha class="w-full bg-[#212224] border border-[#2d3544] rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                {% if form.senha.errors %}
+                <p class="text-xs text-red-500 mt-1">{{ form.senha.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Avançado -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-[#212224] rounded-lg border border-[#2d3544]">
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-400 ml-1">Charset</label>
+                {% render_field form.charset class="w-full bg-[#2B2C30] border border-[#2d3544] rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="WIN1252" %}
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-400 ml-1">Instância (SQL Server)</label>
+                {% render_field form.instancia class="w-full bg-[#2B2C30] border border-[#2d3544] rounded-lg px-4 py-2 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="flex items-center gap-3 p-4 rounded-lg bg-[#212224] border border-[#2d3544]">
+            <label class="relative inline-flex items-center cursor-pointer">
+                {% render_field form.ativo class="sr-only peer" %}
+                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            </label>
+            <span class="text-sm font-bold text-white">Conexão Ativa</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-[#2d3544] bg-[#212224] flex justify-end gap-3">
+        <button type="button" @click="open = false" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">
+            Cancelar
+        </button>
+        <button type="submit" class="inline-flex justify-center items-center px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-lg shadow-lg shadow-orange-500/20 transition-all">
+            <span class="material-symbols-outlined text-lg mr-2">save</span>
+            Salvar Conexão
+        </button>
+    </div>
+</form>
+
+{% if form.errors %}
+<script>
+    // Se houver erros, garantimos que o modal permaneça aberto (htmx swap behavior já cuida disso, mas reforçando)
+    // O Alpine.js 'open' state está no pai, então o swap interno não fecha o modal.
+</script>
+{% else %}
+<script>
+    // Script executado após sucesso (se o form for válido e redirecionar/retornar json)
+    // Na nossa view, retornamos JsonResponse, então precisamos tratar o htmx:afterRequest no botão ou container
+    // Mas se retornamos HTML substituído (form com erros), ok.
+    // Se a view retornar JSON success, o HTMX não faz swap automático do JSON.
+    // Precisamos de um trigger.
+    
+    // Ajuste: As views retornam JsonResponse({"status": "success"}).
+    // Precisamos capturar isso para fechar o modal e atualizar a lista.
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+        if(evt.detail.successful && evt.detail.xhr.response) {
+            try {
+                const data = JSON.parse(evt.detail.xhr.response);
+                if(data.status === 'success') {
+                    // Fechar modal
+                    document.querySelector('[x-data]').__x.$data.open = false;
+                    
+                    // Atualizar a lista (disparar evento ou clicar na tab)
+                    // Como não temos um evento global, simulamos clique na tab ativa ou fazemos um get manual
+                    // O jeito mais fácil é disparar um evento customizado que a lista ouve, ou reload
+                    
+                    // Mas espera, as views de Forms do projeto (User, FormaPagamento) retornam JSON.
+                    // Como elas atualizam a lista? 
+                    // Elas devem ter um listener no frontend ou retorna um trigger.
+                    
+                    // Vamos verificar como UserForm faz.
+                    // ... Olhando settings_user_form: Ele não tem script especial.
+                    // Olhando as Views: TenantUserCreateView retorna JsonResponse.
+                    // Onde isso é tratado? Provavelmente num script global ou inline no botão que abriu.
+                    
+                    // VAMOS ADICIONAR O TRATAMENTO AQUI PARA GARANTIR
+                    
+                    // Disparar atualização da lista
+                    const tabBtn = document.querySelector('button[hx-get*="settings/conexoes/"]'); 
+                    if(tabBtn) htmx.trigger(tabBtn, 'click'); // Recarrega a tab
+                }
+            } catch(e) {
+                // Não é JSON, é HTML (erro de form), deixa renderizar
+            }
+        }
+    });
+</script>
+{% endif %}

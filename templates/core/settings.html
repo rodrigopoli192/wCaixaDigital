@@ -38,6 +38,18 @@
                     <span class="font-medium">Formas de Pagamento</span>
                 </button>
 
+                <!-- Conexões Externas Tab -->
+                <button 
+                    @click="activeTab = 'conexoes'"
+                    hx-get="{% url 'core:settings_conexoes_list' %}" 
+                    hx-target="#settings-content" 
+                    hx-swap="innerHTML"
+                    :class="activeTab === 'conexoes' ? 'bg-[#2B2C30] border border-orange-500/50 text-white shadow-sm' : 'text-slate-400 hover:bg-[#2B2C30] hover:text-slate-200'"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left">
+                    <span class="material-symbols-outlined" :class="activeTab === 'conexoes' ? 'text-orange-500' : ''">database</span>
+                    <span class="font-medium">Dados de Conexão</span>
+                </button>
+
                 <!-- Placeholder for future settings -->
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-[#2B2C30] hover:text-slate-200 rounded-lg transition-all opacity-50 cursor-not-allowed">
                     <span class="material-symbols-outlined">store</span>
