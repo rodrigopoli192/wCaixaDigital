@@ -1,0 +1,22 @@
+Name                                                        Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------------------------------
+caixa_nfse\core\__init__.py                                     1      0   100%
+caixa_nfse\core\admin.py                                       25      0   100%
+caixa_nfse\core\apps.py                                        10      0   100%
+caixa_nfse\core\context_processors.py                           5      0   100%
+caixa_nfse\core\forms.py                                       12      1    92%   40
+caixa_nfse\core\management\__init__.py                          0      0   100%
+caixa_nfse\core\management\commands\__init__.py                 0      0   100%
+caixa_nfse\core\management\commands\create_admin.py            17     17     0%   5-32
+caixa_nfse\core\management\commands\create_sample_data.py      40     40     0%   5-138
+caixa_nfse\core\migrations\0001_initial.py                      9      0   100%
+caixa_nfse\core\migrations\__init__.py                          0      0   100%
+caixa_nfse\core\models.py                                     146      0   100%
+caixa_nfse\core\tests\__init__.py                               0      0   100%
+caixa_nfse\core\tests\test_forms.py                            22      0   100%
+caixa_nfse\core\tests\test_models.py                           87      0   100%
+caixa_nfse\core\tests\test_views.py                           147     14    90%   27-28, 42-60, 73-76
+caixa_nfse\core\urls.py                                         5      0   100%
+caixa_nfse\core\views.py                                      233     41    82%   92-94, 103, 117, 158-183, 233-242, 258-259, 303, 310, 318, 320, 334, 374-377, 426, 489-492, 521-524, 539
+-----------------------------------------------------------------------------------------
+TOTAL                                                         759    113    85%

@@ -1,0 +1,77 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from option)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, django-4.11.1
+collecting ... collected 39 items
+
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_authenticated PASSED [  2%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_unauthenticated PASSED [  5%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_success PASSED [  7%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_duplicate_error PASSED [ 10%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_get_abrir_caixa_page PASSED [ 12%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_success PASSED [ 15%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_already_open_redirect PASSED [ 17%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_success PASSED [ 20%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_invalid_form PASSED [ 23%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_get_fechar_caixa_page PASSED [ 25%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_success PASSED [ 28%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_error_closed PASSED [ 30%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaUpdateView::test_update_caixa_success PASSED [ 33%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaUpdateView::test_update_caixa_context PASSED [ 35%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestListaMovimentosView::test_list_movimentos PASSED [ 38%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFechamentosPendentesView::test_list_pendentes_manager PASSED [ 41%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFechamentosPendentesView::test_list_pendentes_forbidden PASSED [ 43%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestAprovarFechamentoView::test_aprovar_fechamento_success PASSED [ 46%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestAprovarFechamentoView::test_rejeitar_fechamento_success PASSED [ 48%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_movimento_saida_decreases_balance PASSED [ 51%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_block_retroactive_movement PASSED [ 53%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_htmx_request_returns_partial PASSED [ 56%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFecharCaixaExtra::test_fechar_htmx_response PASSED [ 58%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFecharCaixaExtra::test_fechar_com_diferenca PASSED [ 61%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFecharCaixaExtra::test_fechar_htmx_post_success PASSED [ 64%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaDetailView::test_detail_view PASSED [ 66%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaCreateViewExtra::test_create_caixa_context PASSED [ 69%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestAbrirCaixaExtra::test_abrir_htmx_post_success PASSED [ 71%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestAbrirCaixaExtra::test_abrir_htmx_get_partial PASSED [ 74%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoHTMX::test_movimento_htmx_post_success PASSED [ 76%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_tenant_mixin_no_tenant PASSED [ 79%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_fechar_caixa_permission_denied PASSED [ 82%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_fechar_caixa_manager_other_operator PASSED [ 84%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_fechar_caixa_post_no_abertura FAILED [ 87%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_rejeitar_fechamento_sem_justificativa ERROR [ 89%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_novo_movimento_retroactive_htmx PASSED [ 92%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageFinal::test_fechar_caixa_access_denied_for_non_opener_non_manager PASSED [ 94%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageFinal::test_calcular_detalhamento_loop PASSED [ 97%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageFinal::test_fechar_caixa_post_race_condition FAILED [100%]
+
+=================================== ERRORS ====================================
+_ ERROR at setup of TestCoverageGapView.test_rejeitar_fechamento_sem_justificativa _
+file C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py, line 411
+      def test_rejeitar_fechamento_sem_justificativa(self, client_logged, user, fechamento):
+E       fixture 'fechamento' not found
+>       available fixtures: _dj_autoclear_mailbox, _django_clear_site_cache, _django_db_helper, _django_db_marker, _django_set_urlconf, _django_setup_unittest, _fail_for_invalid_template_variable, _live_server_helper, _session_faker, _template_string_if_invalid_marker, abertura, admin_client, admin_user, anyio_backend, anyio_backend_name, anyio_backend_options, async_client, async_rf, cache, caixa, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, client, client_logged, db, django_assert_max_num_queries, django_assert_num_queries, django_capture_on_commit_callbacks, django_db_blocker, django_db_createdb, django_db_keepdb, django_db_modify_db_settings, django_db_modify_db_settings_parallel_suffix, django_db_modify_db_settings_tox_suffix, django_db_modify_db_settings_xdist_suffix, django_db_reset_sequences, django_db_serialized_rollback, django_db_setup, django_db_use_migrations, django_mail_dnsname, django_mail_patch_dns, django_test_environment, django_user_model, django_username_field, doctest_namespace, faker, forma_pagamento, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, live_server, mailoutbox, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rf, settings, subtests, tenant, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, transactional_db, user
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py:411
+================================== FAILURES ===================================
+___________ TestCoverageGapView.test_fechar_caixa_post_no_abertura ____________
+caixa_nfse\caixa\tests\test_views_extra.py:408: in test_fechar_caixa_post_no_abertura
+    assert response.status_code == 302
+E   assert 403 == 302
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+___________ TestCoverageFinal.test_fechar_caixa_post_race_condition ___________
+caixa_nfse\caixa\tests\test_views_extra.py:519: in test_fechar_caixa_post_race_condition
+    assert response.status_code == 302
+E   assert 403 == 302
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+-------------------------- Captured stderr teardown ---------------------------
+Destroying test database for alias 'default'...
+
+=========================== short test summary info ===========================
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_fechar_caixa_post_no_abertura
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageFinal::test_fechar_caixa_post_race_condition
+ERROR caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_rejeitar_fechamento_sem_justificativa
+==================== 2 failed, 36 passed, 1 error in 2.27s ====================

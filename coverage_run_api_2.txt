@@ -1,0 +1,62 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from option)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, django-4.11.1
+collecting ... collected 8 items
+
+caixa_nfse/api/tests/test_serializers.py::TestCaixaSerializer::test_valid_data PASSED [ 12%]
+caixa_nfse/api/tests/test_serializers.py::TestCaixaSerializer::test_read_only_fields PASSED [ 25%]
+caixa_nfse/api/tests/test_serializers.py::TestClienteSerializer::test_valid_data PASSED [ 37%]
+caixa_nfse/api/tests/test_serializers.py::TestNotaFiscalSerializer::test_serialize_data PASSED [ 50%]
+caixa_nfse/api/tests/test_views.py::TestCaixaViewSet::test_list_caixas_tenant_isolation FAILED [ 62%]
+caixa_nfse/api/tests/test_views.py::TestCaixaViewSet::test_create_caixa FAILED [ 75%]
+caixa_nfse/api/tests/test_views.py::TestClienteViewSet::test_list_clientes FAILED [ 87%]
+caixa_nfse/api/tests/test_views.py::TestAuth::test_unauthenticated FAILED [100%]
+
+================================== FAILURES ===================================
+_____________ TestCaixaViewSet.test_list_caixas_tenant_isolation ______________
+caixa_nfse\api\tests\test_views.py:23: in test_list_caixas_tenant_isolation
+    assert response.status_code == status.HTTP_200_OK
+E   assert 404 == 200
+E    +  where 404 = <HttpResponseNotFound status_code=404, "text/html; charset=utf-8">.status_code
+E    +  and   200 = status.HTTP_200_OK
+_____________________ TestCaixaViewSet.test_create_caixa ______________________
+caixa_nfse\api\tests\test_views.py:31: in test_create_caixa
+    assert response.status_code == status.HTTP_201_CREATED
+E   assert 404 == 201
+E    +  where 404 = <HttpResponseNotFound status_code=404, "text/html; charset=utf-8">.status_code
+E    +  and   201 = status.HTTP_201_CREATED
+____________________ TestClienteViewSet.test_list_clientes ____________________
+caixa_nfse\api\tests\test_views.py:55: in test_list_clientes
+    assert response.status_code == status.HTTP_200_OK
+E   assert 404 == 200
+E    +  where 404 = <HttpResponseNotFound status_code=404, "text/html; charset=utf-8">.status_code
+E    +  and   200 = status.HTTP_200_OK
+________________________ TestAuth.test_unauthenticated ________________________
+caixa_nfse\api\tests\test_views.py:66: in test_unauthenticated
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+E   assert 404 == 403
+E    +  where 404 = <HttpResponseNotFound status_code=404, "text/html; charset=utf-8">.status_code
+E    +  and   403 = status.HTTP_403_FORBIDDEN
+-------------------------- Captured stderr teardown ---------------------------
+Destroying test database for alias 'default'...
+
+============================== warnings summary ===============================
+caixa_nfse/api/tests/test_views.py::TestCaixaViewSet::test_list_caixas_tenant_isolation
+caixa_nfse/api/tests/test_views.py::TestCaixaViewSet::test_create_caixa
+caixa_nfse/api/tests/test_views.py::TestClienteViewSet::test_list_clientes
+  C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED caixa_nfse/api/tests/test_views.py::TestCaixaViewSet::test_list_caixas_tenant_isolation
+FAILED caixa_nfse/api/tests/test_views.py::TestCaixaViewSet::test_create_caixa
+FAILED caixa_nfse/api/tests/test_views.py::TestClienteViewSet::test_list_clientes
+FAILED caixa_nfse/api/tests/test_views.py::TestAuth::test_unauthenticated - a...
+=================== 4 failed, 4 passed, 3 warnings in 1.65s ===================

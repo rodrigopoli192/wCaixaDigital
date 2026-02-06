@@ -1,0 +1,97 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from option)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, django-4.11.1
+collecting ... collected 24 items
+
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_authenticated PASSED [  4%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_unauthenticated PASSED [  8%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_success PASSED [ 12%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_duplicate_error PASSED [ 16%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_get_abrir_caixa_page PASSED [ 20%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_success PASSED [ 25%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_already_open_redirect PASSED [ 29%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_success PASSED [ 33%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_invalid_form PASSED [ 37%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_get_fechar_caixa_page PASSED [ 41%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_success PASSED [ 45%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_error_closed PASSED [ 50%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaUpdateView::test_update_caixa_success FAILED [ 54%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaUpdateView::test_update_caixa_context PASSED [ 58%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestListaMovimentosView::test_list_movimentos ERROR [ 62%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFechamentosPendentesView::test_list_pendentes_manager ERROR [ 66%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFechamentosPendentesView::test_list_pendentes_forbidden PASSED [ 70%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestAprovarFechamentoView::test_aprovar_fechamento_success ERROR [ 75%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestAprovarFechamentoView::test_rejeitar_fechamento_success ERROR [ 79%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_movimento_saida_decreases_balance PASSED [ 83%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_block_retroactive_movement FAILED [ 87%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_htmx_request_returns_partial PASSED [ 91%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFecharCaixaExtra::test_fechar_htmx_response PASSED [ 95%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFecharCaixaExtra::test_fechar_com_diferenca FAILED [100%]
+
+=================================== ERRORS ====================================
+_______ ERROR at setup of TestListaMovimentosView.test_list_movimentos ________
+file C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py, line 41
+      def test_list_movimentos(self, client_logged, movimento):
+E       fixture 'movimento' not found
+>       available fixtures: _dj_autoclear_mailbox, _django_clear_site_cache, _django_db_helper, _django_db_marker, _django_set_urlconf, _django_setup_unittest, _fail_for_invalid_template_variable, _live_server_helper, _session_faker, _template_string_if_invalid_marker, abertura, admin_client, admin_user, anyio_backend, anyio_backend_name, anyio_backend_options, async_client, async_rf, cache, caixa, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, client, client_logged, db, django_assert_max_num_queries, django_assert_num_queries, django_capture_on_commit_callbacks, django_db_blocker, django_db_createdb, django_db_keepdb, django_db_modify_db_settings, django_db_modify_db_settings_parallel_suffix, django_db_modify_db_settings_tox_suffix, django_db_modify_db_settings_xdist_suffix, django_db_reset_sequences, django_db_serialized_rollback, django_db_setup, django_db_use_migrations, django_mail_dnsname, django_mail_patch_dns, django_test_environment, django_user_model, django_username_field, doctest_namespace, faker, forma_pagamento, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, live_server, mailoutbox, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rf, settings, subtests, tenant, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, transactional_db, user
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py:41
+_ ERROR at setup of TestFechamentosPendentesView.test_list_pendentes_manager __
+file C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py, line 54
+      def test_list_pendentes_manager(self, client_logged, user, fechamento):
+E       fixture 'fechamento' not found
+>       available fixtures: _dj_autoclear_mailbox, _django_clear_site_cache, _django_db_helper, _django_db_marker, _django_set_urlconf, _django_setup_unittest, _fail_for_invalid_template_variable, _live_server_helper, _session_faker, _template_string_if_invalid_marker, abertura, admin_client, admin_user, anyio_backend, anyio_backend_name, anyio_backend_options, async_client, async_rf, cache, caixa, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, client, client_logged, db, django_assert_max_num_queries, django_assert_num_queries, django_capture_on_commit_callbacks, django_db_blocker, django_db_createdb, django_db_keepdb, django_db_modify_db_settings, django_db_modify_db_settings_parallel_suffix, django_db_modify_db_settings_tox_suffix, django_db_modify_db_settings_xdist_suffix, django_db_reset_sequences, django_db_serialized_rollback, django_db_setup, django_db_use_migrations, django_mail_dnsname, django_mail_patch_dns, django_test_environment, django_user_model, django_username_field, doctest_namespace, faker, forma_pagamento, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, live_server, mailoutbox, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rf, settings, subtests, tenant, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, transactional_db, user
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py:54
+_ ERROR at setup of TestAprovarFechamentoView.test_aprovar_fechamento_success _
+file C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py, line 81
+      def test_aprovar_fechamento_success(self, client_logged, user, fechamento):
+E       fixture 'fechamento' not found
+>       available fixtures: _dj_autoclear_mailbox, _django_clear_site_cache, _django_db_helper, _django_db_marker, _django_set_urlconf, _django_setup_unittest, _fail_for_invalid_template_variable, _live_server_helper, _session_faker, _template_string_if_invalid_marker, abertura, admin_client, admin_user, anyio_backend, anyio_backend_name, anyio_backend_options, async_client, async_rf, cache, caixa, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, client, client_logged, db, django_assert_max_num_queries, django_assert_num_queries, django_capture_on_commit_callbacks, django_db_blocker, django_db_createdb, django_db_keepdb, django_db_modify_db_settings, django_db_modify_db_settings_parallel_suffix, django_db_modify_db_settings_tox_suffix, django_db_modify_db_settings_xdist_suffix, django_db_reset_sequences, django_db_serialized_rollback, django_db_setup, django_db_use_migrations, django_mail_dnsname, django_mail_patch_dns, django_test_environment, django_user_model, django_username_field, doctest_namespace, faker, forma_pagamento, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, live_server, mailoutbox, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rf, settings, subtests, tenant, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, transactional_db, user
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py:81
+_ ERROR at setup of TestAprovarFechamentoView.test_rejeitar_fechamento_success _
+file C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py, line 101
+      def test_rejeitar_fechamento_success(self, client_logged, user, fechamento):
+E       fixture 'fechamento' not found
+>       available fixtures: _dj_autoclear_mailbox, _django_clear_site_cache, _django_db_helper, _django_db_marker, _django_set_urlconf, _django_setup_unittest, _fail_for_invalid_template_variable, _live_server_helper, _session_faker, _template_string_if_invalid_marker, abertura, admin_client, admin_user, anyio_backend, anyio_backend_name, anyio_backend_options, async_client, async_rf, cache, caixa, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, client, client_logged, db, django_assert_max_num_queries, django_assert_num_queries, django_capture_on_commit_callbacks, django_db_blocker, django_db_createdb, django_db_keepdb, django_db_modify_db_settings, django_db_modify_db_settings_parallel_suffix, django_db_modify_db_settings_tox_suffix, django_db_modify_db_settings_xdist_suffix, django_db_reset_sequences, django_db_serialized_rollback, django_db_setup, django_db_use_migrations, django_mail_dnsname, django_mail_patch_dns, django_test_environment, django_user_model, django_username_field, doctest_namespace, faker, forma_pagamento, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, live_server, mailoutbox, monkeypatch, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rf, settings, subtests, tenant, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, transactional_db, user
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py:101
+================================== FAILURES ===================================
+________________ TestCaixaUpdateView.test_update_caixa_success ________________
+caixa_nfse\caixa\tests\test_views_extra.py:22: in test_update_caixa_success
+    assert response.status_code == 302
+E   assert 200 == 302
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+___________ TestNovoMovimentoExtra.test_block_retroactive_movement ____________
+caixa_nfse\caixa\tests\test_views_extra.py:160: in test_block_retroactive_movement
+    assert response.status_code == 302
+E   assert 200 == 302
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+_______________ TestFecharCaixaExtra.test_fechar_com_diferenca ________________
+caixa_nfse\caixa\tests\test_views_extra.py:190: in test_fechar_com_diferenca
+    abertura.saldo_movimentos = Decimal("100.00")  # System expects 100
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: property 'saldo_movimentos' of 'AberturaCaixa' object has no setter
+-------------------------- Captured stderr teardown ---------------------------
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+=========================== short test summary info ===========================
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaUpdateView::test_update_caixa_success - assert 200 == 302
+ +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_block_retroactive_movement - assert 200 == 302
+ +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestFecharCaixaExtra::test_fechar_com_diferenca - AttributeError: property 'saldo_movimentos' of 'AberturaCaixa' object has no setter
+ERROR caixa_nfse/caixa/tests/test_views_extra.py::TestListaMovimentosView::test_list_movimentos
+ERROR caixa_nfse/caixa/tests/test_views_extra.py::TestFechamentosPendentesView::test_list_pendentes_manager
+ERROR caixa_nfse/caixa/tests/test_views_extra.py::TestAprovarFechamentoView::test_aprovar_fechamento_success
+ERROR caixa_nfse/caixa/tests/test_views_extra.py::TestAprovarFechamentoView::test_rejeitar_fechamento_success
+=================== 3 failed, 17 passed, 4 errors in 2.01s ====================

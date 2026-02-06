@@ -1,0 +1,134 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, django-4.11.1
+collecting ... collected 12 items
+
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_authenticated PASSED [  8%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_unauthenticated PASSED [ 16%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_success PASSED [ 25%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_duplicate_error FAILED [ 33%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_get_abrir_caixa_page PASSED [ 41%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_success FAILED [ 50%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_already_open_redirect FAILED [ 58%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_success FAILED [ 66%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_invalid_form PASSED [ 75%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_get_fechar_caixa_page PASSED [ 83%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_success PASSED [ 91%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_error_closed PASSED [100%]
+
+================================== FAILURES ===================================
+____________ TestCaixaCreateView.test_create_caixa_duplicate_error ____________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: UNIQUE constraint failed: caixa_caixa.tenant_id, caixa_caixa.identificador
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\caixa\tests\test_views.py:55: in test_create_caixa_duplicate_error
+    response = client_logged.post(url, data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1153: in post
+    response = super().post(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:499: in post
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\base.py:198: in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\views\generic\base.py:106: in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\auth\mixins.py:74: in dispatch
+    return super().dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\views\generic\base.py:145: in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\views\generic\edit.py:182: in post
+    return super().post(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\views\generic\edit.py:151: in post
+    return self.form_valid(form)
+           ^^^^^^^^^^^^^^^^^^^^^
+caixa_nfse\caixa\views.py:69: in form_valid
+    return super().form_valid(form)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\views\generic\edit.py:133: in form_valid
+    self.object = form.save()
+                  ^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\forms\models.py:574: in save
+    self.instance.save()
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: UNIQUE constraint failed: caixa_caixa.tenant_id, caixa_caixa.identificador
+_________________ TestAbrirCaixaView.test_abrir_caixa_success _________________
+caixa_nfse\caixa\tests\test_views.py:81: in test_abrir_caixa_success
+    assert response.status_code == 302  # Redirects to detail
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   assert 200 == 302
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+__________ TestAbrirCaixaView.test_abrir_caixa_already_open_redirect __________
+caixa_nfse\caixa\tests\test_views.py:99: in test_abrir_caixa_already_open_redirect
+    assert response.status_code == 302
+E   assert 200 == 302
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+________________ TestNovoMovimentoView.test_movimento_success _________________
+caixa_nfse\caixa\tests\test_views.py:122: in test_movimento_success
+    assert (
+E   assert 302 == 200
+E    +  where 302 = <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/caixa/b549c2dd-e715-4e1f-8c74-e43d45e32433/">.status_code
+=========================== short test summary info ===========================
+FAILED caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_duplicate_error - django.db.utils.IntegrityError: UNIQUE constraint failed: caixa_caixa.tenant_id, caixa_caixa.identificador
+FAILED caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_success - assert 200 == 302
+ +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+FAILED caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_already_open_redirect - assert 200 == 302
+ +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+FAILED caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_success - assert 302 == 200
+ +  where 302 = <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/caixa/b549c2dd-e715-4e1f-8c74-e43d45e32433/">.status_code
+========================= 4 failed, 8 passed in 1.73s =========================

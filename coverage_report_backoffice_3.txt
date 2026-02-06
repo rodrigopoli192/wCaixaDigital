@@ -1,0 +1,9 @@
+Name                                Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------
+caixa_nfse\backoffice\__init__.py       0      0   100%
+caixa_nfse\backoffice\apps.py           5      0   100%
+caixa_nfse\backoffice\forms.py         44      0   100%
+caixa_nfse\backoffice\urls.py           4      0   100%
+caixa_nfse\backoffice\views.py         92     15    84%   55-56, 141-143, 146, 149-151, 154-157, 160-163
+-----------------------------------------------------------------
+TOTAL                                 145     15    90%

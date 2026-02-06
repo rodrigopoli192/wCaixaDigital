@@ -19,6 +19,16 @@ class AbrirCaixaForm(forms.ModelForm):
             "observacao": forms.Textarea(attrs={"rows": 3}),
         }
 
+    saldo_abertura = forms.CharField(
+        label="Saldo de Abertura",
+        widget=forms.TextInput(attrs={"class": "money-input", "inputmode": "decimal"}),
+    )
+    fundo_troco = forms.CharField(
+        label="Fundo de Troco",
+        widget=forms.TextInput(attrs={"class": "money-input", "inputmode": "decimal"}),
+        required=False,
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
@@ -30,6 +40,37 @@ class AbrirCaixaForm(forms.ModelForm):
             "observacao",
             Submit("submit", "Abrir Caixa", css_class="btn-primary"),
         )
+        # Adicionar classes para formatação no frontend
+        self.fields["saldo_abertura"].widget.attrs.update({"class": "money-input"})
+        self.fields["fundo_troco"].widget.attrs.update({"class": "money-input"})
+
+    def clean_saldo_abertura(self):
+        """Converte valor BRL para Decimal."""
+        return self._clean_money_field("saldo_abertura")
+
+    def clean_fundo_troco(self):
+        """Converte valor BRL para Decimal."""
+        return self._clean_money_field("fundo_troco")
+
+    def _clean_money_field(self, field_name):
+        from decimal import Decimal, InvalidOperation
+
+        valor = self.cleaned_data.get(field_name)
+        if valor is None:
+            return valor
+
+        if isinstance(valor, Decimal):
+            return valor
+
+        # Remove formatação
+        valor_str = str(valor).strip().replace("R$", "").replace(".", "").replace(",", ".")
+        if not valor_str:
+            return Decimal("0")
+
+        try:
+            return Decimal(valor_str)
+        except InvalidOperation as e:
+            raise forms.ValidationError("Valor inválido.") from e
 
 
 class MovimentoCaixaForm(forms.ModelForm):

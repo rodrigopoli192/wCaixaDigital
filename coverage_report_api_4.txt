@@ -1,0 +1,9 @@
+Name                            Stmts   Miss  Cover   Missing
+-------------------------------------------------------------
+caixa_nfse\api\__init__.py          1      0   100%
+caixa_nfse\api\apps.py              5      0   100%
+caixa_nfse\api\serializers.py      20      0   100%
+caixa_nfse\api\urls.py              8      0   100%
+caixa_nfse\api\views.py            36      2    94%   48, 61
+-------------------------------------------------------------
+TOTAL                              70      2    97%

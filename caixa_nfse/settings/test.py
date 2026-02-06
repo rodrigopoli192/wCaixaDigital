@@ -15,6 +15,12 @@ DATABASES = {
     }
 }
 
+# Remove WhiteNoise middleware and storage for tests
+if "whitenoise.middleware.WhiteNoiseMiddleware" in MIDDLEWARE:
+    MIDDLEWARE.remove("whitenoise.middleware.WhiteNoiseMiddleware")
+
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+
 # Disable caching
 CACHES = {
     "default": {
@@ -36,3 +42,18 @@ EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
 # Disable encryption for tests
 FIELD_ENCRYPTION_KEY = "dGVzdC1lbmNyeXB0aW9uLWtleS0zMi1ieXRlcyE="  # base64 encoded test key
+
+# Logging - disable file logging during tests to avoid lock issues
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": True,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "CRITICAL",  # Only critical errors
+    },
+}

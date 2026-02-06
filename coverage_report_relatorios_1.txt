@@ -1,0 +1,14 @@
+Name                                                    Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------------------------
+caixa_nfse\relatorios\__init__.py                           1      0   100%
+caixa_nfse\relatorios\apps.py                               5      0   100%
+caixa_nfse\relatorios\services.py                         101      5    95%   16-17, 25-26, 159
+caixa_nfse\relatorios\templatetags\__init__.py              7      3    57%   13-15
+caixa_nfse\relatorios\templatetags\relatorios_tags.py       7      3    57%   13-15
+caixa_nfse\relatorios\tests\__init__.py                     0      0   100%
+caixa_nfse\relatorios\tests\test_services.py               52      0   100%
+caixa_nfse\relatorios\tests\test_views.py                  90     48    47%   43-46, 49-53, 56-67, 70-75, 84-89, 92-100, 109-112, 115-119
+caixa_nfse\relatorios\urls.py                               4      0   100%
+caixa_nfse\relatorios\views.py                            326    238    27%   42, 46, 50-56, 60-82, 85-88, 118-137, 140-153, 156-161, 166-194, 214-255, 258-273, 276-277, 284-302, 318-341, 344-356, 359-360, 367-380, 398-423, 426-438, 441-446, 454-470, 487-503, 506-520, 523-537, 555-571, 574-586, 589-591, 594-608, 626-643, 646-658, 661-674, 683-701, 710-800
+-------------------------------------------------------------------------------------
+TOTAL                                                     593    297    50%

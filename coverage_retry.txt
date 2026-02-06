@@ -1,0 +1,59 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from option)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, django-4.11.1
+collecting ... collected 48 items
+
+caixa_nfse/caixa/tests/test_forms.py::TestMovimentoCaixaForm::test_clean_valor_formato_brasileiro PASSED [  2%]
+caixa_nfse/caixa/tests/test_forms.py::TestMovimentoCaixaForm::test_clean_valor_simples PASSED [  4%]
+caixa_nfse/caixa/tests/test_forms.py::TestMovimentoCaixaForm::test_clean_valor_com_rs PASSED [  6%]
+caixa_nfse/caixa/tests/test_forms.py::TestMovimentoCaixaForm::test_clean_valor_vazio_retorna_zero PASSED [  8%]
+caixa_nfse/caixa/tests/test_forms.py::TestMovimentoCaixaForm::test_clean_valor_invalido PASSED [ 10%]
+caixa_nfse/caixa/tests/test_forms.py::TestMovimentoCaixaForm::test_tipo_inicial_entrada PASSED [ 12%]
+caixa_nfse/caixa/tests/test_forms.py::TestFechamentoCaixaForm::test_clean_saldo_informado_formato_brasileiro PASSED [ 14%]
+caixa_nfse/caixa/tests/test_forms.py::TestFechamentoCaixaForm::test_clean_saldo_informado_simples PASSED [ 16%]
+caixa_nfse/caixa/tests/test_forms.py::TestFechamentoCaixaForm::test_clean_saldo_vazio_erro PASSED [ 18%]
+caixa_nfse/caixa/tests/test_forms.py::TestFechamentoCaixaForm::test_justificativa_obrigatoria_com_diferenca PASSED [ 20%]
+caixa_nfse/caixa/tests/test_forms.py::TestFechamentoCaixaForm::test_justificativa_nao_obrigatoria_sem_diferenca PASSED [ 22%]
+caixa_nfse/caixa/tests/test_forms.py::TestFechamentoCaixaForm::test_diferenca_pequena_tolerada PASSED [ 25%]
+caixa_nfse/caixa/tests/test_forms.py::TestAbrirCaixaForm::test_form_fields PASSED [ 27%]
+caixa_nfse/caixa/tests/test_forms.py::TestAbrirCaixaForm::test_valid_form PASSED [ 29%]
+caixa_nfse/caixa/tests/test_models.py::TestCaixaModel::test_create_caixa PASSED [ 31%]
+caixa_nfse/caixa/tests/test_models.py::TestCaixaModel::test_caixa_str PASSED [ 33%]
+caixa_nfse/caixa/tests/test_models.py::TestCaixaModel::test_caixa_status_inicial PASSED [ 35%]
+caixa_nfse/caixa/tests/test_models.py::TestCaixaModel::test_caixa_esta_aberto_false PASSED [ 37%]
+caixa_nfse/caixa/tests/test_models.py::TestCaixaModel::test_caixa_unique_identificador_per_tenant PASSED [ 39%]
+caixa_nfse/caixa/tests/test_models.py::TestAberturaCaixaModel::test_create_abertura PASSED [ 41%]
+caixa_nfse/caixa/tests/test_models.py::TestAberturaCaixaModel::test_saldo_movimentos_sem_movimentos PASSED [ 43%]
+caixa_nfse/caixa/tests/test_models.py::TestAberturaCaixaModel::test_saldo_movimentos_com_entrada PASSED [ 45%]
+caixa_nfse/caixa/tests/test_models.py::TestAberturaCaixaModel::test_saldo_movimentos_com_saida PASSED [ 47%]
+caixa_nfse/caixa/tests/test_models.py::TestAberturaCaixaModel::test_total_entradas PASSED [ 50%]
+caixa_nfse/caixa/tests/test_models.py::TestAberturaCaixaModel::test_total_saidas PASSED [ 52%]
+caixa_nfse/caixa/tests/test_models.py::TestAberturaCaixaModel::test_is_operacional_hoje PASSED [ 54%]
+caixa_nfse/caixa/tests/test_models.py::TestMovimentoCaixaModel::test_create_movimento PASSED [ 56%]
+caixa_nfse/caixa/tests/test_models.py::TestMovimentoCaixaModel::test_movimento_is_entrada PASSED [ 58%]
+caixa_nfse/caixa/tests/test_models.py::TestMovimentoCaixaModel::test_movimento_is_saida PASSED [ 60%]
+caixa_nfse/caixa/tests/test_models.py::TestMovimentoCaixaModel::test_movimento_sangria_is_saida PASSED [ 62%]
+caixa_nfse/caixa/tests/test_models.py::TestMovimentoCaixaModel::test_movimento_suprimento_is_entrada PASSED [ 64%]
+caixa_nfse/caixa/tests/test_models.py::TestFechamentoCaixaModel::test_create_fechamento PASSED [ 66%]
+caixa_nfse/caixa/tests/test_models.py::TestFechamentoCaixaModel::test_fechamento_diferenca_zero PASSED [ 68%]
+caixa_nfse/caixa/tests/test_models.py::TestFechamentoCaixaModel::test_fechamento_diferenca_positiva PASSED [ 70%]
+caixa_nfse/caixa/tests/test_models.py::TestFechamentoCaixaModel::test_fechamento_diferenca_negativa PASSED [ 72%]
+caixa_nfse/caixa/tests/test_models.py::TestFechamentoCaixaModel::test_fechamento_status_inicial PASSED [ 75%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_authenticated PASSED [ 77%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_unauthenticated PASSED [ 79%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_success PASSED [ 81%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_duplicate_error PASSED [ 83%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_get_abrir_caixa_page PASSED [ 85%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_success PASSED [ 87%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_already_open_redirect PASSED [ 89%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_success PASSED [ 91%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_invalid_form PASSED [ 93%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_get_fechar_caixa_page PASSED [ 95%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_success PASSED [ 97%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_error_closed PASSED [100%]
+
+============================= 48 passed in 2.07s ==============================

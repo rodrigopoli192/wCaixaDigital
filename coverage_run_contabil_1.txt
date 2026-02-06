@@ -1,0 +1,42 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from option)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, django-4.11.1
+collecting ... collected 0 items / 1 error
+
+=================================== ERRORS ====================================
+__________ ERROR collecting caixa_nfse/contabil/tests/test_models.py __________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\apps\config.py:235: in get_model
+    return self.models[model_name.lower()]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   KeyError: 'formapagamento'
+
+During handling of the above exception, another exception occurred:
+caixa_nfse\contabil\tests\test_models.py:4: in <module>
+    from caixa_nfse.tests.factories import (
+caixa_nfse\tests\factories.py:56: in <module>
+    class FormaPagamentoFactory(factory.django.DjangoModelFactory):
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:83: in __new__
+    meta.contribute_to_class(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:213: in contribute_to_class
+    self.model = self.get_model_class()
+                 ^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:71: in get_model_class
+    self.model = get_model(app, model_name)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:35: in get_model
+    return _get_model(app, model)
+           ^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\apps\registry.py:213: in get_model
+    return app_config.get_model(model_name, require_ready=require_ready)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\apps\config.py:237: in get_model
+    raise LookupError(
+E   LookupError: App 'fiscal' doesn't have a 'FormaPagamento' model.
+=========================== short test summary info ===========================
+ERROR caixa_nfse/contabil/tests/test_models.py - LookupError: App 'fiscal' do...
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+============================== 1 error in 0.28s ===============================

@@ -1,0 +1,555 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from option)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, django-4.11.1
+collecting ... collected 9 items
+
+caixa_nfse/nfse/tests/test_models.py::TestServicoMunicipalModel::test_create_servico PASSED [ 11%]
+caixa_nfse/nfse/tests/test_models.py::TestServicoMunicipalModel::test_unique_codigo_lc116_municipio PASSED [ 22%]
+caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_calculation_on_save FAILED [ 33%]
+caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_calculation_with_retention FAILED [ 44%]
+caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_calculation_with_other_taxes FAILED [ 55%]
+caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_pode_cancelar FAILED [ 66%]
+caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_str_representation FAILED [ 77%]
+caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_unique_rps_per_tenant FAILED [ 88%]
+caixa_nfse/nfse/tests/test_models.py::TestEventoFiscalModel::test_create_evento FAILED [100%]
+
+================================== FAILURES ===================================
+_____________ TestNotaFiscalServicoModel.test_calculation_on_save _____________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\nfse\tests\test_models.py:40: in test_calculation_on_save
+    nota = NotaFiscalServicoFactory(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:43: in __call__
+    return cls.create(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:539: in create
+    return cls._generate(enums.CREATE_STRATEGY, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:122: in _generate
+    return super()._generate(strategy, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:468: in _generate
+    return step.build()
+           ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\builder.py:274: in build
+    instance = self.factory_meta.instantiate(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:320: in instantiate
+    return self.factory._create(model, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:175: in _create
+    return manager.create(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:669: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models.py:298: in save
+    super().save(*args, **kwargs)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+_________ TestNotaFiscalServicoModel.test_calculation_with_retention __________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\nfse\tests\test_models.py:58: in test_calculation_with_retention
+    nota = NotaFiscalServicoFactory(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:43: in __call__
+    return cls.create(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:539: in create
+    return cls._generate(enums.CREATE_STRATEGY, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:122: in _generate
+    return super()._generate(strategy, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:468: in _generate
+    return step.build()
+           ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\builder.py:274: in build
+    instance = self.factory_meta.instantiate(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:320: in instantiate
+    return self.factory._create(model, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:175: in _create
+    return manager.create(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:669: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models.py:298: in save
+    super().save(*args, **kwargs)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+________ TestNotaFiscalServicoModel.test_calculation_with_other_taxes _________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\nfse\tests\test_models.py:71: in test_calculation_with_other_taxes
+    nota = NotaFiscalServicoFactory(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:43: in __call__
+    return cls.create(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:539: in create
+    return cls._generate(enums.CREATE_STRATEGY, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:122: in _generate
+    return super()._generate(strategy, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:468: in _generate
+    return step.build()
+           ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\builder.py:274: in build
+    instance = self.factory_meta.instantiate(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:320: in instantiate
+    return self.factory._create(model, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:175: in _create
+    return manager.create(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:669: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models.py:298: in save
+    super().save(*args, **kwargs)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+________________ TestNotaFiscalServicoModel.test_pode_cancelar ________________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\nfse\tests\test_models.py:82: in test_pode_cancelar
+    nota = NotaFiscalServicoFactory(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:43: in __call__
+    return cls.create(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:539: in create
+    return cls._generate(enums.CREATE_STRATEGY, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:122: in _generate
+    return super()._generate(strategy, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:468: in _generate
+    return step.build()
+           ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\builder.py:274: in build
+    instance = self.factory_meta.instantiate(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:320: in instantiate
+    return self.factory._create(model, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:175: in _create
+    return manager.create(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:669: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models.py:298: in save
+    super().save(*args, **kwargs)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+_____________ TestNotaFiscalServicoModel.test_str_representation ______________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\nfse\tests\test_models.py:98: in test_str_representation
+    nota = NotaFiscalServicoFactory(numero_rps=123, numero_nfse=None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:43: in __call__
+    return cls.create(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:539: in create
+    return cls._generate(enums.CREATE_STRATEGY, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:122: in _generate
+    return super()._generate(strategy, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:468: in _generate
+    return step.build()
+           ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\builder.py:274: in build
+    instance = self.factory_meta.instantiate(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:320: in instantiate
+    return self.factory._create(model, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:175: in _create
+    return manager.create(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:669: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models.py:298: in save
+    super().save(*args, **kwargs)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+____________ TestNotaFiscalServicoModel.test_unique_rps_per_tenant ____________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\nfse\tests\test_models.py:107: in test_unique_rps_per_tenant
+    n1 = NotaFiscalServicoFactory(tenant=tenant, numero_rps=10, serie_rps="1")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:43: in __call__
+    return cls.create(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:539: in create
+    return cls._generate(enums.CREATE_STRATEGY, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:122: in _generate
+    return super()._generate(strategy, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:468: in _generate
+    return step.build()
+           ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\builder.py:274: in build
+    instance = self.factory_meta.instantiate(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:320: in instantiate
+    return self.factory._create(model, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:175: in _create
+    return manager.create(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:669: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models.py:298: in save
+    super().save(*args, **kwargs)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+__________________ TestEventoFiscalModel.test_create_evento ___________________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\nfse\tests\test_models.py:119: in test_create_evento
+    evento = EventoFiscalFactory()
+             ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:43: in __call__
+    return cls.create(**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:539: in create
+    return cls._generate(enums.CREATE_STRATEGY, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:122: in _generate
+    return super()._generate(strategy, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:468: in _generate
+    return step.build()
+           ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\builder.py:270: in build
+    step.resolve(pre)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\builder.py:211: in resolve
+    self.attributes[field_name] = getattr(self.stub, field_name)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\builder.py:356: in __getattr__
+    value = value.evaluate_pre(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\declarations.py:67: in evaluate_pre
+    return self.evaluate(instance, step, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\declarations.py:457: in evaluate
+    return step.recurse(subfactory, extra, force_sequence=force_sequence)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\builder.py:228: in recurse
+    return builder.build(parent_step=self, force_sequence=force_sequence)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\builder.py:274: in build
+    instance = self.factory_meta.instantiate(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\base.py:320: in instantiate
+    return self.factory._create(model, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:175: in _create
+    return manager.create(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:669: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models.py:298: in save
+    super().save(*args, **kwargs)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: nfse_notafiscalservico.competencia
+-------------------------- Captured stderr teardown ---------------------------
+Destroying test database for alias 'default'...
+
+=========================== short test summary info ===========================
+FAILED caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_calculation_on_save
+FAILED caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_calculation_with_retention
+FAILED caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_calculation_with_other_taxes
+FAILED caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_pode_cancelar
+FAILED caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_str_representation
+FAILED caixa_nfse/nfse/tests/test_models.py::TestNotaFiscalServicoModel::test_unique_rps_per_tenant
+FAILED caixa_nfse/nfse/tests/test_models.py::TestEventoFiscalModel::test_create_evento
+========================= 7 failed, 2 passed in 1.79s =========================

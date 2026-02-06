@@ -1,0 +1,21 @@
+[run]
+omit =
+    */migrations/*
+    */tests/*
+    */venv/*
+    manage.py
+    caixa_nfse/asgi.py
+    caixa_nfse/wsgi.py
+    caixa_nfse/settings/local.py
+    caixa_nfse/settings/production.py
+    caixa_nfse/core/management/commands/create_sample_data.py
+    caixa_nfse/core/management/commands/create_admin.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if settings.DEBUG
+    if TYPE_CHECKING:

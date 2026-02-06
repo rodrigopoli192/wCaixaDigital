@@ -1,0 +1,105 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, django-4.11.1
+collecting ... collected 12 items
+
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_authenticated PASSED [  8%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_unauthenticated FAILED [ 16%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_success FAILED [ 25%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_duplicate_error FAILED [ 33%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_get_abrir_caixa_page PASSED [ 41%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_success FAILED [ 50%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_already_open_redirect FAILED [ 58%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_success ERROR [ 66%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_invalid_form FAILED [ 75%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_get_fechar_caixa_page PASSED [ 83%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_success FAILED [ 91%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_error_closed PASSED [100%]
+
+=================================== ERRORS ====================================
+_______ ERROR at setup of TestNovoMovimentoView.test_movimento_success ________
+caixa_nfse\conftest.py:81: in forma_pagamento
+    return FormaPagamento.objects.create(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:667: in create
+    obj = self.model(**kwargs)
+          ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:590: in __init__
+    raise TypeError(
+E   TypeError: FormaPagamento() got unexpected keyword arguments: 'codigo'
+================================== FAILURES ===================================
+_____________ TestCaixaListView.test_list_caixas_unauthenticated ______________
+caixa_nfse\caixa\tests\test_views.py:30: in test_list_caixas_unauthenticated
+    assert "/accounts/login/" in response.url
+E   assert '/accounts/login/' in '/login/?next=/caixa/'
+E    +  where '/login/?next=/caixa/' = <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/login/?next=/caixa/">.url
+________________ TestCaixaCreateView.test_create_caixa_success ________________
+caixa_nfse\caixa\tests\test_views.py:39: in test_create_caixa_success
+    url = reverse("caixa:create")
+          ^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'create' not found. 'create' is not a valid view function or pattern name.
+____________ TestCaixaCreateView.test_create_caixa_duplicate_error ____________
+caixa_nfse\caixa\tests\test_views.py:50: in test_create_caixa_duplicate_error
+    url = reverse("caixa:create")
+          ^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'create' not found. 'create' is not a valid view function or pattern name.
+_________________ TestAbrirCaixaView.test_abrir_caixa_success _________________
+caixa_nfse\caixa\tests\test_views.py:81: in test_abrir_caixa_success
+    assert response.status_code == 302  # Redirects to detail
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   assert 200 == 302
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+__________ TestAbrirCaixaView.test_abrir_caixa_already_open_redirect __________
+caixa_nfse\caixa\tests\test_views.py:99: in test_abrir_caixa_already_open_redirect
+    assert response.status_code == 302
+E   assert 200 == 302
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+______________ TestNovoMovimentoView.test_movimento_invalid_form ______________
+caixa_nfse\caixa\tests\test_views.py:140: in test_movimento_invalid_form
+    url = reverse("caixa:movimento_create", kwargs={"pk": abertura.pk})
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'movimento_create' not found. 'movimento_create' is not a valid view function or pattern name.
+________________ TestFecharCaixaView.test_fechar_caixa_success ________________
+caixa_nfse\caixa\tests\test_views.py:182: in test_fechar_caixa_success
+    assert abertura.fechamento.status == StatusFechamento.PENDENTE
+E   AssertionError: assert 'APROVADO' == StatusFechamento.PENDENTE
+E     
+E     - PENDENTE
+E     + APROVADO
+=========================== short test summary info ===========================
+FAILED caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_unauthenticated - assert '/accounts/login/' in '/login/?next=/caixa/'
+ +  where '/login/?next=/caixa/' = <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/login/?next=/caixa/">.url
+FAILED caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_success - django.urls.exceptions.NoReverseMatch: Reverse for 'create' not found. 'create' is not a valid view function or pattern name.
+FAILED caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_duplicate_error - django.urls.exceptions.NoReverseMatch: Reverse for 'create' not found. 'create' is not a valid view function or pattern name.
+FAILED caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_success - assert 200 == 302
+ +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+FAILED caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_already_open_redirect - assert 200 == 302
+ +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+FAILED caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_invalid_form - django.urls.exceptions.NoReverseMatch: Reverse for 'movimento_create' not found. 'movimento_create' is not a valid view function or pattern name.
+FAILED caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_success - AssertionError: assert 'APROVADO' == StatusFechamento.PENDENTE
+  
+  - PENDENTE
+  + APROVADO
+ERROR caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_success - TypeError: FormaPagamento() got unexpected keyword arguments: 'codigo'
+==================== 7 failed, 4 passed, 1 error in 1.63s =====================

@@ -1,0 +1,43 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from option)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, django-4.11.1
+collecting ... collected 24 items
+
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_authenticated PASSED [  4%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaListView::test_list_caixas_unauthenticated PASSED [  8%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_success PASSED [ 12%]
+caixa_nfse/caixa/tests/test_views.py::TestCaixaCreateView::test_create_caixa_duplicate_error PASSED [ 16%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_get_abrir_caixa_page PASSED [ 20%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_success PASSED [ 25%]
+caixa_nfse/caixa/tests/test_views.py::TestAbrirCaixaView::test_abrir_caixa_already_open_redirect PASSED [ 29%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_success PASSED [ 33%]
+caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_invalid_form PASSED [ 37%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_get_fechar_caixa_page PASSED [ 41%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_success PASSED [ 45%]
+caixa_nfse/caixa/tests/test_views.py::TestFecharCaixaView::test_fechar_caixa_error_closed PASSED [ 50%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaUpdateView::test_update_caixa_success PASSED [ 54%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaUpdateView::test_update_caixa_context PASSED [ 58%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestListaMovimentosView::test_list_movimentos PASSED [ 62%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFechamentosPendentesView::test_list_pendentes_manager PASSED [ 66%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFechamentosPendentesView::test_list_pendentes_forbidden PASSED [ 70%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestAprovarFechamentoView::test_aprovar_fechamento_success FAILED [ 75%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestAprovarFechamentoView::test_rejeitar_fechamento_success PASSED [ 79%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_movimento_saida_decreases_balance PASSED [ 83%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_block_retroactive_movement PASSED [ 87%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_htmx_request_returns_partial PASSED [ 91%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFecharCaixaExtra::test_fechar_htmx_response PASSED [ 95%]
+caixa_nfse/caixa/tests/test_views_extra.py::TestFecharCaixaExtra::test_fechar_com_diferenca PASSED [100%]
+
+================================== FAILURES ===================================
+__________ TestAprovarFechamentoView.test_aprovar_fechamento_success __________
+caixa_nfse\caixa\tests\test_views_extra.py:140: in test_aprovar_fechamento_success
+    assert fechamento.operador_aprovador == user
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'FechamentoCaixa' object has no attribute 'operador_aprovador'. Did you mean: 'observacao_aprovador'?
+=========================== short test summary info ===========================
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestAprovarFechamentoView::test_aprovar_fechamento_success
+======================== 1 failed, 23 passed in 1.93s =========================

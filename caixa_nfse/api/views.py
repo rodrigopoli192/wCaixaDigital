@@ -31,6 +31,9 @@ class CaixaViewSet(TenantFilterMixin, viewsets.ModelViewSet):
     filterset_fields = ["status", "tipo", "ativo"]
     search_fields = ["identificador"]
 
+    def perform_create(self, serializer):
+        serializer.save(tenant=self.request.user.tenant)
+
 
 class ClienteViewSet(TenantFilterMixin, viewsets.ModelViewSet):
     """API endpoint for Cliente."""
@@ -41,6 +44,9 @@ class ClienteViewSet(TenantFilterMixin, viewsets.ModelViewSet):
     filterset_fields = ["tipo_pessoa", "ativo", "uf"]
     search_fields = ["razao_social", "cpf_cnpj"]
 
+    def perform_create(self, serializer):
+        serializer.save(tenant=self.request.user.tenant)
+
 
 class NotaFiscalViewSet(TenantFilterMixin, viewsets.ModelViewSet):
     """API endpoint for NotaFiscalServico."""
@@ -50,3 +56,6 @@ class NotaFiscalViewSet(TenantFilterMixin, viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     filterset_fields = ["status", "data_emissao"]
     search_fields = ["numero_rps", "numero_nfse"]
+
+    def perform_create(self, serializer):
+        serializer.save(tenant=self.request.user.tenant)

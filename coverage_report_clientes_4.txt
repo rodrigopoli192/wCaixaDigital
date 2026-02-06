@@ -1,0 +1,16 @@
+Name                                             Stmts   Miss  Cover   Missing
+------------------------------------------------------------------------------
+caixa_nfse\clientes\__init__.py                      1      0   100%
+caixa_nfse\clientes\admin.py                         8      0   100%
+caixa_nfse\clientes\apps.py                          5      0   100%
+caixa_nfse\clientes\filters.py                      10      0   100%
+caixa_nfse\clientes\forms.py                        27     17    37%   33-36, 78-99
+caixa_nfse\clientes\migrations\0001_initial.py       6      0   100%
+caixa_nfse\clientes\migrations\0002_initial.py       7      0   100%
+caixa_nfse\clientes\migrations\__init__.py           0      0   100%
+caixa_nfse\clientes\models.py                       86      2    98%   26, 44
+caixa_nfse\clientes\tables.py                        9      0   100%
+caixa_nfse\clientes\urls.py                          4      0   100%
+caixa_nfse\clientes\views.py                        60     25    58%   20-23, 46-48, 51-53, 56-74, 84-86
+------------------------------------------------------------------------------
+TOTAL                                              223     44    80%

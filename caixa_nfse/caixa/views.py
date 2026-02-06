@@ -112,6 +112,13 @@ class AbrirCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def test_func(self):
         return self.request.user.pode_operar_caixa
 
+    def dispatch(self, request, *args, **kwargs):
+        caixa = self.get_caixa()
+        if caixa.status != StatusCaixa.FECHADO:
+            messages.error(request, "Este caixa já está aberto ou bloqueado.")
+            return redirect("caixa:detail", pk=caixa.pk)
+        return super().dispatch(request, *args, **kwargs)
+
     def get_caixa(self):
         return get_object_or_404(
             Caixa,
@@ -132,10 +139,6 @@ class AbrirCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
     def form_valid(self, form):
         caixa = self.get_caixa()
-
-        if caixa.status != StatusCaixa.FECHADO:
-            messages.error(self.request, "Este caixa já está aberto ou bloqueado.")
-            return redirect("caixa:detail", pk=caixa.pk)
 
         with transaction.atomic():
             abertura = form.save(commit=False)
@@ -245,10 +248,6 @@ class FecharCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     def form_valid(self, form):
         caixa = self.get_caixa()
         abertura = self.get_abertura()
-
-        if not abertura:
-            messages.error(self.request, "Não há abertura de caixa para fechar.")
-            return redirect("caixa:detail", pk=caixa.pk)
 
         with transaction.atomic():
             fechamento = form.save(commit=False)
@@ -456,11 +455,15 @@ class AprovarFechamentoView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
         if action == "aprovar":
             self.object.aprovar(request.user, observacao)
             messages.success(request, "Fechamento aprovado com sucesso!")
-        elif action == "rejeitar":
+            return redirect(self.success_url)
+
+        if action == "rejeitar":
             if not observacao:
                 messages.error(request, "Justificativa obrigatória para rejeição.")
-                return self.get(request, *args, **kwargs)
+                return super().get(request, *args, **kwargs)
+
             self.object.rejeitar(request.user, observacao)
             messages.warning(request, "Fechamento rejeitado.")
+            return redirect(self.success_url)
 
         return redirect(self.success_url)

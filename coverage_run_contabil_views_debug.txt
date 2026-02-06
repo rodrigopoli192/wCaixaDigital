@@ -1,0 +1,230 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from option)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, django-4.11.1
+collecting ... collected 5 items
+
+caixa_nfse/contabil/tests/test_views.py::TestPlanoContasListView::test_list_plano_contas FAILED [ 20%]
+caixa_nfse/contabil/tests/test_views.py::TestPlanoContasListView::test_filter_tenant FAILED [ 40%]
+caixa_nfse/contabil/tests/test_views.py::TestLancamentoListView::test_list_lancamentos FAILED [ 60%]
+caixa_nfse/contabil/tests/test_views.py::TestLancamentoDetailView::test_detail_lancamento PASSED [ 80%]
+caixa_nfse/contabil/tests/test_views.py::TestExportarLancamentosView::test_export_csv FAILED [100%]
+
+================================== FAILURES ===================================
+_______________ TestPlanoContasListView.test_list_plano_contas ________________
+caixa_nfse\contabil\tests\test_views.py:32: in test_list_plano_contas
+    response = client_logged.get(url)
+               ^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\base.py:221: in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:114: in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:92: in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\backends\django.py:107: in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:174: in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:160: in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:66: in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\defaulttags.py:511: in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'conta_create' not found. 'conta_create' is not a valid view function or pattern name.
+---------------------------- Captured stdout setup ----------------------------
+Operations to perform:
+  Synchronize unmigrated apps: api, backoffice, crispy_bootstrap5, crispy_forms, django_filters, django_htmx, django_tables2, humanize, messages, relatorios, rest_framework, staticfiles, widget_tweaks
+  Apply all migrations: admin, auditoria, auth, caixa, clientes, contabil, contenttypes, core, fiscal, nfse, sessions
+Synchronizing apps without migrations:
+  Creating tables...
+    Running deferred SQL...
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying core.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying auditoria.0001_initial... OK
+  Applying auditoria.0002_initial... OK
+  Applying clientes.0001_initial... OK
+  Applying nfse.0001_initial... OK
+  Applying caixa.0001_initial... OK
+  Applying caixa.0002_initial... OK
+  Applying caixa.0003_fechamentocaixa_observacao... OK
+  Applying clientes.0002_initial... OK
+  Applying contabil.0001_initial... OK
+  Applying contabil.0002_initial... OK
+  Applying fiscal.0001_initial... OK
+  Applying sessions.0001_initial... OK
+---------------------------- Captured stderr setup ----------------------------
+Creating test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+_________________ TestPlanoContasListView.test_filter_tenant __________________
+caixa_nfse\contabil\tests\test_views.py:42: in test_filter_tenant
+    response = client_logged.get(url)
+               ^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\base.py:221: in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:114: in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:92: in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\backends\django.py:107: in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:174: in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:160: in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:66: in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\defaulttags.py:511: in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'conta_create' not found. 'conta_create' is not a valid view function or pattern name.
+________________ TestLancamentoListView.test_list_lancamentos _________________
+caixa_nfse\contabil\tests\test_views.py:53: in test_list_lancamentos
+    url = reverse("contabil:lancamento_list")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'lancamento_list' not found. 'lancamento_list' is not a valid view function or pattern name.
+_________________ TestExportarLancamentosView.test_export_csv _________________
+caixa_nfse\contabil\tests\test_views.py:77: in test_export_csv
+    url = reverse("contabil:exportar_lancamentos")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'exportar_lancamentos' not found. 'exportar_lancamentos' is not a valid view function or pattern name.
+-------------------------- Captured stderr teardown ---------------------------
+Destroying test database for alias 'default' ('file:memorydb_default?mode=memory&cache=shared')...
+
+=========================== short test summary info ===========================
+FAILED caixa_nfse/contabil/tests/test_views.py::TestPlanoContasListView::test_list_plano_contas - django.urls.exceptions.NoReverseMatch: Reverse for 'conta_create' not found. 'conta_create' is not a valid view function or pattern name.
+FAILED caixa_nfse/contabil/tests/test_views.py::TestPlanoContasListView::test_filter_tenant - django.urls.exceptions.NoReverseMatch: Reverse for 'conta_create' not found. 'conta_create' is not a valid view function or pattern name.
+FAILED caixa_nfse/contabil/tests/test_views.py::TestLancamentoListView::test_list_lancamentos - django.urls.exceptions.NoReverseMatch: Reverse for 'lancamento_list' not found. 'lancamento_list' is not a valid view function or pattern name.
+FAILED caixa_nfse/contabil/tests/test_views.py::TestExportarLancamentosView::test_export_csv - django.urls.exceptions.NoReverseMatch: Reverse for 'exportar_lancamentos' not found. 'exportar_lancamentos' is not a valid view function or pattern name.
+========================= 4 failed, 1 passed in 1.82s =========================
