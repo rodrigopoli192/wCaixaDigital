@@ -1,18 +1,18 @@
 {% load widget_tweaks %}
 
-<div id="fechar-caixa-container" class="bg-[#212224] text-slate-200 h-full flex flex-col w-full max-w-7xl rounded-xl shadow-2xl border border-[#2d3544] overflow-hidden">
+<div id="fechar-caixa-container" class="bg-white dark:bg-[#212224] text-slate-900 dark:text-slate-200 h-full flex flex-col w-full max-w-7xl rounded-xl shadow-2xl border border-slate-200 dark:border-[#2d3544] overflow-hidden">
     <!-- Header -->
-    <div class="flex justify-between items-start px-8 py-6 border-b border-slate-800/50">
+    <div class="flex justify-between items-start px-8 py-6 border-b border-slate-100 dark:border-slate-800/50">
         <div class="flex items-center gap-4">
             <div class="size-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
                 <span class="material-symbols-outlined text-orange-500">account_balance_wallet</span>
             </div>
             <div>
-                <h3 class="text-xl font-bold text-white tracking-tight">Fechamento de Caixa e Auditoria</h3>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Fechamento de Caixa e Auditoria</h3>
                 <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mt-0.5">Conformidade Contábil & Gestão NFS-e</p>
             </div>
         </div>
-        <button type="button" @click="open = false" class="text-slate-500 hover:text-white transition-colors">
+        <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-white transition-colors">
             <span class="material-symbols-outlined">close</span>
         </button>
     </div>
@@ -39,22 +39,22 @@
                 <!-- Resumo -->
                 <div>
                     <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Resumo do Sistema</h4>
-                <div class="p-6 rounded-2xl bg-[#2B2C30] border border-slate-800 relative overflow-hidden">
+                <div class="p-6 rounded-2xl bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-slate-800 relative overflow-hidden">
                         <!-- Background Glow -->
                         <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-3xl rounded-full -mr-10 -mt-10 pointer-events-none"></div>
 
                         <div class="space-y-4 relative z-10">
-                            <div class="flex justify-between items-center text-sm border-b border-slate-700/50 pb-4">
-                                <span class="text-slate-400">Saldo de Abertura</span>
-                                <span class="font-bold text-slate-300 font-mono text-base">R$ {{ abertura.saldo_abertura|floatformat:2 }}</span>
+                            <div class="flex justify-between items-center text-sm border-b border-slate-200 dark:border-slate-700/50 pb-4">
+                                <span class="text-slate-600 dark:text-slate-400">Saldo de Abertura</span>
+                                <span class="font-bold text-slate-700 dark:text-slate-300 font-mono text-base">R$ {{ abertura.saldo_abertura|floatformat:2 }}</span>
                             </div>
-                            <div class="flex justify-between items-center text-sm border-b border-slate-700/50 pb-4">
-                                <span class="text-slate-400">Entradas Totais</span>
-                                <span class="font-bold text-emerald-400 font-mono text-base">+ R$ {{ abertura.total_entradas|floatformat:2 }}</span>
+                            <div class="flex justify-between items-center text-sm border-b border-slate-200 dark:border-slate-700/50 pb-4">
+                                <span class="text-slate-600 dark:text-slate-400">Entradas Totais</span>
+                                <span class="font-bold text-emerald-600 dark:text-emerald-400 font-mono text-base">+ R$ {{ abertura.total_entradas|floatformat:2 }}</span>
                             </div>
                             <div class="flex justify-between items-center text-sm">
-                                <span class="text-slate-400">Saídas Totais</span>
-                                <span class="font-bold text-red-500 font-mono text-base">- R$ {{ abertura.total_saidas|floatformat:2 }}</span>
+                                <span class="text-slate-600 dark:text-slate-400">Saídas Totais</span>
+                                <span class="font-bold text-red-600 dark:text-red-500 font-mono text-base">- R$ {{ abertura.total_saidas|floatformat:2 }}</span>
                             </div>
                             
                             <div class="pt-6 flex flex-col items-end gap-1">
@@ -73,16 +73,16 @@
                     <h4 class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-4">Detalhamento por Meio</h4>
                     <div class="space-y-3">
                         {% for item in totais_forma_pagamento %}
-                        <div class="flex items-center justify-between p-4 rounded-xl bg-[#2B2C30] border border-slate-800 hover:border-slate-700 transition-colors group">
+                        <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors group">
                             <div class="flex items-center gap-4">
-                                <div class="size-10 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-slate-700 transition-colors">
+                                <div class="size-10 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center group-hover:bg-slate-100 dark:group-hover:bg-slate-700 transition-colors shadow-sm dark:shadow-none">
                                     <span class="material-symbols-outlined text-slate-400 text-lg">
                                         {% if 'PIX' in item.forma_pagamento__nome|upper %}qr_code_2{% elif 'CART' in item.forma_pagamento__nome|upper %}credit_card{% else %}payments{% endif %}
                                     </span>
                                 </div>
-                                <span class="font-medium text-slate-300">{{ item.forma_pagamento__nome }}</span>
+                                <span class="font-medium text-slate-700 dark:text-slate-300">{{ item.forma_pagamento__nome }}</span>
                             </div>
-                            <span class="font-mono text-white font-bold">{{ item.total|floatformat:2 }}</span>
+                            <span class="font-mono text-slate-900 dark:text-white font-bold">{{ item.total|floatformat:2 }}</span>
                         </div>
                         {% endfor %}
                     </div>
@@ -98,9 +98,9 @@
                     <div class="relative group">
                         <label class="absolute text-[10px] font-bold uppercase text-slate-500 top-4 left-6">Saldo em Caixa (Informado)</label>
                         <div class="absolute bottom-4 left-6 flex items-center gap-2 pointer-events-none">
-                            <span class="text-2xl font-bold text-slate-600">R$</span>
+                            <span class="text-2xl font-bold text-slate-600 dark:text-slate-600">R$</span>
                         </div>
-                        {% render_field form.saldo_informado class="valor-input block w-full pt-10 pb-4 pl-16 pr-6 rounded-2xl text-4xl font-mono font-bold text-right text-white bg-[#2B2C30] border border-slate-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none placeholder-slate-700" placeholder="0.00" %}
+                        {% render_field form.saldo_informado class="valor-input block w-full pt-10 pb-4 pl-16 pr-6 rounded-2xl text-4xl font-mono font-bold text-right text-slate-900 dark:text-white bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-slate-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none placeholder-slate-300 dark:placeholder-slate-700 shadow-sm dark:shadow-none" placeholder="0.00" %}
                     </div>
                      {% if form.saldo_informado.errors %}
                         <p class="text-xs text-red-500 mt-2 ml-1">{{ form.saldo_informado.errors.0 }}</p>
@@ -108,7 +108,7 @@
                 </div>
 
                 <!-- Painel Diferença -->
-                <div id="diff-panel" class="p-6 rounded-2xl bg-[#2B2C30] border border-slate-800 transition-all duration-300 relative overflow-hidden group">
+                <div id="diff-panel" class="p-6 rounded-2xl bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-slate-800 transition-all duration-300 relative overflow-hidden group shadow-sm dark:shadow-none">
                      <!-- Background Gradients -->
                      <div id="diff-bg-glow" class="absolute inset-0 opacity-0 transition-opacity duration-500"></div>
 
@@ -129,26 +129,26 @@
                 <!-- Justificativa -->
                 <div id="justificativa-container" class="hidden space-y-2 max-h-0 overflow-hidden transition-all duration-500 opacity-0 transform translate-y-4">
                     <label class="text-[10px] font-bold uppercase tracking-widest text-red-500 ml-1">Justificativa da Divergência (Obrigatório)</label>
-                    {% render_field form.justificativa_diferenca class="w-full rounded-xl bg-[#2B2C30] border border-slate-700 text-sm text-slate-300 p-4 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none resize-none placeholder-slate-600" rows="3" placeholder="Explique detalhadamente o motivo da quebra de caixa..." %}
+                    {% render_field form.justificativa_diferenca class="w-full rounded-xl bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-slate-300 p-4 focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none resize-none placeholder-slate-400 dark:placeholder-slate-600 shadow-sm dark:shadow-none" rows="3" placeholder="Explique detalhadamente o motivo da quebra de caixa..." %}
                 </div>
 
                 <!-- Observações -->
                 <div class="pt-4 space-y-2">
                     <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Observações Gerais</label>
-                    {% render_field form.observacoes class="w-full rounded-xl bg-[#2B2C30] border border-slate-700 text-sm text-slate-300 p-4 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all outline-none resize-none placeholder-slate-600" rows="2" placeholder="Notas adicionais sobre o turno..." %}
+                    {% render_field form.observacoes class="w-full rounded-xl bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-slate-300 p-4 focus:border-slate-500 focus:ring-1 focus:ring-slate-500 transition-all outline-none resize-none placeholder-slate-400 dark:placeholder-slate-600 shadow-sm dark:shadow-none" rows="2" placeholder="Notas adicionais sobre o turno..." %}
                 </div>
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="px-8 py-5 border-t border-slate-800 bg-[#212224] flex items-center justify-between z-20">
+        <div class="px-8 py-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#212224] flex items-center justify-between z-20">
             <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/30 border border-slate-800/50">
                 <span class="material-symbols-outlined text-slate-500 text-sm">verified_user</span>
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Auditoria Imutável Ativa</span>
             </div>
 
             <div class="flex items-center gap-4">
-                <button type="button" @click="open = false" class="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors">
+                <button type="button" @click="open = false" class="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
                     Cancelar
                 </button>
                 <button type="submit" class="group relative inline-flex items-center justify-center px-8 py-3 bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-all shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30 hover:-translate-y-0.5">
@@ -228,9 +228,9 @@
             // Estado Neutro (Vazio)
             if (isNaN(informado)) {
                 diffDisplay.textContent = 'R$ 0,00';
-                diffDisplay.className = 'font-mono text-3xl font-bold text-slate-600 transition-colors duration-300';
+                diffDisplay.className = 'font-mono text-3xl font-bold text-slate-500 dark:text-slate-600 transition-colors duration-300';
                 
-                diffPanel.className = 'p-6 rounded-2xl bg-[#2B2C30] border border-slate-800 transition-all duration-300 relative overflow-hidden group';
+                diffPanel.className = 'p-6 rounded-2xl bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-slate-800 transition-all duration-300 relative overflow-hidden group shadow-sm dark:shadow-none';
                 diffBgGlow.className = 'absolute inset-0 opacity-0 transition-opacity duration-500';
                 
                 diffIcon.textContent = 'pending';

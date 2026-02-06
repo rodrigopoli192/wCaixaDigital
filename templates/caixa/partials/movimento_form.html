@@ -1,10 +1,10 @@
 {% load widget_tweaks %}
 
-<div id="novo-movimento-container" class="bg-[#212224] text-slate-200 w-full max-w-2xl rounded-xl shadow-2xl border border-[#2d3544] overflow-hidden">
+<div id="novo-movimento-container" class="bg-white dark:bg-[#212224] text-slate-900 dark:text-slate-200 w-full max-w-2xl rounded-xl shadow-2xl border border-slate-200 dark:border-[#2d3544] overflow-hidden">
     <!-- Header -->
-    <div class="flex justify-between items-center px-6 py-5 border-b border-white/5">
-        <h3 class="text-lg font-bold text-white tracking-tight">Novo Movimento</h3>
-        <button type="button" @click="open = false" class="text-slate-500 hover:text-white transition-colors">
+    <div class="flex justify-between items-center px-6 py-5 border-b border-slate-100 dark:border-white/5">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Novo Movimento</h3>
+        <button type="button" @click="open = false" class="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-white transition-colors">
             <span class="material-symbols-outlined text-xl">close</span>
         </button>
     </div>
@@ -23,18 +23,18 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Tipo -->
                 <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-slate-400 ml-1">Tipo de Movimento</label>
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Tipo de Movimento</label>
                     <div class="relative">
-                        {% render_field form.tipo class="w-full appearance-none bg-[#202024] border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        {% render_field form.tipo class="w-full appearance-none bg-slate-50 dark:bg-[#202024] border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
                         <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-xl">arrow_drop_down</span>
                     </div>
                 </div>
 
                 <!-- Forma -->
                 <div class="space-y-1.5">
-                     <label class="text-xs font-bold text-slate-400 ml-1">Forma de Pagamento</label>
+                     <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Forma de Pagamento</label>
                     <div class="relative">
-                        {% render_field form.forma_pagamento class="w-full appearance-none bg-[#202024] border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        {% render_field form.forma_pagamento class="w-full appearance-none bg-slate-50 dark:bg-[#202024] border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
                         <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-xl">arrow_drop_down</span>
                     </div>
                 </div>
@@ -42,10 +42,10 @@
 
             <!-- Valor -->
             <div class="space-y-1.5">
-                <label class="text-xs font-bold text-slate-400 ml-1">Valor</label>
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Valor</label>
                 <div class="relative group">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold group-focus-within:text-white transition-colors">R$</span>
-                    {% render_field form.valor class="w-full bg-[#202024] border border-white/10 rounded-lg pl-10 pr-4 py-3 text-lg font-bold text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="0,00" %}
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold group-focus-within:text-slate-900 dark:group-focus-within:text-white transition-colors">R$</span>
+                    {% render_field form.valor class="w-full bg-slate-50 dark:bg-[#202024] border border-slate-200 dark:border-white/10 rounded-lg pl-10 pr-4 py-3 text-lg font-bold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" placeholder="0,00" %}
                 </div>
                 {% if form.valor.errors %}
                 <p class="text-xs text-red-500 mt-1">{{ form.valor.errors|join:", " }}</p>
@@ -54,22 +54,22 @@
 
              <!-- Descrição -->
              <div class="space-y-1.5">
-                <label class="text-xs font-bold text-slate-400 ml-1">Descrição</label>
-                {% render_field form.descricao class="w-full bg-[#202024] border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none resize-none" rows="2" placeholder="Ex: Venda de produtos eletrônicos..." %}
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 ml-1">Descrição</label>
+                {% render_field form.descricao class="w-full bg-slate-50 dark:bg-[#202024] border border-slate-200 dark:border-white/10 rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none resize-none" rows="2" placeholder="Ex: Venda de produtos eletrônicos..." %}
             </div>
 
             <!-- Cliente -->
             <div class="space-y-1.5">
                 <div class="flex justify-between items-center px-1">
-                    <label class="text-xs font-bold text-slate-400">Cliente (Tomador)</label>
-                    <span class="text-[10px] bg-orange-500/20 text-orange-500 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Obrigatório para NFS-e</span>
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400">Cliente (Tomador)</label>
+                    <span class="text-[10px] bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-500 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Obrigatório para NFS-e</span>
                 </div>
                 <div class="flex gap-2">
                     <div class="relative flex-1">
-                        {% render_field form.cliente class="w-full appearance-none bg-[#202024] border border-white/10 rounded-lg pl-4 pr-10 py-3 text-sm text-white placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
+                        {% render_field form.cliente class="w-full appearance-none bg-slate-50 dark:bg-[#202024] border border-slate-200 dark:border-white/10 rounded-lg pl-4 pr-10 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" %}
                         <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-lg">search</span>
                     </div>
-                    <button type="button" hx-get="{% url 'clientes:create' %}" hx-target="#modal-stack" hx-swap="innerHTML" class="flex items-center justify-center px-4 bg-[#202024] border border-slate-700/50 rounded-lg hover:bg-slate-700 hover:border-slate-600 transition-all text-slate-400 hover:text-orange-500 group" title="Cadastrar Novo Cliente">
+                    <button type="button" hx-get="{% url 'clientes:create' %}" hx-target="#modal-stack" hx-swap="innerHTML" class="flex items-center justify-center px-4 bg-slate-50 dark:bg-[#202024] border border-slate-200 dark:border-slate-700/50 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all text-slate-400 hover:text-orange-500 group" title="Cadastrar Novo Cliente">
                         <span class="material-symbols-outlined text-xl group-hover:scale-110 transition-transform">person_add</span>
                     </button>
                 </div>
@@ -77,13 +77,13 @@
             </div>
 
             <!-- NFS-e Toggle -->
-            <div class="flex items-center justify-between p-4 rounded-xl bg-[#202024] border border-white/5" x-data="{ checked: false }">
+            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-[#202024] border border-slate-200 dark:border-white/5" x-data="{ checked: false }">
                 <div class="flex items-center gap-3">
-                    <div class="size-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-orange-500">receipt_long</span>
+                    <div class="size-10 rounded-lg bg-orange-100 dark:bg-orange-500/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-orange-600 dark:text-orange-500">receipt_long</span>
                     </div>
                     <div>
-                        <p class="text-sm font-bold text-white">Emitir NFS-e automaticamente</p>
+                        <p class="text-sm font-bold text-slate-900 dark:text-white">Emitir NFS-e automaticamente</p>
                         <p class="text-xs text-slate-500">Gera a nota fiscal eletrônica após o registro</p>
                     </div>
                 </div>
@@ -91,15 +91,15 @@
                 <!-- Toggle Switch -->
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="{{ form.emitir_nfse.name }}" class="sr-only peer" x-model="checked" {% if form.emitir_nfse.value %}checked{% endif %}>
-                    <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                    <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
                 </label>
             </div>
 
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-5 border-t border-[#2d3544] bg-[#212224] flex justify-end gap-3 rounded-b-lg">
-             <button type="button" @click="open = false" class="px-4 py-2 text-sm font-medium text-slate-400 hover:text-white transition-colors">
+        <div class="px-6 py-5 border-t border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#212224] flex justify-end gap-3 rounded-b-lg">
+             <button type="button" @click="open = false" class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                 Cancelar
             </button>
             <button type="submit" class="inline-flex justify-center items-center px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-lg shadow-lg shadow-orange-500/20 transition-all">

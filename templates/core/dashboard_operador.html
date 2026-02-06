@@ -127,7 +127,7 @@
                 Registrar Venda
             </a>
             {% if request.user.pode_emitir_nfse %}
-            <a href="{% url 'nfse:create' %}" class="bg-transparent hover:bg-primary/10 text-primary border-2 border-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
+            <a href="{% url 'nfse:create' %}" class="bg-transparent hover:bg-orange-50 dark:hover:bg-primary/10 text-orange-600 dark:text-primary border border-orange-200 dark:border-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
                 <span class="material-symbols-outlined">description</span>
                 Emitir NFS-e
             </a>
@@ -138,7 +138,7 @@
                 hx-trigger="click"
                 hx-swap="innerHTML"
                 @click.prevent="open = true"
-                class="bg-transparent hover:bg-slate-700/50 text-slate-300 border border-border-dark px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
+                class="bg-transparent hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-border-dark px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
                 <span class="material-symbols-outlined">diamond</span>
                 Justificar Sangria/Suprimento
             </a>
