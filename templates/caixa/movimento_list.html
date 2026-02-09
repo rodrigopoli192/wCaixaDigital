@@ -204,133 +204,57 @@
         </form>
     </div>
 
-    <!-- 4. Table Section -->
-    <div class="bg-[#2B2C30] rounded-2xl border border-[#2d3544] overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-[#2B2C30] text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-[#2d3544]">
-                        <th class="px-6 py-4">Data / Hora</th>
-                        <th class="px-6 py-4">Tipo</th>
-                        <th class="px-6 py-4">Forma de Pagamento</th>
-                        <th class="px-6 py-4 text-right">Valor</th>
-                        <th class="px-6 py-4">Descrição</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-[#2d3544]">
-                    {% for mov in object_list %}
-                    <tr class="hover:bg-[#2d3544]/50 transition-colors group">
-                        
-                        <!-- Data/Hora -->
-                        <td class="px-6 py-4 w-[140px]">
-                            <div class="flex flex-col">
-                                <span class="font-bold text-white text-sm">{{ mov.created_at|date:"d/m/Y" }}</span>
-                                <span class="text-[11px] text-slate-500 font-mono">{{ mov.created_at|date:"H:i:s" }}</span>
-                            </div>
-                        </td>
-
-                        <!-- Tipo -->
-                        <td class="px-6 py-4 w-[120px]">
-                            {% if mov.tipo == 'ENTRADA' %}
-                                <span class="inline-block px-3 py-1 rounded border border-emerald-500/20 bg-emerald-500/10 text-emerald-500 text-[10px] font-bold uppercase tracking-wide">
-                                    Entrada
-                                </span>
-                            {% elif mov.tipo == 'SAIDA' %}
-                                <span class="inline-block px-3 py-1 rounded border border-red-500/20 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase tracking-wide">
-                                    Saída
-                                </span>
-                            {% elif mov.tipo == 'SANGRIA' %}
-                                <span class="inline-block px-3 py-1 rounded border border-orange-500/20 bg-orange-500/10 text-orange-500 text-[10px] font-bold uppercase tracking-wide">
-                                    Sangria
-                                </span>
-                             {% elif mov.tipo == 'SUPRIMENTO' %}
-                                <span class="inline-block px-3 py-1 rounded border border-blue-500/20 bg-blue-500/10 text-blue-500 text-[10px] font-bold uppercase tracking-wide">
-                                    Suprimento
-                                </span>
-                            {% endif %}
-                        </td>
-
-                         <!-- Forma Pagto -->
-                        <td class="px-6 py-4">
-                            {% if mov.forma_pagamento %}
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-lg text-slate-500">payments</span>
-                                <span class="text-sm text-slate-300 font-medium">{{ mov.forma_pagamento.nome }}</span>
-                            </div>
-                            {% else %}
-                            <span class="text-slate-600 text-sm">-</span>
-                            {% endif %}
-                        </td>
-
-                         <!-- Valor -->
-                        <td class="px-6 py-4 text-right">
-                             {% if mov.tipo == 'ENTRADA' or mov.tipo == 'SUPRIMENTO' %}
-                                <span class="text-emerald-500 font-bold text-sm tracking-tight">+ R$ {{ mov.valor|floatformat:2 }}</span>
-                             {% else %}
-                                <span class="text-red-500 font-bold text-sm tracking-tight">- R$ {{ mov.valor|floatformat:2 }}</span>
-                             {% endif %}
-                        </td>
-
-                        <!-- Descrição -->
-                        <td class="px-6 py-4 max-w-md">
-                            <span class="text-sm text-slate-500 italic">
-                                {{ mov.descricao|default:"Sem descrição" }}
-                            </span>
-                        </td>
-
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="px-6 py-16 text-center">
-                            <div class="flex flex-col items-center justify-center text-slate-500">
-                                <span class="material-symbols-outlined text-4xl opacity-30 mb-2">receipt_long</span>
-                                <p class="text-sm">Nenhuma movimentação registrada.</p>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <!-- 4. Movements Cards Section -->
+    <div class="space-y-2">
+        {% for mov in object_list %}
+        {% include "caixa/partials/_movimento_card.html" with mov=mov show_tipo=True show_checkbox=False show_origem=False show_caixa=False %}
+        {% empty %}
+        <div class="bg-[#2B2C30] rounded-2xl border border-[#2d3544] p-16">
+            <div class="flex flex-col items-center justify-center text-slate-500">
+                <span class="material-symbols-outlined text-4xl opacity-30 mb-2">receipt_long</span>
+                <p class="text-sm">Nenhuma movimentação registrada.</p>
+            </div>
         </div>
+        {% endfor %}
+    </div>
 
-        <!-- Footer / Pagination -->
-        <div class="px-6 py-4 bg-[#2B2C30] border-t border-[#2d3544] flex flex-col md:flex-row items-center justify-between gap-4">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">
-                {% if is_paginated %}
-                    Exibindo {{ page_obj.start_index }} de {{ page_obj.end_index }} movimentações
-                {% else %}
-                    Total de {{ object_list.count }} movimentações
-                {% endif %}
+    <!-- Pagination -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-4">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">
+            {% if is_paginated %}
+                Exibindo {{ page_obj.start_index }} de {{ page_obj.end_index }} movimentações
+            {% else %}
+                Total de {{ object_list.count }} movimentações
+            {% endif %}
+        </span>
+
+        {% if is_paginated %}
+        <div class="flex items-center gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-4 py-1.5 rounded border border-[#2d3544] text-slate-400 hover:text-white hover:border-slate-500 text-xs font-bold uppercase transition-colors">
+                Anterior
+            </a>
+            {% else %}
+            <span class="px-4 py-1.5 rounded border border-[#2d3544] text-slate-700 text-xs font-bold uppercase cursor-not-allowed">
+                Anterior
+            </span>
+            {% endif %}
+
+            <span class="size-8 rounded bg-orange-500 text-white flex items-center justify-center text-sm font-bold shadow-lg shadow-orange-500/20">
+                {{ page_obj.number }}
             </span>
 
-            {% if is_paginated %}
-            <div class="flex items-center gap-2">
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-4 py-1.5 rounded border border-[#2d3544] text-[#2d3544] hover:text-white hover:border-slate-500 text-xs font-bold uppercase transition-colors">
-                    Anterior
-                </a>
-                {% else %}
-                <span class="px-4 py-1.5 rounded border border-[#2d3544] text-slate-700 text-xs font-bold uppercase cursor-not-allowed">
-                    Anterior
-                </span>
-                {% endif %}
-
-                <span class="size-8 rounded bg-orange-500 text-white flex items-center justify-center text-sm font-bold shadow-lg shadow-orange-500/20">
-                    {{ page_obj.number }}
-                </span>
-
-                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-4 py-1.5 rounded border border-[#2d3544] text-slate-400 hover:text-white hover:border-slate-500 text-xs font-bold uppercase transition-colors">
-                    Próximo
-                </a>
-                {% else %}
-                 <span class="px-4 py-1.5 rounded border border-[#2d3544] text-slate-700 text-xs font-bold uppercase cursor-not-allowed">
-                    Próximo
-                </span>
-                {% endif %}
-            </div>
+             {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-4 py-1.5 rounded border border-[#2d3544] text-slate-400 hover:text-white hover:border-slate-500 text-xs font-bold uppercase transition-colors">
+                Próximo
+            </a>
+            {% else %}
+             <span class="px-4 py-1.5 rounded border border-[#2d3544] text-slate-700 text-xs font-bold uppercase cursor-not-allowed">
+                Próximo
+            </span>
             {% endif %}
         </div>
+        {% endif %}
     </div>
 
     <!-- 5. Imported Movements Pending Section -->
