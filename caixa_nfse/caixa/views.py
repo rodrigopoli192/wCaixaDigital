@@ -703,8 +703,12 @@ class ListaImportadosView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """List pending imported movements for an abertura."""
 
     model = None
-    template_name = "caixa/partials/importados_list.html"
     context_object_name = "importados"
+
+    def get_template_names(self):
+        if self.request.headers.get("HX-Request"):
+            return ["caixa/partials/importados_list.html"]
+        return ["caixa/importados_page.html"]
 
     def test_func(self):
         return self.request.user.pode_operar_caixa

@@ -214,7 +214,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def _get_operador_context(self, user):
         """Context for operator dashboard with current caixa focus."""
-        from caixa_nfse.caixa.models import AberturaCaixa, Caixa, MovimentoCaixa
+        from caixa_nfse.caixa.models import AberturaCaixa, Caixa, MovimentoCaixa, MovimentoImportado
 
         tenant = user.tenant
         caixa_atual = None
@@ -222,6 +222,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         ultimos_movimentos = []
         total_entradas = 0
         total_saidas = 0
+        pendentes_count = 0
 
         if tenant:
             # Find operator's open caixa
@@ -244,6 +245,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 )
                 total_entradas = totais["entradas"] or 0
                 total_saidas = totais["saidas"] or 0
+
+                pendentes_count = MovimentoImportado.objects.filter(
+                    abertura=abertura_atual, tenant=tenant, confirmado=False
+                ).count()
 
             # All active caixas (available and in use)
             todos_caixas = (
@@ -273,6 +278,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "saldo_atual": total_entradas - total_saidas,
             "todos_caixas": todos_caixas if not abertura_atual else [],
             "historico_aberturas": historico_aberturas,
+            "pendentes_count": pendentes_count,
             "hoje": timezone.now().date(),
         }
 

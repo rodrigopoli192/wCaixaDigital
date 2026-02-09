@@ -14,11 +14,11 @@
 
     {% if importados %}
     <!-- Action Bar -->
-    <div class="flex items-center justify-between p-4 bg-[#2B2C30] rounded-xl border border-[#2d3544]">
+    <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-[#2B2C30] rounded-xl border border-slate-200 dark:border-[#2d3544]">
         <div class="flex items-center gap-3">
             <input type="checkbox" @click="toggleAll()" :checked="selectAll"
                    class="w-4 h-4 text-primary rounded focus:ring-primary">
-            <span class="text-sm font-bold text-slate-400">
+            <span class="text-sm font-bold text-slate-500 dark:text-slate-400">
                 <span x-text="selected.length" class="text-primary">0</span> de {{ importados|length }} selecionado(s)
             </span>
         </div>
@@ -35,14 +35,14 @@
                 
                 <div class="flex items-center gap-2">
                     <select name="forma_pagamento_id" required
-                            class="h-9 bg-[#2B2C30] border border-[#2d3544] rounded-lg px-3 text-sm text-slate-200 focus:border-primary outline-none">
+                            class="h-9 bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 text-sm text-slate-700 dark:text-slate-200 focus:border-primary outline-none">
                         <option value="">Forma Pagto.</option>
                         {% for fp in formas_pagamento %}
                         <option value="{{ fp.pk }}">{{ fp.nome }}</option>
                         {% endfor %}
                     </select>
                     <select name="tipo" 
-                            class="h-9 bg-[#2B2C30] border border-[#2d3544] rounded-lg px-3 text-sm text-slate-200 focus:border-primary outline-none">
+                            class="h-9 bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 text-sm text-slate-700 dark:text-slate-200 focus:border-primary outline-none">
                         <option value="ENTRADA">Entrada</option>
                         <option value="SAIDA">Saída</option>
                     </select>

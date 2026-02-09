@@ -123,8 +123,18 @@
                 hx-swap="innerHTML"
                 @click.prevent="open = true"
                 class="bg-primary hover:bg-orange-400 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/20">
-                <span class="material-symbols-outlined">shopping_cart</span>
-                Registrar Venda
+                <span class="material-symbols-outlined">swap_horiz</span>
+                Nova Movimentação
+            </a>
+            <a href="#"
+                hx-get="{% url 'caixa:importar_movimentos' abertura_atual.pk %}"
+                hx-target="#modal-content"
+                hx-trigger="click"
+                hx-swap="innerHTML"
+                @click.prevent="open = true"
+                class="bg-transparent hover:bg-orange-50 dark:hover:bg-primary/10 text-orange-600 dark:text-primary border border-orange-200 dark:border-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined">upload_file</span>
+                Importar Movimentações
             </a>
             {% if request.user.pode_emitir_nfse %}
             <a href="{% url 'nfse:create' %}" class="bg-transparent hover:bg-orange-50 dark:hover:bg-primary/10 text-orange-600 dark:text-primary border border-orange-200 dark:border-primary px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
@@ -132,16 +142,6 @@
                 Emitir NFS-e
             </a>
             {% endif %}
-            <a href="#" 
-                hx-get="{% url 'caixa:novo_movimento' abertura_atual.pk %}?tipo=sangria"
-                hx-target="#modal-content"
-                hx-trigger="click"
-                hx-swap="innerHTML"
-                @click.prevent="open = true"
-                class="bg-transparent hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-border-dark px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all">
-                <span class="material-symbols-outlined">diamond</span>
-                Justificar Sangria/Suprimento
-            </a>
         {% else %}
             <div class="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-100 dark:bg-background-dark border border-slate-200 dark:border-border-dark w-full max-w-lg">
                 <div class="flex items-center gap-2 text-warning font-bold">
@@ -252,6 +252,31 @@
         </div>
     </div>
 
+    <!-- Movimentações Pendentes (full-width) -->
+    {% if pendentes_count %}
+    <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm dark:shadow-none">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-amber-500">cloud_download</span>
+                <h4 class="font-bold text-slate-900 dark:text-white">Movimentações Pendentes</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">{{ pendentes_count }}</span>
+            </div>
+            <a href="{% url 'caixa:lista_importados' abertura_atual.pk %}" class="text-sm text-primary hover:text-orange-400 flex items-center gap-1 transition-colors">
+                Ver Importados
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+        </div>
+
+        <div class="p-4"
+             hx-get="{% url 'caixa:lista_importados' abertura_atual.pk %}"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+            <div class="flex justify-center items-center py-8">
+                <span class="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     {% else %}
     <!-- Nenhum Caixa Aberto - Terminal Selection -->

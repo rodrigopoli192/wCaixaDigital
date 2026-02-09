@@ -1,7 +1,7 @@
 <!-- Reusable Movement Card with Collapsible Details -->
 <!-- Variables: mov, show_checkbox (bool), show_tipo (bool), show_origem (bool), show_caixa (bool) -->
 
-<div class="bg-[#2B2C30] rounded-xl border border-[#2d3544] overflow-hidden transition-colors"
+<div class="bg-white dark:bg-[#2B2C30] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden transition-colors shadow-sm dark:shadow-none"
      {% if show_checkbox %}:class="selected.includes('{{ mov.pk }}') ? 'border-primary/50 bg-primary/5' : ''"{% endif %}
      x-data="{ details: false }">
 
@@ -17,28 +17,28 @@
         <div class="flex-1 min-w-0 space-y-1">
             <!-- Row 1: Protocolo | Descrição | Status/Tipo | Emolumento | Taxas | Total | Badge -->
             <div class="flex items-center gap-4">
-                <span class="text-sm font-mono text-slate-200 shrink-0 w-[80px] truncate" title="{{ mov.protocolo }}">{{ mov.protocolo|default:"—" }}</span>
-                <span class="text-sm text-slate-300 truncate flex-1 min-w-0" title="{{ mov.descricao }}">{{ mov.descricao|default:"—" }}</span>
+                <span class="text-sm font-mono text-slate-700 dark:text-slate-200 shrink-0 w-[80px] truncate" title="{{ mov.protocolo }}">{{ mov.protocolo|default:"—" }}</span>
+                <span class="text-sm text-slate-600 dark:text-slate-300 truncate flex-1 min-w-0" title="{{ mov.descricao }}">{{ mov.descricao|default:"—" }}</span>
 
                 {% if show_tipo %}
                 <!-- Tipo Badge (MovimentoCaixa) -->
                 {% if mov.tipo == 'ENTRADA' %}
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold shrink-0">Entrada</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">Entrada</span>
                 {% elif mov.tipo == 'SAIDA' %}
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 font-bold shrink-0">Saída</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-600 dark:text-red-400 font-bold shrink-0">Saída</span>
                 {% elif mov.tipo == 'SANGRIA' %}
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 font-bold shrink-0">Sangria</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold shrink-0">Sangria</span>
                 {% elif mov.tipo == 'SUPRIMENTO' %}
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-bold shrink-0">Suprimento</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold shrink-0">Suprimento</span>
                 {% elif mov.tipo == 'ESTORNO' %}
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 font-bold shrink-0">Estorno</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-600 dark:text-slate-400 font-bold shrink-0">Estorno</span>
                 {% endif %}
                 {% else %}
                 <!-- Status Badge (MovimentoImportado) -->
                 <span class="text-[10px] px-2 py-0.5 rounded-full shrink-0
-                    {% if mov.status_item == 'Aberto' or not mov.status_item %}bg-emerald-500/20 text-emerald-400
-                    {% elif mov.status_item == 'Cancelado' %}bg-red-500/20 text-red-400
-                    {% else %}bg-blue-500/20 text-blue-400{% endif %} font-bold">
+                    {% if mov.status_item == 'Aberto' or not mov.status_item %}bg-emerald-500/20 text-emerald-600 dark:text-emerald-400
+                    {% elif mov.status_item == 'Cancelado' %}bg-red-500/20 text-red-600 dark:text-red-400
+                    {% else %}bg-blue-500/20 text-blue-600 dark:text-blue-400{% endif %} font-bold">
                     {{ mov.status_item|default:"Aberto" }}
                 </span>
                 {% endif %}
@@ -46,26 +46,26 @@
                 <!-- Values -->
                 <div class="flex items-center gap-3 shrink-0 text-right">
                     <div class="w-[90px]">
-                        <span class="text-[9px] uppercase text-slate-500 block leading-none">Emolumento</span>
-                        <span class="text-xs font-mono text-slate-200">R$ {{ mov.emolumento|default:"0"|floatformat:2 }}</span>
+                        <span class="text-[9px] uppercase text-slate-400 dark:text-slate-500 block leading-none">Emolumento</span>
+                        <span class="text-xs font-mono text-slate-700 dark:text-slate-200">R$ {{ mov.emolumento|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="w-[80px]">
-                        <span class="text-[9px] uppercase text-slate-500 block leading-none">Taxas</span>
+                        <span class="text-[9px] uppercase text-slate-400 dark:text-slate-500 block leading-none">Taxas</span>
                         {% with fundos=mov.valor_total_fundos %}
-                        <span class="text-xs font-mono {% if fundos %}text-blue-400{% else %}text-slate-500{% endif %}">R$ {{ fundos|floatformat:2 }}</span>
+                        <span class="text-xs font-mono {% if fundos %}text-blue-600 dark:text-blue-400{% else %}text-slate-400 dark:text-slate-500{% endif %}">R$ {{ fundos|floatformat:2 }}</span>
                         {% endwith %}
                     </div>
                     <div class="w-[90px]">
-                        <span class="text-[9px] uppercase text-slate-500 block leading-none">Total</span>
+                        <span class="text-[9px] uppercase text-slate-400 dark:text-slate-500 block leading-none">Total</span>
                         {% with total=mov.valor_total_taxas %}
-                        <span class="text-xs font-mono font-bold {% if total %}text-emerald-400{% else %}text-slate-500{% endif %}">R$ {{ total|floatformat:2 }}</span>
+                        <span class="text-xs font-mono font-bold {% if total %}text-emerald-600 dark:text-emerald-400{% else %}text-slate-400 dark:text-slate-500{% endif %}">R$ {{ total|floatformat:2 }}</span>
                         {% endwith %}
                     </div>
                 </div>
 
                 {% if show_origem %}
                 <!-- Origem badge (importados) -->
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-400 font-medium shrink-0 max-w-[180px] truncate"
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-medium shrink-0 max-w-[180px] truncate"
                       title="{{ mov.conexao.sistema|default:'—' }} - {{ mov.rotina.nome|default:'—' }}">
                     {{ mov.conexao.sistema|default:"—" }} - {{ mov.rotina.nome|default:"—" }}
                 </span>
@@ -73,7 +73,7 @@
 
                 {% if show_caixa %}
                 <!-- Caixa badge (dashboards) -->
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-400 font-medium shrink-0" title="{{ mov.abertura.caixa.identificador }}">
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-medium shrink-0" title="{{ mov.abertura.caixa.identificador }}">
                     {{ mov.abertura.caixa.identificador }}
                 </span>
                 {% endif %}
@@ -96,51 +96,51 @@
         </div>
 
         <!-- Expand Toggle -->
-        <button @click="details = !details" class="shrink-0 p-1 rounded hover:bg-[#2d3544] transition-colors">
+        <button @click="details = !details" class="shrink-0 p-1 rounded hover:bg-slate-100 dark:hover:bg-[#2d3544] transition-colors">
             <span class="material-symbols-outlined text-slate-400 text-lg transition-transform" :class="details ? 'rotate-180' : ''">expand_more</span>
         </button>
     </div>
 
     <!-- Details Accordion -->
-    <div x-show="details" x-collapse class="border-t border-[#2d3544]">
+    <div x-show="details" x-collapse class="border-t border-slate-200 dark:border-[#2d3544]">
         <div class="px-5 py-4 space-y-3">
             <!-- Row 1: Meta Info -->
             <div class="flex items-center gap-6 text-xs flex-wrap">
                 {% if mov.status_item %}
                 <div>
-                    <span class="text-slate-500">Status:</span>
-                    <span class="text-slate-300 font-medium ml-1">{{ mov.status_item }}</span>
+                    <span class="text-slate-400 dark:text-slate-500">Status:</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium ml-1">{{ mov.status_item }}</span>
                 </div>
                 {% endif %}
                 <div>
-                    <span class="text-slate-500">QTD:</span>
-                    <span class="text-slate-300 font-medium ml-1">{{ mov.quantidade|default:"1" }}</span>
+                    <span class="text-slate-400 dark:text-slate-500">QTD:</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium ml-1">{{ mov.quantidade|default:"1" }}</span>
                 </div>
                 {% if show_origem %}
                 <div>
-                    <span class="text-slate-500">Origem:</span>
-                    <span class="text-slate-300 font-medium ml-1">{{ mov.conexao.sistema|default:"—" }} — {{ mov.rotina.nome|default:"—" }}</span>
+                    <span class="text-slate-400 dark:text-slate-500">Origem:</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium ml-1">{{ mov.conexao.sistema|default:"—" }} — {{ mov.rotina.nome|default:"—" }}</span>
                 </div>
                 <div>
-                    <span class="text-slate-500">Importado em:</span>
-                    <span class="text-slate-300 font-medium ml-1">{{ mov.importado_em|date:"d/m/Y H:i" }}</span>
+                    <span class="text-slate-400 dark:text-slate-500">Importado em:</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium ml-1">{{ mov.importado_em|date:"d/m/Y H:i" }}</span>
                 </div>
                 {% endif %}
                 {% if show_tipo %}
                 <div>
-                    <span class="text-slate-500">Data:</span>
-                    <span class="text-slate-300 font-medium ml-1">{{ mov.data_hora|date:"d/m/Y H:i" }}</span>
+                    <span class="text-slate-400 dark:text-slate-500">Data:</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium ml-1">{{ mov.data_hora|date:"d/m/Y H:i" }}</span>
                 </div>
                 {% if show_caixa %}
                 <div>
-                    <span class="text-slate-500">Operador:</span>
-                    <span class="text-slate-300 font-medium ml-1">{{ mov.abertura.operador.first_name|default:mov.abertura.operador.email }}</span>
+                    <span class="text-slate-400 dark:text-slate-500">Operador:</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium ml-1">{{ mov.abertura.operador.first_name|default:mov.abertura.operador.email }}</span>
                 </div>
                 {% endif %}
                 {% if mov.forma_pagamento %}
                 <div>
-                    <span class="text-slate-500">Forma Pagto:</span>
-                    <span class="text-slate-300 font-medium ml-1">{{ mov.forma_pagamento.nome }}</span>
+                    <span class="text-slate-400 dark:text-slate-500">Forma Pagto:</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium ml-1">{{ mov.forma_pagamento.nome }}</span>
                 </div>
                 {% endif %}
                 {% endif %}
@@ -148,66 +148,66 @@
 
             <!-- Row 2: All Taxes Grid -->
             <div>
-                <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold block mb-2">Taxas Detalhadas</span>
+                <span class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold block mb-2">Taxas Detalhadas</span>
                 <div class="grid grid-cols-5 gap-x-6 gap-y-1.5">
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">Tx Judiciária</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.taxa_judiciaria|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">Tx Judiciária</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.taxa_judiciaria|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">ISS</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.iss|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">ISS</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.iss|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">FUNDESP</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.fundesp|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">FUNDESP</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.fundesp|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">FUNESP</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.funesp|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">FUNESP</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.funesp|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">Estado</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.estado|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">Estado</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.estado|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">FESEMPS</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.fesemps|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">FESEMPS</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.fesemps|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">FUNEMP</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.funemp|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">FUNEMP</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.funemp|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">FUNCOMP</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.funcomp|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">FUNCOMP</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.funcomp|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">FEPADSAJ</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.fepadsaj|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">FEPADSAJ</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.fepadsaj|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">FUNPROGE</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.funproge|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">FUNPROGE</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.funproge|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">FUNDEPEG</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.fundepeg|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">FUNDEPEG</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.fundepeg|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">FUNDAF</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.fundaf|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">FUNDAF</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.fundaf|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">FEMAL</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.femal|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">FEMAL</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.femal|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500">FECAD</span>
-                        <span class="font-mono text-slate-300">R$ {{ mov.fecad|default:"0"|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">FECAD</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.fecad|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
-                        <span class="text-slate-500 font-bold">Emolumento</span>
+                        <span class="text-slate-400 dark:text-slate-500 font-bold">Emolumento</span>
                         <span class="font-mono font-bold text-primary">R$ {{ mov.emolumento|default:"0"|floatformat:2 }}</span>
                     </div>
                 </div>
