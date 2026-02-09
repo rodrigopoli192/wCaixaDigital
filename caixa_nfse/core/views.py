@@ -701,6 +701,35 @@ class RotinasPorSistemaView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
         )
 
 
+class RotinasJsonView(LoginRequiredMixin, View):
+    """JSON API: returns rotinas for a conexao's sistema."""
+
+    def get(self, request):
+        conexao_id = request.GET.get("conexao_id")
+        if not conexao_id:
+            return JsonResponse({"rotinas": []})
+
+        try:
+            conexao = ConexaoExterna.objects.get(pk=conexao_id, tenant=request.user.tenant)
+        except ConexaoExterna.DoesNotExist:
+            return JsonResponse({"rotinas": []})
+
+        from caixa_nfse.backoffice.models import Rotina
+
+        rotinas = Rotina.objects.filter(sistema=conexao.sistema, ativo=True).values(
+            "pk", "nome", "descricao"
+        )
+
+        return JsonResponse(
+            {
+                "rotinas": [
+                    {"id": str(r["pk"]), "nome": r["nome"], "descricao": r["descricao"] or ""}
+                    for r in rotinas
+                ]
+            }
+        )
+
+
 class RotinaExecutionView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
     """
     Handles parsing and execution of SQL Routines with variables.

@@ -42,3 +42,55 @@ class Rotina(models.Model):
 
     def __str__(self):
         return f"{self.sistema.nome} - {self.nome}"
+
+
+class MapeamentoColunaRotina(models.Model):
+    """
+    Mapeia colunas retornadas por uma rotina SQL para campos do MovimentoImportado.
+    Configurável pelo admin no backoffice.
+    """
+
+    CAMPOS_DESTINO_CHOICES = [
+        ("protocolo", "Protocolo"),
+        ("status_item", "Status"),
+        ("quantidade", "Quantidade"),
+        ("valor", "Valor Principal"),
+        ("descricao", "Descrição"),
+        ("cliente_nome", "Nome do Apresentante"),
+        ("emolumento", "Emolumento"),
+        ("taxa_judiciaria", "Taxa Judiciária"),
+        ("iss", "ISS"),
+        ("fundesp", "FUNDESP"),
+        ("funesp", "FUNESP"),
+        ("estado", "Estado"),
+        ("fesemps", "FESEMPS"),
+        ("funemp", "FUNEMP"),
+        ("funcomp", "FUNCOMP"),
+        ("fepadsaj", "FEPADSAJ"),
+        ("funproge", "FUNPROGE"),
+        ("fundepeg", "FUNDEPEG"),
+        ("fundaf", "FUNDAF"),
+        ("femal", "FEMAL"),
+        ("fecad", "FECAD"),
+    ]
+
+    rotina = models.ForeignKey(Rotina, related_name="mapeamentos", on_delete=models.CASCADE)
+    coluna_sql = models.CharField(
+        "coluna SQL",
+        max_length=100,
+        help_text="Nome exato da coluna retornada pela query SQL",
+    )
+    campo_destino = models.CharField(
+        "campo destino",
+        max_length=50,
+        choices=CAMPOS_DESTINO_CHOICES,
+    )
+
+    class Meta:
+        verbose_name = "Mapeamento de Coluna"
+        verbose_name_plural = "Mapeamentos de Colunas"
+        unique_together = ["rotina", "campo_destino"]
+        ordering = ["rotina", "campo_destino"]
+
+    def __str__(self):
+        return f"{self.coluna_sql} → {self.get_campo_destino_display()}"

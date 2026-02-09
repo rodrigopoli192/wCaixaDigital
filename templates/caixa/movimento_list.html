@@ -59,6 +59,16 @@
         <div class="flex items-center gap-3">
              {% if abertura.is_operacional_hoje %}
              <a href="#" 
+                hx-get="{% url 'caixa:importar_movimentos' abertura.pk %}"
+                hx-target="#modal-content"
+                hx-trigger="click"
+                hx-swap="innerHTML"
+                @click.prevent="open = true"
+                class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-5 py-3 font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5">
+                <span class="material-symbols-outlined">cloud_download</span>
+                Importar
+            </a>
+             <a href="#" 
                 hx-get="{% url 'caixa:novo_movimento' abertura.pk %}"
                 hx-target="#modal-content"
                 hx-trigger="click"
@@ -322,5 +332,30 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- 5. Imported Movements Pending Section -->
+    {% if abertura.caixa.status == 'ABERTO' %}
+    <div class="bg-[#2B2C30] rounded-2xl border border-[#2d3544] overflow-hidden"
+         x-data="{ expanded: false }">
+        <button @click="expanded = !expanded"
+                class="w-full flex items-center justify-between px-6 py-4 hover:bg-[#2d3544]/50 transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-blue-400">cloud_queue</span>
+                <span class="text-sm font-bold text-white">Movimentos Importados (Pendentes)</span>
+            </div>
+            <span class="material-symbols-outlined text-slate-400 transition-transform" :class="expanded ? 'rotate-180' : ''">expand_more</span>
+        </button>
+        <div x-show="expanded" x-collapse
+             id="importados-container"
+             hx-get="{% url 'caixa:lista_importados' abertura.pk %}"
+             hx-trigger="revealed"
+             hx-swap="innerHTML">
+            <div class="flex justify-center p-6">
+                <span class="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

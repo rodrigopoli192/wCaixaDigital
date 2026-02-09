@@ -449,7 +449,7 @@ class ConexaoExterna(TenantAwareModel):
         ordering = ["sistema"]
 
     def __str__(self):
-        return f"{self.get_sistema_display()} ({self.get_tipo_conexao_display()})"
+        return f"{self.sistema} ({self.get_tipo_conexao_display()})"
 
 
 def generate_hash(data: dict[str, Any], previous_hash: str = "") -> str:

@@ -1,0 +1,139 @@
+<!-- Imported Movements List (Staging) -->
+<div class="space-y-4" x-data="{ 
+    selected: [], 
+    selectAll: false,
+    toggleAll() { 
+        this.selectAll = !this.selectAll;
+        if (this.selectAll) {
+            this.selected = {{ importados|length }} > 0 ? [{% for i in importados %}'{{ i.pk }}'{% if not forloop.last %},{% endif %}{% endfor %}] : [];
+        } else {
+            this.selected = [];
+        }
+    }
+}">
+
+    {% if importados %}
+    <!-- Action Bar -->
+    <div class="flex items-center justify-between p-4 bg-[#2B2C30] rounded-xl border border-[#2d3544]">
+        <div class="flex items-center gap-3">
+            <span class="text-sm font-bold text-slate-400">
+                <span x-text="selected.length" class="text-primary">0</span> de {{ importados|length }} selecionado(s)
+            </span>
+        </div>
+        <div class="flex items-center gap-2">
+            <!-- Confirm Button -->
+            <form method="post" 
+                  hx-post="{% url 'caixa:confirmar_importados' abertura.pk %}"
+                  hx-swap="none"
+                  x-show="selected.length > 0" x-transition>
+                {% csrf_token %}
+                <template x-for="id in selected" :key="id">
+                    <input type="hidden" name="importado_ids" :value="id">
+                </template>
+                
+                <div class="flex items-center gap-2">
+                    <select name="forma_pagamento_id" required
+                            class="h-9 bg-[#2B2C30] border border-[#2d3544] rounded-lg px-3 text-sm text-slate-200 focus:border-primary outline-none">
+                        <option value="">Forma Pagto.</option>
+                        {% for fp in formas_pagamento %}
+                        <option value="{{ fp.pk }}">{{ fp.nome }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="tipo" 
+                            class="h-9 bg-[#2B2C30] border border-[#2d3544] rounded-lg px-3 text-sm text-slate-200 focus:border-primary outline-none">
+                        <option value="ENTRADA">Entrada</option>
+                        <option value="SAIDA">Saída</option>
+                    </select>
+                    <button type="submit" class="h-9 bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-lg text-sm font-bold flex items-center gap-1 transition-all">
+                        <span class="material-symbols-outlined text-sm">check_circle</span>
+                        Confirmar
+                    </button>
+                </div>
+            </form>
+
+            <!-- Delete Button -->
+            <form method="post"
+                  hx-post="{% url 'caixa:excluir_importados' abertura.pk %}"
+                  hx-swap="none"
+                  hx-confirm="Excluir os itens selecionados?"
+                  x-show="selected.length > 0" x-transition>
+                {% csrf_token %}
+                <template x-for="id in selected" :key="id">
+                    <input type="hidden" name="importado_ids" :value="id">
+                </template>
+                <button type="submit" class="h-9 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-3 rounded-lg text-sm font-bold flex items-center gap-1 transition-all border border-red-600/30">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                    Excluir
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-[#2B2C30] rounded-2xl border border-[#2d3544] overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-[#2B2C30] text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-[#2d3544]">
+                        <th class="px-4 py-3 w-10">
+                            <input type="checkbox" @click="toggleAll()" :checked="selectAll"
+                                   class="w-4 h-4 text-primary rounded focus:ring-primary">
+                        </th>
+                        <th class="px-4 py-3">Protocolo</th>
+                        <th class="px-4 py-3">Descrição</th>
+                        <th class="px-4 py-3">Apresentante</th>
+                        <th class="px-4 py-3 text-right">Emolumento</th>
+                        <th class="px-4 py-3 text-right">Total Taxas</th>
+                        <th class="px-4 py-3">Rotina</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#2d3544]">
+                    {% for imp in importados %}
+                    <tr class="hover:bg-[#2d3544]/50 transition-colors" :class="selected.includes('{{ imp.pk }}') ? 'bg-primary/5' : ''">
+                        <td class="px-4 py-3">
+                            <input type="checkbox" value="{{ imp.pk }}" x-model="selected"
+                                   class="w-4 h-4 text-primary rounded focus:ring-primary">
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="text-sm font-mono text-slate-200">{{ imp.protocolo|default:"—" }}</span>
+                        </td>
+                        <td class="px-4 py-3 max-w-[200px]">
+                            <span class="text-sm text-slate-400 truncate block">{{ imp.descricao|default:"—" }}</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="text-sm text-slate-400">{{ imp.cliente_nome|default:"—" }}</span>
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            {% if imp.emolumento %}
+                            <span class="text-sm font-medium text-slate-200">R$ {{ imp.emolumento|floatformat:2 }}</span>
+                            {% else %}
+                            <span class="text-slate-600">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            {% with total=imp.valor_total_taxas %}
+                            {% if total %}
+                            <span class="text-sm font-medium text-emerald-400">R$ {{ total|floatformat:2 }}</span>
+                            {% else %}
+                            <span class="text-slate-600">—</span>
+                            {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-700 text-slate-400 font-medium">{{ imp.rotina.nome|default:"—" }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="flex flex-col items-center justify-center py-12 text-slate-500">
+        <span class="material-symbols-outlined text-4xl opacity-30 mb-2">cloud_off</span>
+        <p class="text-sm">Nenhum movimento importado pendente.</p>
+    </div>
+    {% endif %}
+</div>

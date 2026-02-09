@@ -90,4 +90,9 @@ urlpatterns = [
         views.RotinaExecutionView.as_view(),
         name="api_rotinas_execucao",
     ),
+    path(
+        "api/rotinas-json/",
+        views.RotinasJsonView.as_view(),
+        name="api_rotinas_json",
+    ),
 ]

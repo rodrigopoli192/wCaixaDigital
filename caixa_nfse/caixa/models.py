@@ -657,3 +657,131 @@ class FechamentoCaixa(TenantAwareModel):
         self.data_aprovacao = timezone.now()
         self.observacao_aprovador = observacao
         self.save()
+
+
+class MovimentoImportado(TenantAwareModel):
+    """
+    Staging table for movements imported from external databases via Rotinas SQL.
+    Data is stored temporarily here until confirmed and migrated to MovimentoCaixa.
+    """
+
+    abertura = models.ForeignKey(
+        AberturaCaixa,
+        verbose_name=_("abertura"),
+        on_delete=models.CASCADE,
+        related_name="importados",
+    )
+    conexao = models.ForeignKey(
+        "core.ConexaoExterna",
+        verbose_name=_("conexão"),
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="importados",
+    )
+    rotina = models.ForeignKey(
+        "backoffice.Rotina",
+        verbose_name=_("rotina"),
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="importados",
+    )
+    importado_em = models.DateTimeField(_("importado em"), auto_now_add=True)
+    importado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("importado por"),
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="importacoes",
+    )
+
+    # Confirmation status
+    confirmado = models.BooleanField(_("confirmado"), default=False)
+    confirmado_em = models.DateTimeField(_("confirmado em"), null=True, blank=True)
+    movimento_destino = models.ForeignKey(
+        MovimentoCaixa,
+        verbose_name=_("movimento destino"),
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="importacao_origem",
+    )
+
+    # Mirrored data fields
+    protocolo = models.CharField(_("protocolo"), max_length=100, blank=True, default="")
+    status_item = models.CharField(_("status do item"), max_length=100, blank=True, default="")
+    quantidade = models.PositiveIntegerField(_("quantidade"), default=1, blank=True, null=True)
+    valor = models.DecimalField(
+        _("valor"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    descricao = models.CharField(_("descrição"), max_length=500, blank=True, default="")
+    cliente_nome = models.CharField(
+        _("nome do apresentante"),
+        max_length=200,
+        blank=True,
+        default="",
+    )
+
+    # Tax fields
+    iss = models.DecimalField(
+        _("ISS"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fundesp = models.DecimalField(
+        _("FUNDESP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funesp = models.DecimalField(
+        _("FUNESP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    estado = models.DecimalField(
+        _("Estado"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fesemps = models.DecimalField(
+        _("FESEMPS"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funemp = models.DecimalField(
+        _("FUNEMP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funcomp = models.DecimalField(
+        _("FUNCOMP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fepadsaj = models.DecimalField(
+        _("FEPADSAJ"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funproge = models.DecimalField(
+        _("FUNPROGE"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fundepeg = models.DecimalField(
+        _("FUNDEPEG"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fundaf = models.DecimalField(
+        _("FUNDAF"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    femal = models.DecimalField(
+        _("FEMAL"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fecad = models.DecimalField(
+        _("FECAD"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    emolumento = models.DecimalField(
+        _("emolumento"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    taxa_judiciaria = models.DecimalField(
+        _("taxa judiciária"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+
+    TAXA_FIELDS = MovimentoCaixa.TAXA_FIELDS
+
+    class Meta:
+        verbose_name = _("movimento importado")
+        verbose_name_plural = _("movimentos importados")
+        ordering = ["-importado_em"]
+
+    def __str__(self):
+        return f"Import #{self.pk} - {self.protocolo or 'S/P'}"
+
+    @property
+    def valor_total_taxas(self) -> Decimal:
+        return sum(getattr(self, f) or Decimal("0.00") for f in self.TAXA_FIELDS)

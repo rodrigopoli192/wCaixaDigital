@@ -169,3 +169,16 @@ class RotinaForm(forms.ModelForm):
                 }
             ),
         }
+
+
+from django.forms import inlineformset_factory
+
+from caixa_nfse.backoffice.models import MapeamentoColunaRotina
+
+MapeamentoInlineFormSet = inlineformset_factory(
+    Rotina,
+    MapeamentoColunaRotina,
+    fields=["coluna_sql", "campo_destino"],
+    extra=3,
+    can_delete=True,
+)

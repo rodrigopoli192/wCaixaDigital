@@ -470,3 +470,213 @@ class AprovarFechamentoView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
             return redirect(self.success_url)
 
         return redirect(self.success_url)
+
+
+class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """Modal for importing movements from external databases."""
+
+    model = AberturaCaixa
+    template_name = "caixa/partials/importar_form.html"
+
+    def test_func(self):
+        return self.request.user.pode_operar_caixa
+
+    def get_queryset(self):
+        return AberturaCaixa.objects.filter(tenant=self.request.user.tenant, fechado=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from caixa_nfse.core.models import ConexaoExterna
+
+        context["abertura"] = self.object
+        context["conexoes"] = ConexaoExterna.objects.filter(
+            tenant=self.request.user.tenant, ativo=True
+        )
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Execute selected rotinas and save results to staging."""
+        import logging
+
+        from django.http import HttpResponse
+        from django.template.loader import render_to_string
+
+        from caixa_nfse.backoffice.models import Rotina
+        from caixa_nfse.caixa.services.importador import ImportadorMovimentos
+        from caixa_nfse.core.models import ConexaoExterna
+
+        logger = logging.getLogger(__name__)
+        self.object = self.get_object()
+        abertura = self.object
+
+        conexao_id = request.POST.get("conexao_id")
+        rotina_ids = request.POST.getlist("rotina_ids")
+        data_inicio = request.POST.get("data_inicio")
+        data_fim = request.POST.get("data_fim")
+
+        if not conexao_id or not rotina_ids or not data_inicio or not data_fim:
+            return HttpResponse(
+                '<div class="p-4 text-red-500 text-sm">'
+                "Preencha todos os campos: conexão, rotinas e período.</div>"
+            )
+
+        try:
+            conexao = ConexaoExterna.objects.get(pk=conexao_id, tenant=request.user.tenant)
+            rotinas = Rotina.objects.filter(pk__in=rotina_ids, ativo=True)
+
+            resultados = ImportadorMovimentos.executar_rotinas(
+                conexao, rotinas, data_inicio, data_fim
+            )
+
+            total_importados = 0
+            all_logs = []
+            for rotina, headers, rows, logs in resultados:
+                all_logs.extend(logs)
+                if headers and rows:
+                    count = ImportadorMovimentos.salvar_importacao(
+                        abertura, conexao, rotina, headers, rows, request.user
+                    )
+                    total_importados += count
+
+            html = render_to_string(
+                "caixa/partials/importados_results.html",
+                {
+                    "total_importados": total_importados,
+                    "logs": all_logs,
+                    "abertura": abertura,
+                },
+                request=request,
+            )
+            return HttpResponse(html)
+
+        except Exception:
+            logger.exception("Erro ao importar movimentos")
+            return HttpResponse(
+                '<div class="p-4 text-red-500 text-sm">'
+                "Erro ao conectar ou executar rotinas. Verifique a conexão e tente novamente.</div>"
+            )
+
+
+class ListaImportadosView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """List pending imported movements for an abertura."""
+
+    model = None
+    template_name = "caixa/partials/importados_list.html"
+    context_object_name = "importados"
+
+    def test_func(self):
+        return self.request.user.pode_operar_caixa
+
+    def get_queryset(self):
+        from caixa_nfse.caixa.models import MovimentoImportado
+
+        return MovimentoImportado.objects.filter(
+            abertura_id=self.kwargs["pk"],
+            tenant=self.request.user.tenant,
+            confirmado=False,
+        ).select_related("rotina", "conexao")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["abertura"] = get_object_or_404(
+            AberturaCaixa,
+            pk=self.kwargs["pk"],
+            tenant=self.request.user.tenant,
+        )
+        from caixa_nfse.core.models import FormaPagamento
+
+        context["formas_pagamento"] = FormaPagamento.objects.filter(
+            tenant=self.request.user.tenant, ativo=True
+        )
+        return context
+
+
+class ConfirmarImportadosView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """Confirm selected imported movements and migrate to MovimentoCaixa."""
+
+    model = AberturaCaixa
+
+    def test_func(self):
+        return self.request.user.pode_operar_caixa
+
+    def get_queryset(self):
+        return AberturaCaixa.objects.filter(tenant=self.request.user.tenant, fechado=False)
+
+    def post(self, request, *args, **kwargs):
+        from django.http import HttpResponse
+
+        from caixa_nfse.caixa.models import TipoMovimento
+        from caixa_nfse.caixa.services.importador import ImportadorMovimentos
+        from caixa_nfse.core.models import FormaPagamento
+
+        self.object = self.get_object()
+        abertura = self.object
+
+        ids = request.POST.getlist("importado_ids")
+        forma_pagamento_id = request.POST.get("forma_pagamento_id")
+        tipo = request.POST.get("tipo", TipoMovimento.ENTRADA)
+
+        if not ids or not forma_pagamento_id:
+            return HttpResponse(
+                '<div class="p-3 text-red-500 text-sm">'
+                "Selecione ao menos um item e a forma de pagamento.</div>"
+            )
+
+        try:
+            forma_pagamento = FormaPagamento.objects.get(
+                pk=forma_pagamento_id, tenant=request.user.tenant
+            )
+            count = ImportadorMovimentos.confirmar_movimentos(
+                ids, abertura, forma_pagamento, tipo, request.user
+            )
+
+            response = HttpResponse()
+            response["HX-Refresh"] = "true"
+            messages.success(request, f"{count} movimento(s) confirmado(s) com sucesso!")
+            return response
+
+        except Exception:
+            import logging
+
+            logging.getLogger(__name__).exception("Erro ao confirmar importados")
+            return HttpResponse(
+                '<div class="p-3 text-red-500 text-sm">Erro ao confirmar movimentos.</div>'
+            )
+
+
+class ExcluirImportadosView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """Delete selected imported movements (discard)."""
+
+    model = AberturaCaixa
+
+    def test_func(self):
+        return self.request.user.pode_operar_caixa
+
+    def get_queryset(self):
+        return AberturaCaixa.objects.filter(tenant=self.request.user.tenant, fechado=False)
+
+    def post(self, request, *args, **kwargs):
+        from django.http import HttpResponse
+
+        from caixa_nfse.caixa.models import MovimentoImportado
+
+        self.object = self.get_object()
+
+        ids = request.POST.getlist("importado_ids")
+        if not ids:
+            return HttpResponse(
+                '<div class="p-3 text-red-500 text-sm">'
+                "Selecione ao menos um item para excluir.</div>"
+            )
+
+        deleted, _ = MovimentoImportado.objects.filter(
+            pk__in=ids,
+            abertura=self.object,
+            tenant=request.user.tenant,
+            confirmado=False,
+        ).delete()
+
+        response = HttpResponse()
+        response["HX-Refresh"] = "true"
+        messages.success(request, f"{deleted} item(ns) excluído(s).")
+        return response

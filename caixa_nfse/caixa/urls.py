@@ -24,6 +24,27 @@ urlpatterns = [
         views.ListaMovimentosView.as_view(),
         name="lista_movimentos",
     ),
+    # Importação de movimentos
+    path(
+        "abertura/<uuid:pk>/importar/",
+        views.ImportarMovimentosView.as_view(),
+        name="importar_movimentos",
+    ),
+    path(
+        "abertura/<uuid:pk>/importados/",
+        views.ListaImportadosView.as_view(),
+        name="lista_importados",
+    ),
+    path(
+        "abertura/<uuid:pk>/importados/confirmar/",
+        views.ConfirmarImportadosView.as_view(),
+        name="confirmar_importados",
+    ),
+    path(
+        "abertura/<uuid:pk>/importados/excluir/",
+        views.ExcluirImportadosView.as_view(),
+        name="excluir_importados",
+    ),
     # Fechamentos pendentes de aprovação
     path(
         "fechamentos/pendentes/",

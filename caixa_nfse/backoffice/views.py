@@ -249,17 +249,29 @@ class RotinaCreateView(LoginRequiredMixin, PlatformAdminRequiredMixin, CreateVie
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        from caixa_nfse.backoffice.forms import MapeamentoInlineFormSet
         from caixa_nfse.backoffice.models import Sistema
 
         context["sistema"] = Sistema.objects.get(pk=self.kwargs["sistema_pk"])
+        if self.request.POST:
+            context["mapeamento_formset"] = MapeamentoInlineFormSet(self.request.POST)
+        else:
+            context["mapeamento_formset"] = MapeamentoInlineFormSet()
         return context
 
     def form_valid(self, form):
-        form.instance.sistema_id = self.kwargs["sistema_pk"]
-        form.save()
         from django.http import HttpResponse
 
-        # Refresh the Sistema Update Page (which lists routines)
+        context = self.get_context_data()
+        formset = context["mapeamento_formset"]
+
+        form.instance.sistema_id = self.kwargs["sistema_pk"]
+        rotina = form.save()
+
+        if formset.is_valid():
+            formset.instance = rotina
+            formset.save()
+
         return HttpResponse("<script>window.location.reload()</script>")
 
 
@@ -276,9 +288,29 @@ class RotinaUpdateView(LoginRequiredMixin, PlatformAdminRequiredMixin, UpdateVie
 
         return RotinaForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from caixa_nfse.backoffice.forms import MapeamentoInlineFormSet
+
+        if self.request.POST:
+            context["mapeamento_formset"] = MapeamentoInlineFormSet(
+                self.request.POST, instance=self.object
+            )
+        else:
+            context["mapeamento_formset"] = MapeamentoInlineFormSet(instance=self.object)
+        return context
+
     def form_valid(self, form):
-        form.save()
         from django.http import HttpResponse
+
+        context = self.get_context_data()
+        formset = context["mapeamento_formset"]
+
+        rotina = form.save()
+
+        if formset.is_valid():
+            formset.instance = rotina
+            formset.save()
 
         return HttpResponse("<script>window.location.reload()</script>")
 

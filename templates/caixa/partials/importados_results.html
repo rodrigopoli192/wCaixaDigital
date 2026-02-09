@@ -1,0 +1,49 @@
+<!-- Import Results Summary (shown after import execution) -->
+<div class="p-5 space-y-4">
+    
+    {% if total_importados > 0 %}
+    <!-- Success -->
+    <div class="flex items-center gap-3 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+        <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-2xl">check_circle</span>
+        <div>
+            <p class="font-bold text-emerald-700 dark:text-emerald-300">{{ total_importados }} registro(s) importado(s) com sucesso!</p>
+            <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">Os registros estão na aba "Importados" aguardando confirmação.</p>
+        </div>
+    </div>
+
+    <div class="flex justify-end">
+        <a href="{% url 'caixa:lista_importados' abertura.pk %}"
+           class="text-primary hover:text-orange-600 font-bold text-sm flex items-center gap-1 transition-colors"
+           hx-get="{% url 'caixa:lista_importados' abertura.pk %}"
+           hx-target="#importados-container"
+           hx-swap="innerHTML">
+            <span class="material-symbols-outlined text-lg">visibility</span>
+            Ver Importados
+        </a>
+    </div>
+    {% else %}
+    <!-- No records -->
+    <div class="flex items-center gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+        <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-2xl">info</span>
+        <div>
+            <p class="font-bold text-amber-700 dark:text-amber-300">Nenhum registro encontrado.</p>
+            <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">Verifique o período selecionado e tente novamente.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if logs %}
+    <!-- Execution Logs -->
+    <details class="group">
+        <summary class="text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer flex items-center gap-1 hover:text-slate-300 transition-colors">
+            <span class="material-symbols-outlined text-sm group-open:rotate-90 transition-transform">chevron_right</span>
+            Log de Execução ({{ logs|length }})
+        </summary>
+        <div class="mt-2 bg-[#1e1e1e] rounded-lg p-3 max-h-[200px] overflow-y-auto custom-scrollbar">
+            {% for log in logs %}
+            <p class="text-xs font-mono text-slate-400 leading-relaxed">{{ log }}</p>
+            {% endfor %}
+        </div>
+    </details>
+    {% endif %}
+</div>

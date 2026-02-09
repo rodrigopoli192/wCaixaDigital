@@ -91,6 +91,69 @@
                 </div>
             </div>
 
+            <!-- Mapeamento de Colunas -->
+            {% if mapeamento_formset %}
+            <div class="mt-6 border border-slate-200 dark:border-border-dark rounded-xl overflow-hidden"
+                 x-data="{ expanded: {% if mapeamento_formset.forms.0.instance.pk %}true{% else %}false{% endif %} }">
+                
+                <div class="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-background-dark/50 cursor-pointer" @click="expanded = !expanded">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-lg">swap_horiz</span>
+                        <span class="text-sm font-bold text-slate-700 dark:text-slate-300">Mapeamento de Colunas</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">IMPORTAÇÃO</span>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-400 transition-transform duration-200" :class="expanded ? 'rotate-180' : ''">expand_more</span>
+                </div>
+
+                <div x-show="expanded" x-transition class="p-4 space-y-3 border-t border-slate-200 dark:border-border-dark">
+                    <p class="text-xs text-slate-500">Configure quais colunas do resultado SQL correspondem a quais campos do sistema.</p>
+                    
+                    {{ mapeamento_formset.management_form }}
+
+                    <div id="mapeamento-rows" class="space-y-2">
+                        {% for mform in mapeamento_formset %}
+                        <div class="mapeamento-row flex items-center gap-3 {% if mform.instance.pk and mform.DELETE.value %}hidden{% endif %}">
+                            {% if mform.instance.pk %}{{ mform.id }}{% endif %}
+                            <div class="flex-1">
+                                {% if forloop.first %}
+                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Coluna SQL</label>
+                                {% endif %}
+                                <input type="text" name="{{ mform.coluna_sql.html_name }}" value="{{ mform.coluna_sql.value|default:'' }}" 
+                                       placeholder="Ex: NR_PROTOCOLO"
+                                       class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-3 py-2 text-sm font-mono focus:ring-2 focus:ring-primary focus:border-primary text-slate-900 dark:text-white outline-none">
+                            </div>
+                            <div class="flex items-end pt-1">
+                                <span class="material-symbols-outlined text-slate-400 text-lg">arrow_forward</span>
+                            </div>
+                            <div class="flex-1">
+                                {% if forloop.first %}
+                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Campo Destino</label>
+                                {% endif %}
+                                <select name="{{ mform.campo_destino.html_name }}" 
+                                        class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary text-slate-900 dark:text-white outline-none">
+                                    <option value="">-- Selecione --</option>
+                                    {% for val, label in mform.campo_destino.field.choices %}
+                                    {% if val %}
+                                    <option value="{{ val }}" {% if mform.campo_destino.value == val %}selected{% endif %}>{{ label }}</option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="flex items-end">
+                                {% if mform.instance.pk %}
+                                <label class="cursor-pointer p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" title="Remover">
+                                    {{ mform.DELETE }}
+                                    <span class="material-symbols-outlined text-red-400 text-lg">delete</span>
+                                </label>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Actions -->
             <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-border-dark">
                 <button type="button" onclick="document.getElementById('rotina-modal').remove()" class="px-5 py-2.5 rounded-lg border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-50 dark:hover:bg-background-dark transition-colors">
