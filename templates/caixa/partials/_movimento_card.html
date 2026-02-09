@@ -81,12 +81,12 @@
 
             <!-- Row 2: Subtitle -->
             <div class="flex items-center gap-2 pl-0">
-                {% if mov.cliente_nome %}
-                <span class="text-[10px] text-slate-500 truncate" title="{{ mov.cliente_nome }}">Apresentante: {{ mov.cliente_nome }}</span>
-                {% elif mov.cliente %}
-                <span class="text-[10px] text-slate-500 truncate" title="{{ mov.cliente }}">Cliente: {{ mov.cliente }}</span>
+                {% if show_origem %}
+                    {% if mov.cliente_nome %}
+                    <span class="text-[10px] text-slate-500 truncate" title="{{ mov.cliente_nome }}">Apresentante: {{ mov.cliente_nome }}</span>
+                    {% endif %}
                 {% endif %}
-                {% if mov.forma_pagamento %}
+                {% if show_tipo and mov.forma_pagamento %}
                 <span class="text-[10px] text-slate-500 flex items-center gap-0.5">
                     <span class="material-symbols-outlined text-[10px]">payments</span>
                     {{ mov.forma_pagamento.nome }}
