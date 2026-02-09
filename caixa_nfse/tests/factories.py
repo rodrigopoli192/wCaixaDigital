@@ -104,6 +104,11 @@ class MovimentoCaixaFactory(factory.django.DjangoModelFactory):
     forma_pagamento = factory.SubFactory(FormaPagamentoFactory)
     valor = Decimal("50.00")
     descricao = "Movimento de teste"
+    protocolo = ""
+    status_item = ""
+    quantidade = 1
+    emolumento = Decimal("0.00")
+    taxa_judiciaria = Decimal("0.00")
 
 
 class PlanoContasFactory(factory.django.DjangoModelFactory):

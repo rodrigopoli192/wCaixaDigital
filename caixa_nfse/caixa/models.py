@@ -290,6 +290,133 @@ class MovimentoCaixa(TenantAwareModel):
         blank=True,
     )
 
+    # --- Dados do Ato / Certidão ---
+    protocolo = models.CharField(
+        _("protocolo"),
+        max_length=50,
+        blank=True,
+        default="",
+    )
+    status_item = models.CharField(
+        _("status do item"),
+        max_length=30,
+        blank=True,
+        default="",
+    )
+    quantidade = models.PositiveIntegerField(
+        _("quantidade"),
+        default=1,
+        blank=True,
+        null=True,
+    )
+
+    # --- Taxas Cartoriais ---
+    iss = models.DecimalField(
+        _("ISS"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    fundesp = models.DecimalField(
+        _("FUNDESP"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    funesp = models.DecimalField(
+        _("FUNESP"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    estado = models.DecimalField(
+        _("ESTADO"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    fesemps = models.DecimalField(
+        _("FESEMPS"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    funemp = models.DecimalField(
+        _("FUNEMP"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    funcomp = models.DecimalField(
+        _("FUNCOMP"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    fepadsaj = models.DecimalField(
+        _("FEPADSAJ"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    funproge = models.DecimalField(
+        _("FUNPROGE"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    fundepeg = models.DecimalField(
+        _("FUNDEPEG"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    fundaf = models.DecimalField(
+        _("FUNDAF"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    femal = models.DecimalField(
+        _("FEMAL"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    fecad = models.DecimalField(
+        _("FECAD"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    emolumento = models.DecimalField(
+        _("emolumento"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    taxa_judiciaria = models.DecimalField(
+        _("taxa judiciária"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+
     # Auditoria
     hash_registro = models.CharField(
         _("hash do registro"),
@@ -308,6 +435,25 @@ class MovimentoCaixa(TenantAwareModel):
         _("data/hora"),
         default=timezone.now,
     )
+
+    # Campos de taxa para iteração
+    TAXA_FIELDS = [
+        "iss",
+        "fundesp",
+        "funesp",
+        "estado",
+        "fesemps",
+        "funemp",
+        "funcomp",
+        "fepadsaj",
+        "funproge",
+        "fundepeg",
+        "fundaf",
+        "femal",
+        "fecad",
+        "emolumento",
+        "taxa_judiciaria",
+    ]
 
     class Meta:
         verbose_name = _("movimento de caixa")
@@ -342,6 +488,11 @@ class MovimentoCaixa(TenantAwareModel):
             self.hash_registro = generate_hash(data, self.hash_anterior)
 
         super().save(*args, **kwargs)
+
+    @property
+    def valor_total_taxas(self) -> Decimal:
+        """Soma de todas as taxas cartoriais."""
+        return sum(getattr(self, f) or Decimal("0.00") for f in self.TAXA_FIELDS)
 
     @property
     def is_entrada(self) -> bool:

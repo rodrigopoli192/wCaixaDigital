@@ -35,11 +35,27 @@ class MovimentoTable(tables.Table):
     tipo = tables.Column()
     forma_pagamento = tables.Column()
     valor = tables.Column()
+    protocolo = tables.Column(verbose_name="Protocolo")
+    emolumento = tables.Column(verbose_name="Emolumento")
+    valor_total_taxas = tables.Column(
+        verbose_name="Total Taxas",
+        accessor="valor_total_taxas",
+        orderable=False,
+    )
     descricao = tables.Column()
 
     class Meta:
         model = MovimentoCaixa
-        fields = ["data_hora", "tipo", "forma_pagamento", "valor", "descricao"]
+        fields = [
+            "data_hora",
+            "tipo",
+            "forma_pagamento",
+            "valor",
+            "protocolo",
+            "emolumento",
+            "valor_total_taxas",
+            "descricao",
+        ]
         attrs = {"class": "table table-striped table-hover table-sm"}
         row_attrs = {
             "class": lambda record: "table-success" if record.is_entrada else "table-danger"
@@ -55,3 +71,15 @@ class MovimentoTable(tables.Table):
             prefix,
             f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."),
         )
+
+    def render_emolumento(self, value):
+        """Format emolumento as BRL."""
+        if not value:
+            return "—"
+        return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    def render_valor_total_taxas(self, value):
+        """Format total taxas as BRL."""
+        if not value:
+            return "—"
+        return f"R$ {value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")

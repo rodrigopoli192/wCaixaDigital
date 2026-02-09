@@ -23,6 +23,7 @@ class MovimentoFilter(django_filters.FilterSet):
     """Filter for MovimentoCaixa."""
 
     tipo = django_filters.ChoiceFilter(choices=TipoMovimento.choices)
+    protocolo = django_filters.CharFilter(lookup_expr="icontains", label=_("Protocolo"))
     data_hora = django_filters.DateFromToRangeFilter(
         label=_("Período"),
         widget=django_filters.widgets.RangeWidget(attrs={"type": "date"}),
@@ -32,4 +33,4 @@ class MovimentoFilter(django_filters.FilterSet):
 
     class Meta:
         model = MovimentoCaixa
-        fields = ["tipo", "forma_pagamento"]
+        fields = ["tipo", "forma_pagamento", "protocolo"]

@@ -95,9 +95,52 @@ class MovimentoCaixaForm(forms.ModelForm):
         ),
     )
 
+    # Tax fields as CharField for Brazilian currency mask
+    TAXA_FIELD_NAMES = [
+        "iss",
+        "fundesp",
+        "funesp",
+        "estado",
+        "fesemps",
+        "funemp",
+        "funcomp",
+        "fepadsaj",
+        "funproge",
+        "fundepeg",
+        "fundaf",
+        "femal",
+        "fecad",
+        "emolumento",
+        "taxa_judiciaria",
+    ]
+
     class Meta:
         model = MovimentoCaixa
-        fields = ["tipo", "forma_pagamento", "valor", "descricao", "cliente"]
+        fields = [
+            "tipo",
+            "forma_pagamento",
+            "valor",
+            "descricao",
+            "cliente",
+            "protocolo",
+            "status_item",
+            "quantidade",
+            "iss",
+            "fundesp",
+            "funesp",
+            "estado",
+            "fesemps",
+            "funemp",
+            "funcomp",
+            "fepadsaj",
+            "funproge",
+            "fundepeg",
+            "fundaf",
+            "femal",
+            "fecad",
+            "emolumento",
+            "taxa_judiciaria",
+        ]
         widgets = {
             "descricao": forms.Textarea(attrs={"rows": 2}),
         }
@@ -117,6 +160,14 @@ class MovimentoCaixaForm(forms.ModelForm):
         # Override label_from_instance to show only the name (não "Nome (Tipo)")
         self.fields["forma_pagamento"].label_from_instance = lambda obj: obj.nome
 
+        # Make tax fields not required
+        for field_name in self.TAXA_FIELD_NAMES:
+            self.fields[field_name].required = False
+
+        # Make protocolo/status_item/quantidade not required
+        for field_name in ["protocolo", "status_item", "quantidade"]:
+            self.fields[field_name].required = False
+
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Row(
@@ -126,6 +177,36 @@ class MovimentoCaixaForm(forms.ModelForm):
             ),
             "cliente",
             "descricao",
+            Row(
+                Column("protocolo", css_class="col-md-4"),
+                Column("status_item", css_class="col-md-4"),
+                Column("quantidade", css_class="col-md-4"),
+            ),
+            Row(
+                Column("emolumento", css_class="col-md-6"),
+                Column("taxa_judiciaria", css_class="col-md-6"),
+            ),
+            Row(
+                Column("iss", css_class="col-md-3"),
+                Column("fundesp", css_class="col-md-3"),
+                Column("funesp", css_class="col-md-3"),
+                Column("estado", css_class="col-md-3"),
+            ),
+            Row(
+                Column("fesemps", css_class="col-md-3"),
+                Column("funemp", css_class="col-md-3"),
+                Column("funcomp", css_class="col-md-3"),
+                Column("fepadsaj", css_class="col-md-3"),
+            ),
+            Row(
+                Column("funproge", css_class="col-md-3"),
+                Column("fundepeg", css_class="col-md-3"),
+                Column("fundaf", css_class="col-md-3"),
+                Column("femal", css_class="col-md-3"),
+            ),
+            Row(
+                Column("fecad", css_class="col-md-4"),
+            ),
             Submit("submit", "Registrar Movimento", css_class="btn-primary"),
         )
 
@@ -156,6 +237,33 @@ class MovimentoCaixaForm(forms.ModelForm):
             return Decimal(valor_str)
         except InvalidOperation as e:
             raise forms.ValidationError("Valor inválido. Use o formato: 1.234,56") from e
+
+    def _parse_brl(self, value):
+        """Parse Brazilian currency string to Decimal."""
+        from decimal import Decimal, InvalidOperation
+
+        if value is None or value == "":
+            return Decimal("0.00")
+        if isinstance(value, Decimal):
+            return value
+
+        valor_str = str(value).strip().replace("R$", "").strip()
+        if not valor_str:
+            return Decimal("0.00")
+
+        valor_str = valor_str.replace(".", "").replace(",", ".")
+
+        try:
+            return Decimal(valor_str)
+        except InvalidOperation:
+            return Decimal("0.00")
+
+    def clean(self):
+        cleaned = super().clean()
+        for field_name in self.TAXA_FIELD_NAMES:
+            if field_name in cleaned:
+                cleaned[field_name] = self._parse_brl(cleaned[field_name])
+        return cleaned
 
 
 class FechamentoCaixaForm(forms.ModelForm):
