@@ -486,12 +486,24 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        from caixa_nfse.backoffice.models import Rotina
         from caixa_nfse.core.models import ConexaoExterna
 
         context["abertura"] = self.object
-        context["conexoes"] = ConexaoExterna.objects.filter(
+        conexoes = ConexaoExterna.objects.filter(
             tenant=self.request.user.tenant, ativo=True
-        )
+        ).select_related("sistema")
+
+        conexoes_tree = []
+        for con in conexoes:
+            rotinas = list(
+                Rotina.objects.filter(sistema=con.sistema, ativo=True).values(
+                    "pk", "nome", "descricao"
+                )
+            )
+            if rotinas:
+                conexoes_tree.append({"conexao": con, "rotinas": rotinas})
+        context["conexoes_tree"] = conexoes_tree
         return context
 
     def post(self, request, *args, **kwargs):
@@ -515,58 +527,75 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
             return self._importar_selecionados(request, abertura)
 
         # Step 1: Buscar (execute SQL and return preview)
-        conexao_id = request.POST.get("conexao_id")
-        rotina_ids = request.POST.getlist("rotina_ids")
+        pairs_raw = request.POST.getlist("conexao_rotina_pairs")
         data_inicio = request.POST.get("data_inicio")
         data_fim = request.POST.get("data_fim")
 
-        if not conexao_id or not rotina_ids or not data_inicio or not data_fim:
+        if not pairs_raw or not data_inicio or not data_fim:
             return HttpResponse(
                 '<div class="p-4 text-red-500 text-sm">'
                 "Preencha todos os campos: conexão, rotinas e período.</div>"
             )
 
-        try:
-            conexao = ConexaoExterna.objects.get(pk=conexao_id, tenant=request.user.tenant)
-            rotinas = Rotina.objects.filter(pk__in=rotina_ids, ativo=True)
+        # Parse pairs into {conexao_id: [rotina_ids]}
+        from collections import defaultdict
 
-            resultados = ImportadorMovimentos.executar_rotinas(
-                conexao, rotinas, data_inicio, data_fim
+        conexao_rotinas = defaultdict(list)
+        for pair in pairs_raw:
+            parts = pair.split(":")
+            if len(parts) == 2:
+                conexao_rotinas[parts[0]].append(parts[1])
+
+        if not conexao_rotinas:
+            return HttpResponse(
+                '<div class="p-4 text-red-500 text-sm">'
+                "Selecione ao menos uma conexão e rotina.</div>"
             )
 
-            # Fetch existing protocolos for duplicate detection
+        try:
             from caixa_nfse.caixa.models import MovimentoImportado
-
-            existing_by_rotina = {}
-            for rot in rotinas:
-                existing_by_rotina[str(rot.pk)] = set(
-                    MovimentoImportado.objects.filter(
-                        tenant=request.user.tenant,
-                        conexao__sistema=conexao.sistema,
-                        rotina=rot,
-                    )
-                    .exclude(protocolo="")
-                    .values_list("protocolo", flat=True)
-                )
 
             all_logs = []
             preview_rows = []
-            for rotina, headers, rows, logs in resultados:
-                all_logs.extend(logs)
-                if headers and rows:
-                    for row in rows:
-                        mapped = ImportadorMovimentos.mapear_colunas(rotina, headers, row)
-                        if mapped:
-                            mapped["meta_rotina_id"] = str(rotina.pk)
-                            mapped["meta_origem"] = f"{conexao.sistema} - {rotina.nome}"
-                            mapped["meta_raw_headers"] = json.dumps(headers)
-                            mapped["meta_raw_row"] = json.dumps(
-                                [str(v) if v is not None else "" for v in row]
-                            )
-                            protocolo = str(mapped.get("protocolo", "") or "").strip()
-                            existing = existing_by_rotina.get(str(rotina.pk), set())
-                            mapped["meta_duplicado"] = bool(protocolo and protocolo in existing)
-                            preview_rows.append(mapped)
+
+            for con_id, rot_ids in conexao_rotinas.items():
+                conexao = ConexaoExterna.objects.get(pk=con_id, tenant=request.user.tenant)
+                rotinas = Rotina.objects.filter(pk__in=rot_ids, ativo=True)
+
+                resultados = ImportadorMovimentos.executar_rotinas(
+                    conexao, rotinas, data_inicio, data_fim
+                )
+
+                # Duplicate detection per conexao
+                existing_by_rotina = {}
+                for rot in rotinas:
+                    existing_by_rotina[str(rot.pk)] = set(
+                        MovimentoImportado.objects.filter(
+                            tenant=request.user.tenant,
+                            conexao__sistema=conexao.sistema,
+                            rotina=rot,
+                        )
+                        .exclude(protocolo="")
+                        .values_list("protocolo", flat=True)
+                    )
+
+                for rotina, headers, rows, logs in resultados:
+                    all_logs.extend(logs)
+                    if headers and rows:
+                        for row in rows:
+                            mapped = ImportadorMovimentos.mapear_colunas(rotina, headers, row)
+                            if mapped:
+                                mapped["meta_conexao_id"] = str(conexao.pk)
+                                mapped["meta_rotina_id"] = str(rotina.pk)
+                                mapped["meta_origem"] = f"{conexao.sistema} - {rotina.nome}"
+                                mapped["meta_raw_headers"] = json.dumps(headers)
+                                mapped["meta_raw_row"] = json.dumps(
+                                    [str(v) if v is not None else "" for v in row]
+                                )
+                                protocolo = str(mapped.get("protocolo", "") or "").strip()
+                                existing = existing_by_rotina.get(str(rotina.pk), set())
+                                mapped["meta_duplicado"] = bool(protocolo and protocolo in existing)
+                                preview_rows.append(mapped)
 
             if not preview_rows:
                 html = render_to_string(
@@ -587,7 +616,6 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
                     "preview_rows": preview_rows,
                     "logs": all_logs,
                     "abertura": abertura,
-                    "conexao_id": conexao_id,
                 },
                 request=request,
             )
@@ -613,28 +641,33 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
         from caixa_nfse.core.models import ConexaoExterna
 
         logger = logging.getLogger(__name__)
-        conexao_id = request.POST.get("conexao_id")
         selected = request.POST.getlist("selected_rows")
 
-        if not selected or not conexao_id:
+        if not selected:
             return HttpResponse(
                 '<div class="p-4 text-amber-500 text-sm">'
                 "Nenhum item selecionado para importação.</div>"
             )
 
         try:
-            conexao = ConexaoExterna.objects.get(pk=conexao_id, tenant=request.user.tenant)
+            conexao_cache = {}
             total_importados = 0
             total_duplicados = 0
 
             for idx in selected:
+                conexao_id = request.POST.get(f"conexao_id_{idx}")
                 rotina_id = request.POST.get(f"rotina_id_{idx}")
                 raw_headers = request.POST.get(f"raw_headers_{idx}")
                 raw_row = request.POST.get(f"raw_row_{idx}")
 
-                if not all([rotina_id, raw_headers, raw_row]):
+                if not all([conexao_id, rotina_id, raw_headers, raw_row]):
                     continue
 
+                if conexao_id not in conexao_cache:
+                    conexao_cache[conexao_id] = ConexaoExterna.objects.get(
+                        pk=conexao_id, tenant=request.user.tenant
+                    )
+                conexao = conexao_cache[conexao_id]
                 rotina = Rotina.objects.get(pk=rotina_id, ativo=True)
                 headers = json.loads(raw_headers)
                 row = json.loads(raw_row)

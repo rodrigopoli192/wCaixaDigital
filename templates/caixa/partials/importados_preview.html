@@ -38,7 +38,6 @@
           hx-indicator="#import-selected-spinner">
         {% csrf_token %}
         <input type="hidden" name="action" value="importar">
-        <input type="hidden" name="conexao_id" value="{{ conexao_id }}">
 
         <div class="border border-slate-200 dark:border-border-dark rounded-xl overflow-hidden">
             <div class="max-h-[350px] overflow-y-auto custom-scrollbar">
@@ -70,6 +69,7 @@
                                        class="w-3.5 h-3.5 text-primary rounded focus:ring-primary">
                                 {% endif %}
                                 <!-- Hidden fields per row -->
+                                <input type="hidden" name="conexao_id_{{ forloop.counter0 }}" value="{{ row.meta_conexao_id }}">
                                 <input type="hidden" name="rotina_id_{{ forloop.counter0 }}" value="{{ row.meta_rotina_id }}">
                                 <input type="hidden" name="raw_headers_{{ forloop.counter0 }}" value="{{ row.meta_raw_headers }}">
                                 <input type="hidden" name="raw_row_{{ forloop.counter0 }}" value="{{ row.meta_raw_row }}">
