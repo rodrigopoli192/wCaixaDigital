@@ -1,0 +1,83 @@
+
+<!-- Execution Logs -->
+{% if logs %}
+<div x-data="{ expanded: true }" class="mb-4 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden bg-slate-900 shadow-sm animate-fade-in">
+    <button @click="expanded = !expanded" type="button" class="w-full flex items-center justify-between p-3 text-left hover:bg-slate-800 transition-colors">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-slate-400 text-lg">terminal</span>
+            <span class="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">Logs da Execução</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 font-mono">{{ logs|length }} eventos</span>
+        </div>
+        <span class="material-symbols-outlined text-slate-400 transition-transform duration-200" :class="expanded ? 'rotate-180' : ''">expand_more</span>
+    </button>
+    
+    <div x-show="expanded" class="border-t border-slate-800 p-4 font-mono text-xs max-h-64 overflow-y-auto custom-scrollbar bg-slate-950/50">
+        <div class="space-y-1">
+            {% for log in logs %}
+            <div class="flex gap-3 font-mono">
+                <span class="text-slate-500 select-none w-16 text-right">[{{ log.time }}]</span>
+                <span class="flex-1 break-all 
+                    {% if log.type == 'error' %}text-red-400 font-bold{% endif %}
+                    {% if log.type == 'success' %}text-emerald-400 font-bold{% endif %}
+                    {% if log.type == 'warning' %}text-amber-400{% endif %}
+                    {% if log.type == 'info' %}text-slate-300{% endif %}
+                ">
+                    {{ log.msg }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="mt-4 border border-slate-200 dark:border-border-dark rounded-lg overflow-hidden animate-fade-in shadow-sm">
+    <div class="bg-slate-50 dark:bg-slate-800 p-3 flex justify-between items-center border-b border-slate-200 dark:border-border-dark">
+        <div class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            Resultado da Execução
+            <span class="ml-2 bg-white dark:bg-slate-700 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-600">
+                {{ rows|length }} registros
+            </span>
+        </div>
+        <!-- Future Export Buttons -->
+        <div class="flex gap-2">
+            <!-- 
+            <button type="button" class="text-xs text-slate-500 hover:text-primary transition-colors flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">download</span> Excel
+            </button>
+            -->
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto custom-scrollbar max-h-[300px]">
+        <table class="w-full text-sm text-left text-slate-500 dark:text-slate-400">
+            <thead class="text-xs text-slate-700 dark:text-slate-300 uppercase bg-slate-100 dark:bg-slate-800/50 sticky top-0 z-10">
+                <tr>
+                    {% for header in headers %}
+                    <th scope="col" class="px-6 py-3 whitespace-nowrap border-b border-slate-200 dark:border-border-dark">
+                        {{ header }}
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr class="bg-white dark:bg-surface-dark border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    {% for cell in row %}
+                    <td class="px-6 py-3 whitespace-nowrap">
+                        {{ cell|default:"-" }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="100%" class="px-6 py-8 text-center text-slate-500">
+                        <span class="material-symbols-outlined text-3xl opacity-50 mb-2">table_rows</span>
+                        <p>Nenhum resultado retornado pela consulta.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

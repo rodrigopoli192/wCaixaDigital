@@ -697,8 +697,68 @@ class RotinasPorSistemaView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
         return render(
             request,
             "core/partials/rotinas_list.html",
-            {"rotinas": rotinas, "selected_ids": rotinas_ids},
+            {"rotinas": rotinas, "selected_ids": rotinas_ids, "conexao_id": conexao_id},
         )
+
+
+class RotinaExecutionView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
+    """
+    Handles parsing and execution of SQL Routines with variables.
+    """
+
+    def get(self, request, pk):
+        from caixa_nfse.backoffice.models import Rotina
+        from caixa_nfse.core.services.sql_executor import SQLExecutor
+
+        try:
+            rotina = Rotina.objects.get(pk=pk, ativo=True)
+            sql = f"{rotina.sql_content}\n{rotina.sql_content_extra or ''}"
+            variables = SQLExecutor.extract_variables(sql)
+
+            # Context for template
+            context = {
+                "rotina": rotina,
+                "variables": variables,
+                "conexao_id": request.GET.get("conexao_id"),
+            }
+
+            return render(request, "core/partials/modal_rotina_execution.html", context)
+        except Rotina.DoesNotExist:
+            return HttpResponse("Rotina não encontrada", status=404)
+
+    def post(self, request, pk):
+        from caixa_nfse.backoffice.models import Rotina
+        from caixa_nfse.core.services.sql_executor import SQLExecutor
+
+        try:
+            rotina = Rotina.objects.get(pk=pk, ativo=True)
+            conexao_id = request.POST.get("conexao_id")
+
+            if not conexao_id:
+                return HttpResponse("Conexão não especificada", status=400)
+
+            conexao = ConexaoExterna.objects.get(pk=conexao_id, tenant=request.user.tenant)
+
+            # Build variables dict from POST data
+            sql = f"{rotina.sql_content}\n{rotina.sql_content_extra or ''}"
+            variables = SQLExecutor.extract_variables(sql)
+            params = {var: request.POST.get(var) for var in variables}
+
+            # Execute
+            headers, rows, logs = SQLExecutor.execute_routine(conexao, sql, params)
+
+            return render(
+                request,
+                "core/partials/rotina_results.html",
+                {"headers": headers, "rows": rows, "logs": logs, "rotina": rotina},
+            )
+
+        except Rotina.DoesNotExist:
+            return HttpResponse("Rotina não encontrada", status=404)
+        except ConexaoExterna.DoesNotExist:
+            return HttpResponse("Conexão não encontrada", status=404)
+        except Exception as e:
+            return HttpResponse(f"Erro na execução: {str(e)}", status=500)
 
 
 class UserProfileView(LoginRequiredMixin, UpdateView):

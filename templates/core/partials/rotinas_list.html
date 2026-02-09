@@ -20,6 +20,15 @@
                     <p class="text-sm font-medium text-slate-900 dark:text-white group-hover:text-primary transition-colors">
                         {{ rotina.nome }}
                     </p>
+                    {% if conexao_id %}
+                    <button type="button" 
+                            hx-get="{% url 'core:api_rotinas_execucao' rotina.pk %}?conexao_id={{ conexao_id }}"
+                            hx-target="#modal-container"
+                            class="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-primary hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-all"
+                            title="Executar Rotina">
+                        <span class="material-symbols-outlined text-lg">play_arrow</span>
+                    </button>
+                    {% endif %}
                 </div>
                 {% if rotina.descricao %}
                 <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">

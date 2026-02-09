@@ -1,0 +1,96 @@
+
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm animate-fade-in p-4"
+     id="modal-execution">
+    <div class="bg-white dark:bg-surface-dark rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all scale-100 flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="p-6 border-b border-slate-200 dark:border-border-dark flex justify-between items-center bg-slate-50 dark:bg-background-dark/50">
+            <div>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">terminal</span>
+                    Executar Rotina
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ rotina.nome }}</p>
+            </div>
+            <button onclick="document.getElementById('modal-execution').remove()" class="text-slate-400 hover:text-red-500 transition-colors p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <!-- Body -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-0">
+            <form hx-post="{% url 'core:api_rotinas_execucao' rotina.pk %}" 
+                  hx-target="#execution-results" 
+                  hx-indicator="#executing-spinner"
+                  class="flex flex-col h-full">
+                {% csrf_token %}
+                
+                <input type="hidden" name="conexao_id" value="{{ conexao_id }}">
+                
+                <div class="p-6 space-y-6">
+                    <!-- Variable Inputs -->
+                    {% if variables %}
+                    <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-4 rounded-lg text-sm border border-blue-100 dark:border-blue-900/30 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-xl mt-0.5">info</span>
+                        <div>
+                            <span class="font-bold block mb-1">Parâmetros Necessários</span>
+                            Esta rotina requer o preenchimento das seguintes variáveis antes da execução.
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        {% for var in variables %}
+                        <div class="space-y-1.5 group">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1 flex items-center gap-1 group-focus-within:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-[16px]">data_object</span>
+                                {{ var }}
+                            </label>
+                            
+                            <!-- Simple detection for date fields based on name convention -->
+                            {% if 'DATA' in var or 'DT_' in var %}
+                            <input type="date" name="{{ var }}" required 
+                                   class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none">
+                            {% else %}
+                            <input type="text" name="{{ var }}" required placeholder="Informe o valor..."
+                                   class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none font-mono">
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="flex flex-col items-center justify-center p-8 text-center space-y-3">
+                        <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-3xl text-slate-400">play_arrow</span>
+                        </div>
+                        <div>
+                            <p class="text-slate-900 dark:text-white font-medium">Pronto para Executar</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Esta rotina não requer parâmetros adicionais.</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                     <!-- Results Area -->
+                    <div id="execution-results" class="empty:hidden animate-fade-in"></div>
+                    
+                    <!-- Loading State -->
+                    <div id="executing-spinner" class="hidden flex flex-col items-center justify-center py-8 text-primary animate-fade-in">
+                        <span class="material-symbols-outlined animate-spin text-4xl mb-2">progress_activity</span>
+                        <span class="text-sm font-medium text-slate-500">Executando consulta no banco de dados...</span>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="p-6 border-t border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50 flex justify-end gap-3 mt-auto">
+                    <button type="button" onclick="document.getElementById('modal-execution').remove()" 
+                            class="px-5 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-2.5 bg-primary hover:bg-orange-600 text-white text-sm font-bold rounded-lg shadow-lg shadow-primary/20 transition-all transform active:scale-95 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">play_circle</span>
+                        Executar Rotina
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

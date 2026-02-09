@@ -85,4 +85,9 @@ urlpatterns = [
         views.RotinasPorSistemaView.as_view(),
         name="api_rotinas_por_sistema",
     ),
+    path(
+        "api/rotinas-execucao/<int:pk>/",
+        views.RotinaExecutionView.as_view(),
+        name="api_rotinas_execucao",
+    ),
 ]

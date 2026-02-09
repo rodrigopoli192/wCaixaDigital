@@ -38,7 +38,7 @@
                         <div class="space-y-2">
                             <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Sistema Integrado</label>
                             <div class="relative">
-                                {% render_field form.sistema class="w-full appearance-none bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none" hx-get="/core/api/rotinas-por-sistema/" hx-target="#rotinas-container" hx-trigger="change" %}
+                                {% render_field form.sistema class="w-full appearance-none bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none" hx-get="/api/rotinas-por-sistema/" hx-target="#rotinas-container" hx-trigger="change" %}
                                 <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xl">arrow_drop_down</span>
                             </div>
                             {% if form.sistema.errors %}
@@ -198,8 +198,11 @@
                 </div>
             </div>
         </form>
-    </div>
+        </div>
 </div>
+
+<!-- Modal Container for HTMX -->
+<div id="modal-container"></div>
 
 <script>
     document.body.addEventListener('htmx:afterRequest', function(evt) {
