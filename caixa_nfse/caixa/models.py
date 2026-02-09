@@ -494,6 +494,13 @@ class MovimentoCaixa(TenantAwareModel):
         """Soma de todas as taxas cartoriais."""
         return sum(getattr(self, f) or Decimal("0.00") for f in self.TAXA_FIELDS)
 
+    FUNDOS_FIELDS = [f for f in TAXA_FIELDS if f not in ("emolumento",)]
+
+    @property
+    def valor_total_fundos(self) -> Decimal:
+        """Soma de taxas e fundos (sem emolumento)."""
+        return sum(getattr(self, f) or Decimal("0.00") for f in self.FUNDOS_FIELDS)
+
     @property
     def is_entrada(self) -> bool:
         """Verifica se é movimento de entrada."""
@@ -782,6 +789,13 @@ class MovimentoImportado(TenantAwareModel):
     def __str__(self):
         return f"Import #{self.pk} - {self.protocolo or 'S/P'}"
 
+    FUNDOS_FIELDS = MovimentoCaixa.FUNDOS_FIELDS
+
     @property
     def valor_total_taxas(self) -> Decimal:
         return sum(getattr(self, f) or Decimal("0.00") for f in self.TAXA_FIELDS)
+
+    @property
+    def valor_total_fundos(self) -> Decimal:
+        """Soma de taxas e fundos (sem emolumento)."""
+        return sum(getattr(self, f) or Decimal("0.00") for f in self.FUNDOS_FIELDS)

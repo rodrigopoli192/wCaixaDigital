@@ -495,7 +495,8 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
         return context
 
     def post(self, request, *args, **kwargs):
-        """Execute selected rotinas and save results to staging."""
+        """Two-step import: buscar (preview) then importar (save selected)."""
+        import json
         import logging
 
         from django.http import HttpResponse
@@ -508,7 +509,12 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
         logger = logging.getLogger(__name__)
         self.object = self.get_object()
         abertura = self.object
+        action = request.POST.get("action", "buscar")
 
+        if action == "importar":
+            return self._importar_selecionados(request, abertura)
+
+        # Step 1: Buscar (execute SQL and return preview)
         conexao_id = request.POST.get("conexao_id")
         rotina_ids = request.POST.getlist("rotina_ids")
         data_inicio = request.POST.get("data_inicio")
@@ -528,21 +534,124 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
                 conexao, rotinas, data_inicio, data_fim
             )
 
-            total_importados = 0
+            # Fetch existing protocolos for duplicate detection
+            from caixa_nfse.caixa.models import MovimentoImportado
+
+            existing_by_rotina = {}
+            for rot in rotinas:
+                existing_by_rotina[str(rot.pk)] = set(
+                    MovimentoImportado.objects.filter(
+                        tenant=request.user.tenant,
+                        conexao__sistema=conexao.sistema,
+                        rotina=rot,
+                    )
+                    .exclude(protocolo="")
+                    .values_list("protocolo", flat=True)
+                )
+
             all_logs = []
+            preview_rows = []
             for rotina, headers, rows, logs in resultados:
                 all_logs.extend(logs)
                 if headers and rows:
-                    count = ImportadorMovimentos.salvar_importacao(
-                        abertura, conexao, rotina, headers, rows, request.user
-                    )
-                    total_importados += count
+                    for row in rows:
+                        mapped = ImportadorMovimentos.mapear_colunas(rotina, headers, row)
+                        if mapped:
+                            mapped["meta_rotina_id"] = str(rotina.pk)
+                            mapped["meta_origem"] = f"{conexao.sistema} - {rotina.nome}"
+                            mapped["meta_raw_headers"] = json.dumps(headers)
+                            mapped["meta_raw_row"] = json.dumps(
+                                [str(v) if v is not None else "" for v in row]
+                            )
+                            protocolo = str(mapped.get("protocolo", "") or "").strip()
+                            existing = existing_by_rotina.get(str(rotina.pk), set())
+                            mapped["meta_duplicado"] = bool(protocolo and protocolo in existing)
+                            preview_rows.append(mapped)
+
+            if not preview_rows:
+                html = render_to_string(
+                    "caixa/partials/importados_results.html",
+                    {
+                        "total_importados": 0,
+                        "total_rows": 0,
+                        "logs": all_logs,
+                        "abertura": abertura,
+                    },
+                    request=request,
+                )
+                return HttpResponse(html)
+
+            html = render_to_string(
+                "caixa/partials/importados_preview.html",
+                {
+                    "preview_rows": preview_rows,
+                    "logs": all_logs,
+                    "abertura": abertura,
+                    "conexao_id": conexao_id,
+                },
+                request=request,
+            )
+            return HttpResponse(html)
+
+        except Exception:
+            logger.exception("Erro ao buscar movimentos")
+            return HttpResponse(
+                '<div class="p-4 text-red-500 text-sm">'
+                "Erro ao conectar ou executar rotinas. Verifique a conexão e tente novamente.</div>"
+            )
+
+    def _importar_selecionados(self, request, abertura):
+        """Step 2: Import only selected rows."""
+        import json
+        import logging
+
+        from django.http import HttpResponse
+        from django.template.loader import render_to_string
+
+        from caixa_nfse.backoffice.models import Rotina
+        from caixa_nfse.caixa.services.importador import ImportadorMovimentos
+        from caixa_nfse.core.models import ConexaoExterna
+
+        logger = logging.getLogger(__name__)
+        conexao_id = request.POST.get("conexao_id")
+        selected = request.POST.getlist("selected_rows")
+
+        if not selected or not conexao_id:
+            return HttpResponse(
+                '<div class="p-4 text-amber-500 text-sm">'
+                "Nenhum item selecionado para importação.</div>"
+            )
+
+        try:
+            conexao = ConexaoExterna.objects.get(pk=conexao_id, tenant=request.user.tenant)
+            total_importados = 0
+            total_duplicados = 0
+
+            for idx in selected:
+                rotina_id = request.POST.get(f"rotina_id_{idx}")
+                raw_headers = request.POST.get(f"raw_headers_{idx}")
+                raw_row = request.POST.get(f"raw_row_{idx}")
+
+                if not all([rotina_id, raw_headers, raw_row]):
+                    continue
+
+                rotina = Rotina.objects.get(pk=rotina_id, ativo=True)
+                headers = json.loads(raw_headers)
+                row = json.loads(raw_row)
+
+                created, skipped = ImportadorMovimentos.salvar_importacao(
+                    abertura, conexao, rotina, headers, [row], request.user
+                )
+                total_importados += created
+                total_duplicados += skipped
 
             html = render_to_string(
                 "caixa/partials/importados_results.html",
                 {
                     "total_importados": total_importados,
-                    "logs": all_logs,
+                    "total_duplicados": total_duplicados,
+                    "total_rows": len(selected),
+                    "logs": [],
                     "abertura": abertura,
                 },
                 request=request,
@@ -550,10 +659,10 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
             return HttpResponse(html)
 
         except Exception:
-            logger.exception("Erro ao importar movimentos")
+            logger.exception("Erro ao importar selecionados")
             return HttpResponse(
                 '<div class="p-4 text-red-500 text-sm">'
-                "Erro ao conectar ou executar rotinas. Verifique a conexão e tente novamente.</div>"
+                "Erro ao importar registros selecionados.</div>"
             )
 
 

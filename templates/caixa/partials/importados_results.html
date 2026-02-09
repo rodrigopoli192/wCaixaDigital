@@ -7,22 +7,53 @@
         <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-2xl">check_circle</span>
         <div>
             <p class="font-bold text-emerald-700 dark:text-emerald-300">{{ total_importados }} registro(s) importado(s) com sucesso!</p>
-            <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">Os registros estão na aba "Importados" aguardando confirmação.</p>
+            <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                Os registros estão aguardando confirmação na seção "Movimentos Importados".
+                {% if total_duplicados %}
+                <br><span class="text-amber-500">{{ total_duplicados }} registro(s) ignorado(s) por já terem sido importados anteriormente.</span>
+                {% endif %}
+            </p>
         </div>
     </div>
 
     <div class="flex justify-end">
-        <a href="{% url 'caixa:lista_importados' abertura.pk %}"
-           class="text-primary hover:text-orange-600 font-bold text-sm flex items-center gap-1 transition-colors"
-           hx-get="{% url 'caixa:lista_importados' abertura.pk %}"
-           hx-target="#importados-container"
-           hx-swap="innerHTML">
+        <a href="javascript:void(0)"
+           @click="
+               /* Close modal (same x-data scope as movimento_list.html root) */
+               open = false;
+               /* After modal closes, expand accordion + scroll */
+               setTimeout(() => {
+                   const container = document.getElementById('importados-container');
+                   if (container) {
+                       const accordion = container.closest('[x-data]');
+                       if (accordion && accordion._x_dataStack) {
+                           accordion._x_dataStack[0].expanded = true;
+                       }
+                       htmx.trigger(container, 'revealed');
+                       setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+                   }
+               }, 350);
+           "
+           class="text-primary hover:text-orange-600 font-bold text-sm flex items-center gap-1 transition-colors cursor-pointer">
             <span class="material-symbols-outlined text-lg">visibility</span>
             Ver Importados
         </a>
     </div>
+
+    {% elif total_rows > 0 %}
+    <!-- Query returned rows but none were saved (mapping not configured) -->
+    <div class="flex items-center gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+        <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-2xl">warning</span>
+        <div>
+            <p class="font-bold text-amber-700 dark:text-amber-300">{{ total_rows }} registro(s) retornado(s) pela query, mas nenhum foi importado.</p>
+            <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                Verifique se o <strong>mapeamento de colunas</strong> da rotina está configurado corretamente no Backoffice.
+            </p>
+        </div>
+    </div>
+
     {% else %}
-    <!-- No records -->
+    <!-- No records at all -->
     <div class="flex items-center gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
         <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-2xl">info</span>
         <div>
@@ -34,14 +65,18 @@
 
     {% if logs %}
     <!-- Execution Logs -->
-    <details class="group">
+    <details class="group" open>
         <summary class="text-xs font-bold text-slate-400 uppercase tracking-wider cursor-pointer flex items-center gap-1 hover:text-slate-300 transition-colors">
             <span class="material-symbols-outlined text-sm group-open:rotate-90 transition-transform">chevron_right</span>
             Log de Execução ({{ logs|length }})
         </summary>
-        <div class="mt-2 bg-[#1e1e1e] rounded-lg p-3 max-h-[200px] overflow-y-auto custom-scrollbar">
+        <div class="mt-2 bg-[#1e1e1e] rounded-lg p-3 max-h-[200px] overflow-y-auto custom-scrollbar space-y-0.5">
             {% for log in logs %}
-            <p class="text-xs font-mono text-slate-400 leading-relaxed">{{ log }}</p>
+            <p class="text-xs font-mono leading-relaxed {% if log.type == 'success' %}text-emerald-400{% elif log.type == 'error' %}text-red-400{% elif log.type == 'warning' %}text-amber-400{% else %}text-slate-400{% endif %}">
+                <span class="text-slate-600">[{{ log.time }}]</span>
+                {% if log.type == 'success' %}✓{% elif log.type == 'error' %}✗{% elif log.type == 'warning' %}⚠{% else %}ℹ{% endif %}
+                {{ log.msg }}
+            </p>
             {% endfor %}
         </div>
     </details>

@@ -769,7 +769,10 @@ class RotinaExecutionView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
             conexao = ConexaoExterna.objects.get(pk=conexao_id, tenant=request.user.tenant)
 
             # Build variables dict from POST data
-            sql = f"{rotina.sql_content}\n{rotina.sql_content_extra or ''}"
+            sql_parts = [rotina.sql_content.strip()]
+            if rotina.sql_content_extra:
+                sql_parts.append(rotina.sql_content_extra.strip())
+            sql = "\n".join(sql_parts).replace("\r", "")
             variables = SQLExecutor.extract_variables(sql)
             params = {var: request.POST.get(var) for var in variables}
 

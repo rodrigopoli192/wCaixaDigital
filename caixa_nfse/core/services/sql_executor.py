@@ -67,7 +67,8 @@ class SQLExecutor:
         log(f"Iniciando execução da rotina. Parâmetros recebidos: {list(params.keys())}")
 
         # Basic SQL Injection prevention for the specific @VAR syntax
-        processed_sql = sql
+        # Sanitize SQL: remove \r (Windows CRLF) and strip trailing whitespace
+        processed_sql = sql.replace("\r", "").strip()
         try:
             # Sort by length desc to prioritize longer variable names (extra safety)
             sorted_params = sorted(params.items(), key=lambda x: len(x[0]), reverse=True)
