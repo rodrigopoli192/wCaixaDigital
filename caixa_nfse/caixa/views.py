@@ -398,7 +398,7 @@ class ListaMovimentosView(LoginRequiredMixin, TenantMixin, SingleTableMixin, Fil
 
     def get_queryset(self):
         qs = super().get_queryset()
-        return qs.filter(abertura_id=self.kwargs["pk"])
+        return qs.filter(abertura_id=self.kwargs["pk"]).select_related("cliente", "forma_pagamento")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

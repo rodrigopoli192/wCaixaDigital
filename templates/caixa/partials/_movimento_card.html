@@ -85,6 +85,11 @@
                     {% if mov.cliente_nome %}
                     <span class="text-[10px] text-slate-500 truncate" title="{{ mov.cliente_nome }}">Apresentante: {{ mov.cliente_nome }}</span>
                     {% endif %}
+                {% elif show_tipo and mov.cliente %}
+                    <span class="text-[10px] text-slate-500 truncate" title="{{ mov.cliente.razao_social }}">
+                        <span class="material-symbols-outlined text-[10px]">person</span>
+                        {{ mov.cliente.razao_social }}
+                    </span>
                 {% endif %}
                 {% if show_tipo and mov.forma_pagamento %}
                 <span class="text-[10px] text-slate-500 flex items-center gap-0.5">

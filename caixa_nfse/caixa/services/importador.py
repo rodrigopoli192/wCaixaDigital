@@ -202,9 +202,11 @@ class ImportadorMovimentos:
     def confirmar_movimentos(ids, abertura, forma_pagamento, tipo, user):
         """
         Migrate selected MovimentoImportado records to MovimentoCaixa.
+        Auto-registers Cliente from apresentante name if available.
         Returns count of confirmed movements.
         """
         from caixa_nfse.caixa.models import MovimentoCaixa, MovimentoImportado
+        from caixa_nfse.clientes.models import Cliente
 
         importados = MovimentoImportado.objects.filter(
             pk__in=ids,
@@ -217,17 +219,36 @@ class ImportadorMovimentos:
         caixa = abertura.caixa
 
         for imp in importados:
+            # Auto-register client from apresentante name
+            cliente = None
+            if imp.cliente_nome:
+                # No CPF/CNPJ from import → always create new (homonyms allowed)
+                cliente = Cliente.objects.create(
+                    tenant=user.tenant,
+                    razao_social=imp.cliente_nome.strip(),
+                    cadastro_completo=False,
+                )
+
+            # Build description
+            parts = []
+            if imp.descricao:
+                parts.append(imp.descricao)
+            if not parts:
+                parts.append(f"Protocolo {imp.protocolo}")
+            descricao = " — ".join(parts)
+
             mov_kwargs = {
                 "tenant": user.tenant,
                 "abertura": abertura,
                 "tipo": tipo,
                 "forma_pagamento": forma_pagamento,
                 "valor": imp.valor or imp.valor_total_taxas,
-                "descricao": imp.descricao or f"Protocolo {imp.protocolo}",
+                "descricao": descricao,
                 "created_by": user,
                 "protocolo": imp.protocolo,
                 "status_item": imp.status_item,
                 "quantidade": imp.quantidade,
+                "cliente": cliente,
             }
 
             # Copy tax fields

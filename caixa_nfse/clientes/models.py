@@ -70,11 +70,15 @@ class Cliente(TenantAwareModel):
     cpf_cnpj = models.CharField(
         _("CPF/CNPJ"),
         max_length=18,
+        blank=True,
+        default="",
         help_text=_("Documento com máscara"),
     )
     cpf_cnpj_hash = models.CharField(
         _("hash do documento"),
         max_length=64,
+        blank=True,
+        default="",
         db_index=True,
         editable=False,
     )
@@ -130,6 +134,11 @@ class Cliente(TenantAwareModel):
 
     # Status
     ativo = models.BooleanField(_("ativo"), default=True)
+    cadastro_completo = models.BooleanField(
+        _("cadastro completo"),
+        default=True,
+        help_text=_("Indica se o cliente tem todos os dados preenchidos (CPF, endereço, etc.)"),
+    )
 
     class Meta:
         verbose_name = _("cliente")
@@ -139,6 +148,7 @@ class Cliente(TenantAwareModel):
             models.UniqueConstraint(
                 fields=["tenant", "cpf_cnpj_hash"],
                 name="unique_cliente_documento",
+                condition=models.Q(cpf_cnpj_hash__gt=""),
             ),
         ]
 
@@ -154,6 +164,9 @@ class Cliente(TenantAwareModel):
         """Validate CPF/CNPJ based on tipo_pessoa."""
         super().clean()
 
+        if not self.cpf_cnpj:
+            return
+
         if self.tipo_pessoa == TipoPessoa.PF:
             if not validar_cpf(self.cpf_cnpj):
                 raise ValidationError({"cpf_cnpj": _("CPF inválido.")})
@@ -162,9 +175,12 @@ class Cliente(TenantAwareModel):
                 raise ValidationError({"cpf_cnpj": _("CNPJ inválido.")})
 
     def save(self, *args, **kwargs):
-        # Generate hash for indexed search
-        doc_limpo = re.sub(r"[^0-9]", "", self.cpf_cnpj)
-        self.cpf_cnpj_hash = hashlib.sha256(doc_limpo.encode()).hexdigest()
+        # Generate hash for indexed search (only if document provided)
+        if self.cpf_cnpj:
+            doc_limpo = re.sub(r"[^0-9]", "", self.cpf_cnpj)
+            self.cpf_cnpj_hash = hashlib.sha256(doc_limpo.encode()).hexdigest()
+        else:
+            self.cpf_cnpj_hash = ""
         super().save(*args, **kwargs)
 
     @property

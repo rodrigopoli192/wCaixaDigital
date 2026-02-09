@@ -78,22 +78,24 @@ class ClienteForm(forms.ModelForm):
         cleaned_data = super().clean()
         cpf_cnpj = cleaned_data.get("cpf_cnpj")
 
-        if cpf_cnpj and self.tenant:
-            import hashlib
-            import re
+        if not cpf_cnpj or not self.tenant:
+            return cleaned_data
 
-            # Gera hash para verificação (lógica igual ao model)
-            doc_limpo = re.sub(r"[^0-9]", "", cpf_cnpj)
-            doc_hash = hashlib.sha256(doc_limpo.encode()).hexdigest()
+        import hashlib
+        import re
 
-            # Verifica duplicidade
-            qs = Cliente.objects.filter(tenant=self.tenant, cpf_cnpj_hash=doc_hash)
+        # Gera hash para verificação (lógica igual ao model)
+        doc_limpo = re.sub(r"[^0-9]", "", cpf_cnpj)
+        doc_hash = hashlib.sha256(doc_limpo.encode()).hexdigest()
 
-            # Se for edição, exclui o próprio registro da checagem
-            if self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
+        # Verifica duplicidade
+        qs = Cliente.objects.filter(tenant=self.tenant, cpf_cnpj_hash=doc_hash)
 
-            if qs.exists():
-                self.add_error("cpf_cnpj", "Já existe um cliente cadastrado com este CPF/CNPJ.")
+        # Se for edição, exclui o próprio registro da checagem
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+
+        if qs.exists():
+            self.add_error("cpf_cnpj", "Já existe um cliente cadastrado com este CPF/CNPJ.")
 
         return cleaned_data
