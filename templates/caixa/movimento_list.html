@@ -153,42 +153,38 @@
     </div>
 
     <!-- 3. Filters Section -->
+    <style>
+        .filter-select { -webkit-appearance: none !important; -moz-appearance: none !important; appearance: none !important; }
+    </style>
     <div class="bg-white dark:bg-[#2B2C30] p-4 rounded-xl border border-slate-200 dark:border-[#2d3544] shadow-sm dark:shadow-none">
         <form method="get" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4 items-end">
              <!-- Tipo de Lançamento (3 cols) -->
             <div class="col-span-1 md:col-span-2 xl:col-span-3 space-y-1.5">
                 <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Tipo de Lançamento</label>
                 <div class="relative">
-                    <select name="tipo" class="w-full h-11 bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-4 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none appearance-none font-medium text-sm transition-all hover:border-slate-400 dark:hover:border-slate-600">
+                    <select name="tipo" class="filter-select w-full h-11 bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-4 pr-10 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm transition-all hover:border-slate-400 dark:hover:border-slate-600">
                         <option value="">Todos os Movimentos</option>
                         <option value="ENTRADA" {% if request.GET.tipo == 'ENTRADA' %}selected{% endif %}>Entradas</option>
                         <option value="SAIDA" {% if request.GET.tipo == 'SAIDA' %}selected{% endif %}>Saídas</option>
                         <option value="SANGRIA" {% if request.GET.tipo == 'SANGRIA' %}selected{% endif %}>Sangrias</option>
                         <option value="SUPRIMENTO" {% if request.GET.tipo == 'SUPRIMENTO' %}selected{% endif %}>Suprimentos</option>
                     </select>
-                    <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none">keyboard_arrow_down</span>
+                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-sm">keyboard_arrow_down</span>
                 </div>
             </div>
 
             <!-- Data Início (3 cols) -->
             <div class="col-span-1 xl:col-span-3 space-y-1.5">
                 <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data Início</label>
-                <div class="relative">
-                     <!-- Added [&::-webkit-calendar-picker-indicator]:hidden to hide native icon -->
                      <input type="date" name="data_inicio" value="{{ request.GET.data_inicio }}"
-                       class="w-full h-11 bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg pl-4 pr-10 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm text-placeholder-gray transition-all hover:border-slate-400 dark:hover:border-slate-600 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer">
-                     <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-sm">calendar_today</span>
-                </div>
+                       class="w-full h-11 bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-4 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm transition-all hover:border-slate-400 dark:hover:border-slate-600">
             </div>
 
             <!-- Data Fim (3 cols) -->
             <div class="col-span-1 xl:col-span-3 space-y-1.5">
                 <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data Fim</label>
-                 <div class="relative">
                      <input type="date" name="data_fim" value="{{ request.GET.data_fim }}"
-                       class="w-full h-11 bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg pl-4 pr-10 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm text-placeholder-gray transition-all hover:border-slate-400 dark:hover:border-slate-600 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer">
-                     <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-sm">calendar_today</span>
-                </div>
+                       class="w-full h-11 bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-4 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm transition-all hover:border-slate-400 dark:hover:border-slate-600">
             </div>
 
             <!-- Buttons (3 cols) -->
