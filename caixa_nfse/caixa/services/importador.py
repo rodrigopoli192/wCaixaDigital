@@ -59,6 +59,8 @@ class ImportadorMovimentos:
         # valor
         "VALOR": "valor",
         "VALOR_PRINCIPAL": "valor",
+        "VALORRECEITAADICIONAL1": "valor_receita_adicional_1",
+        "VALORRECEITAADICIONAL2": "valor_receita_adicional_2",
         "VALOREMOLUMENTO": "emolumento",
         # emolumento
         "EMOLUMENTO": "emolumento",
@@ -103,12 +105,37 @@ class ImportadorMovimentos:
         "FECAD": "fecad",
     }
 
+    # Fields that should be accumulated (summed) when multiple columns map to the same target
+    _ACCUMULATE_FIELDS = {
+        "valor",
+        "emolumento",
+        "taxa_judiciaria",
+        "iss",
+        "fundesp",
+        "funesp",
+        "estado",
+        "fesemps",
+        "funemp",
+        "funcomp",
+        "fepadsaj",
+        "funproge",
+        "fundepeg",
+        "fundaf",
+        "femal",
+        "fecad",
+        "valor_receita_adicional_1",
+        "valor_receita_adicional_2",
+    }
+
     @staticmethod
     def mapear_colunas(rotina, headers, row):
         """
         Map a single result row to a dict of MovimentoImportado field values.
         Uses MapeamentoColunaRotina if configured, otherwise falls back to
         auto-mapping based on column name aliases.
+        When multiple SQL columns map to the same decimal target (e.g. VALOR +
+        VALORRECEITAADICIONAL1), values are accumulated (summed) instead of
+        overwritten.
         """
         manual = {m.coluna_sql.upper(): m.campo_destino for m in rotina.mapeamentos.all()}
         use_auto = not manual
@@ -121,7 +148,13 @@ class ImportadorMovimentos:
             else:
                 campo = manual.get(h)
             if campo and i < len(row):
-                mapped[campo] = row[i]
+                # Accumulate decimal fields when same target appears multiple times
+                if campo in ImportadorMovimentos._ACCUMULATE_FIELDS and campo in mapped:
+                    existing = ImportadorMovimentos._parse_decimal(mapped[campo])
+                    new_val = ImportadorMovimentos._parse_decimal(row[i])
+                    mapped[campo] = str(existing + new_val)
+                else:
+                    mapped[campo] = row[i]
 
         return mapped
 
@@ -159,17 +192,73 @@ class ImportadorMovimentos:
             .values_list("protocolo", flat=True)
         )
 
-        importados = []
+        # Helper to normalize description
+        def normalize_desc(d):
+            return " ".join(str(d).split()) if d else ""
+
+        grouped_data = {}
         skipped = 0
+
+        # 1. First pass: Group rows by protocol
         for row in rows:
             mapped = ImportadorMovimentos.mapear_colunas(rotina, headers, row)
             if not mapped:
                 continue
 
             protocolo = str(mapped.get("protocolo", "") or "").strip()
+
+            # Check if protocol exists in DB
             if protocolo and protocolo in existing:
                 skipped += 1
                 continue
+
+            # Key for grouping: usage of protocol. If no protocol, use unique key to avoid grouping
+            group_key = protocolo if protocolo else f"NO_PROTO_{len(grouped_data)}"
+
+            if group_key not in grouped_data:
+                grouped_data[group_key] = {
+                    "protocolo": protocolo,
+                    "valor": Decimal("0.00"),
+                    "taxas": {f: Decimal("0.00") for f in DECIMAL_FIELDS if f != "valor"},
+                    "descricoes": [],
+                    "first_mapped": mapped,  # Store first occurrence for non-summable
+                }
+
+            # Accumulate values
+            group = grouped_data[group_key]
+
+            # Valor principal
+            valor_row = ImportadorMovimentos._parse_decimal(mapped.get("valor"))
+            group["valor"] += valor_row
+
+            # Taxas
+            for tax_field in group["taxas"]:
+                val_tax = ImportadorMovimentos._parse_decimal(mapped.get(tax_field))
+                group["taxas"][tax_field] += val_tax
+
+            # Collect description (avoid duplicates if exact same string)
+            desc = normalize_desc(mapped.get("descricao"))
+            if desc and desc not in group["descricoes"]:
+                # If grouping by protocol, we append.
+                # If grouping by unique/no_proto, we append (it's list of 1 usually).
+                group["descricoes"].append(desc)
+
+        # 2. Second pass: Create objects
+        importados = []
+        for _, data in grouped_data.items():
+            first = data["first_mapped"]
+            protocolo = data["protocolo"]
+
+            # Format description: "{Rotina} - {Desc1}; {Desc2}"
+            desc_list = data["descricoes"]
+            if desc_list:
+                combined_desc = "; ".join(desc_list)
+                final_descricao = f"{rotina.nome} - {combined_desc}"
+            else:
+                final_descricao = f"{rotina.nome}"
+
+            # Truncate description if needed (max 500 chars)
+            final_descricao = final_descricao[:500]
 
             kwargs = {
                 "tenant": user.tenant,
@@ -177,18 +266,36 @@ class ImportadorMovimentos:
                 "conexao": conexao,
                 "rotina": rotina,
                 "importado_por": user,
+                "protocolo": protocolo,
+                "valor": data["valor"],
+                "descricao": final_descricao,
             }
 
-            for campo, valor in mapped.items():
-                if campo in DECIMAL_FIELDS:
-                    kwargs[campo] = ImportadorMovimentos._parse_decimal(valor)
-                elif campo == "quantidade":
-                    try:
-                        kwargs[campo] = int(valor) if valor else 1
-                    except (ValueError, TypeError):
-                        kwargs[campo] = 1
-                else:
-                    kwargs[campo] = str(valor or "")[:500]
+            # Populate tax fields
+            for tax_field, tax_val in data["taxas"].items():
+                kwargs[tax_field] = tax_val
+
+            # Populate non-summable fields from first record
+            # cliente_nome
+            kwargs["cliente_nome"] = str(first.get("cliente_nome") or "")[:200]
+
+            # status_item
+            kwargs["status_item"] = str(first.get("status_item") or "")[:100]
+
+            # quantidade (use first or sum? User didn't specify, but usually quantity 1 makes sense for protocol group or sum.
+            # Given user said "values" are summable, quantity might be.
+            # However, looking at tax/cartorial context, quantity is often 1 per acto.
+            # I will use first record's quantity logic for now as it wasn't explicitly requested to sum quantity,
+            # and 'valores' usually implies currency in this context.
+            # But let's check: "fazer uma soma dos valores".
+            # I'll stick to first record for quantity to be safe or maybe set to 1 if it's a grouped act.
+            # The existing code had explicit logic for quantity.
+            # Let's preserve using the first record's quantity logic.
+            q_val = first.get("quantidade")
+            try:
+                kwargs["quantidade"] = int(q_val) if q_val else 1
+            except (ValueError, TypeError):
+                kwargs["quantidade"] = 1
 
             importados.append(MovimentoImportado(**kwargs))
             if protocolo:

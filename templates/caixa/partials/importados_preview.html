@@ -111,6 +111,8 @@
                             <th class="px-3 py-3 text-right text-slate-400">Fundaf</th>
                             <th class="px-3 py-3 text-right text-slate-400">Femal</th>
                             <th class="px-3 py-3 text-right text-slate-400">Fecad</th>
+                            <th class="px-3 py-3 text-right text-slate-400">Rec. Adic. 1</th>
+                            <th class="px-3 py-3 text-right text-slate-400">Rec. Adic. 2</th>
                             <th class="px-3 py-3 text-center">QTD</th>
                             <th class="px-3 py-3 text-center">Status</th>
                         </tr>
@@ -131,7 +133,7 @@
                                 <input type="hidden" name="conexao_id_{{ forloop.counter0 }}" value="{{ row.meta_conexao_id }}">
                                 <input type="hidden" name="rotina_id_{{ forloop.counter0 }}" value="{{ row.meta_rotina_id }}">
                                 <input type="hidden" name="raw_headers_{{ forloop.counter0 }}" value="{{ row.meta_raw_headers }}">
-                                <input type="hidden" name="raw_row_{{ forloop.counter0 }}" value="{{ row.meta_raw_row }}">
+                                <input type="hidden" name="raw_rows_{{ forloop.counter0 }}" value="{{ row.meta_raw_rows }}">
                             </td>
                             <td class="px-3 py-2 text-center">
                                 <button type="button" 
@@ -163,6 +165,8 @@
                             <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.fundaf|default:"-" }}</td>
                             <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.femal|default:"-" }}</td>
                             <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.fecad|default:"-" }}</td>
+                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.valor_receita_adicional_1|default:"-" }}</td>
+                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.valor_receita_adicional_2|default:"-" }}</td>
 
                             <td class="px-3 py-2 text-center text-slate-600 dark:text-slate-400">{{ row.quantidade|default:"1" }}</td>
                             <td class="px-3 py-2 text-center">

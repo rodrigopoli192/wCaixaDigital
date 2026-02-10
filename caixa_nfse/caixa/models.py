@@ -416,6 +416,20 @@ class MovimentoCaixa(TenantAwareModel):
         default=Decimal("0.00"),
         blank=True,
     )
+    valor_receita_adicional_1 = models.DecimalField(
+        _("Receita Adicional 1"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    valor_receita_adicional_2 = models.DecimalField(
+        _("Receita Adicional 2"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
 
     # Auditoria
     hash_registro = models.CharField(
@@ -453,6 +467,8 @@ class MovimentoCaixa(TenantAwareModel):
         "fecad",
         "emolumento",
         "taxa_judiciaria",
+        "valor_receita_adicional_1",
+        "valor_receita_adicional_2",
     ]
 
     class Meta:
@@ -777,6 +793,20 @@ class MovimentoImportado(TenantAwareModel):
     )
     taxa_judiciaria = models.DecimalField(
         _("taxa judiciária"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    valor_receita_adicional_1 = models.DecimalField(
+        _("Receita Adicional 1"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    valor_receita_adicional_2 = models.DecimalField(
+        _("Receita Adicional 2"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
     )
 
     TAXA_FIELDS = MovimentoCaixa.TAXA_FIELDS

@@ -599,25 +599,118 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
                             if mapped:
                                 mapped["meta_conexao_id"] = str(conexao.pk)
                                 mapped["meta_rotina_id"] = str(rotina.pk)
+                                mapped["meta_rotina_nome"] = rotina.nome
                                 mapped["meta_origem"] = f"{conexao.sistema} - {rotina.nome}"
-                                mapped["meta_raw_headers"] = json.dumps(headers)
-                                mapped["meta_raw_row"] = json.dumps(
-                                    [str(v) if v is not None else "" for v in row]
-                                )
+                                mapped["meta_raw_headers"] = headers
+                                mapped["meta_raw_row"] = [
+                                    str(v) if v is not None else "" for v in row
+                                ]
                                 # Full data for preview details
                                 full_data = {}
-                                for h, v in zip(headers, row):
+                                for h, v in zip(headers, row, strict=False):
                                     if isinstance(v, Decimal):
                                         full_data[h] = f"{v:.2f}"
                                     elif hasattr(v, "isoformat"):
                                         full_data[h] = v.strftime("%d/%m/%Y %H:%M:%S")
                                     else:
                                         full_data[h] = str(v) if v is not None else ""
-                                mapped["meta_full_data"] = json.dumps(full_data)
+                                mapped["meta_full_data"] = full_data
                                 protocolo = str(mapped.get("protocolo", "") or "").strip()
                                 existing = existing_by_rotina.get(str(rotina.pk), set())
                                 mapped["meta_duplicado"] = bool(protocolo and protocolo in existing)
                                 preview_rows.append(mapped)
+
+            # --- Group preview_rows by protocol ---
+            from caixa_nfse.caixa.services.importador import ImportadorMovimentos as _Imp
+
+            SUMMABLE = set(MovimentoImportado.TAXA_FIELDS) | {
+                "valor",
+                "emolumento",
+                "taxa_judiciaria",
+            }
+            grouped = {}  # key -> grouped row dict
+            ungrouped = []  # rows without protocol
+
+            for row in preview_rows:
+                proto = str(row.get("protocolo", "") or "").strip()
+                if not proto:
+                    # No protocol → cannot group, keep as-is
+                    row["meta_raw_headers"] = json.dumps(row["meta_raw_headers"])
+                    row["meta_raw_rows"] = json.dumps([row["meta_raw_row"]])
+                    row["meta_full_data"] = json.dumps(row["meta_full_data"])
+                    ungrouped.append(row)
+                    continue
+
+                if proto not in grouped:
+                    grouped[proto] = {
+                        **row,
+                        "_descricoes": [],
+                        "_raw_rows": [],
+                        "_full_data_list": [],
+                    }
+                    # Initialize summable fields to Decimal
+                    for sf in SUMMABLE:
+                        grouped[proto][sf] = _Imp._parse_decimal(row.get(sf))
+
+                    # Non-summable: already set from first row
+                else:
+                    g = grouped[proto]
+                    # Sum financial fields
+                    for sf in SUMMABLE:
+                        g[sf] = g[sf] + _Imp._parse_decimal(row.get(sf))
+
+                    # Duplicate detection: if any sub-row is duplicated, mark group
+                    if row.get("meta_duplicado"):
+                        g["meta_duplicado"] = True
+
+                # Collect descriptions
+                desc = str(row.get("descricao", "") or "").strip()
+                if desc and desc not in grouped[proto]["_descricoes"]:
+                    grouped[proto]["_descricoes"].append(desc)
+
+                # Collect raw rows
+                grouped[proto]["_raw_rows"].append(row["meta_raw_row"])
+                grouped[proto]["_full_data_list"].append(row["meta_full_data"])
+
+            # Finalize grouped rows
+            preview_rows = []
+            for _, g in grouped.items():
+                rotina_nome = g.get("meta_rotina_nome", "")
+                descs = g.pop("_descricoes")
+                raw_rows_list = g.pop("_raw_rows")
+                full_data_list = g.pop("_full_data_list")
+
+                # Format description: "NomeRotina - Desc1; Desc2"
+                if descs:
+                    g["descricao"] = f"{rotina_nome} - {'; '.join(descs)}"
+                else:
+                    g["descricao"] = rotina_nome
+
+                # Format summable fields for display
+                for sf in SUMMABLE:
+                    val = g.get(sf)
+                    if isinstance(val, Decimal):
+                        g[sf] = f"{val:.2f}"
+
+                # Serialize meta fields for template
+                g["meta_raw_headers"] = json.dumps(g["meta_raw_headers"])
+                g["meta_raw_rows"] = json.dumps(raw_rows_list)
+
+                # Merge full_data for detail modal
+                merged_full = {}
+                for fd in full_data_list:
+                    for k, v in fd.items():
+                        if k not in merged_full:
+                            merged_full[k] = v
+                        elif merged_full[k] != v:
+                            # Append different values
+                            if v not in merged_full[k]:
+                                merged_full[k] += f" | {v}"
+                g["meta_full_data"] = json.dumps(merged_full)
+
+                preview_rows.append(g)
+
+            preview_rows.extend(ungrouped)
 
             if not preview_rows:
                 html = render_to_string(
@@ -680,9 +773,9 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
                 conexao_id = request.POST.get(f"conexao_id_{idx}")
                 rotina_id = request.POST.get(f"rotina_id_{idx}")
                 raw_headers = request.POST.get(f"raw_headers_{idx}")
-                raw_row = request.POST.get(f"raw_row_{idx}")
+                raw_rows_json = request.POST.get(f"raw_rows_{idx}")
 
-                if not all([conexao_id, rotina_id, raw_headers, raw_row]):
+                if not all([conexao_id, rotina_id, raw_headers, raw_rows_json]):
                     continue
 
                 if conexao_id not in conexao_cache:
@@ -692,10 +785,10 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
                 conexao = conexao_cache[conexao_id]
                 rotina = Rotina.objects.get(pk=rotina_id, ativo=True)
                 headers = json.loads(raw_headers)
-                row = json.loads(raw_row)
+                all_rows = json.loads(raw_rows_json)
 
                 created, skipped = ImportadorMovimentos.salvar_importacao(
-                    abertura, conexao, rotina, headers, [row], request.user
+                    abertura, conexao, rotina, headers, all_rows, request.user
                 )
                 total_importados += created
                 total_duplicados += skipped
