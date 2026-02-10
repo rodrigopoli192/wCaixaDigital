@@ -16,9 +16,9 @@
         <!-- Info: two rows stacked -->
         <div class="flex-1 min-w-0 space-y-1">
             <!-- Row 1: Protocolo | Descrição | Status/Tipo | Emolumento | Taxas | Total | Badge -->
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4 overflow-hidden">
                 <span class="text-sm font-mono text-slate-700 dark:text-slate-200 shrink-0 w-[80px] truncate" title="{{ mov.protocolo }}">{{ mov.protocolo|default:"—" }}</span>
-                <span class="text-sm text-slate-600 dark:text-slate-300 truncate flex-1 min-w-0" title="{{ mov.descricao }}">{{ mov.descricao|default:"—" }}</span>
+                <span class="text-sm text-slate-600 dark:text-slate-300 truncate flex-1 min-w-0 max-w-[250px]" title="{{ mov.descricao }}">{{ mov.descricao|default:"—" }}</span>
 
                 {% if show_tipo %}
                 <!-- Tipo Badge (MovimentoCaixa) -->
@@ -210,6 +210,14 @@
                     <div class="flex justify-between text-xs">
                         <span class="text-slate-400 dark:text-slate-500">FECAD</span>
                         <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.fecad|default:"0"|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-400 dark:text-slate-500">Rec. Adic. 1</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.valor_receita_adicional_1|default:"0"|floatformat:2 }}</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-slate-400 dark:text-slate-500">Rec. Adic. 2</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-300">R$ {{ mov.valor_receita_adicional_2|default:"0"|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-xs">
                         <span class="text-slate-400 dark:text-slate-500 font-bold">Emolumento</span>
