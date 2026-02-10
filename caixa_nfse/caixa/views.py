@@ -2,6 +2,8 @@
 Caixa views.
 """
 
+from decimal import Decimal
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import transaction
@@ -602,6 +604,16 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
                                 mapped["meta_raw_row"] = json.dumps(
                                     [str(v) if v is not None else "" for v in row]
                                 )
+                                # Full data for preview details
+                                full_data = {}
+                                for h, v in zip(headers, row):
+                                    if isinstance(v, Decimal):
+                                        full_data[h] = f"{v:.2f}"
+                                    elif hasattr(v, "isoformat"):
+                                        full_data[h] = v.strftime("%d/%m/%Y %H:%M:%S")
+                                    else:
+                                        full_data[h] = str(v) if v is not None else ""
+                                mapped["meta_full_data"] = json.dumps(full_data)
                                 protocolo = str(mapped.get("protocolo", "") or "").strip()
                                 existing = existing_by_rotina.get(str(rotina.pk), set())
                                 mapped["meta_duplicado"] = bool(protocolo and protocolo in existing)
