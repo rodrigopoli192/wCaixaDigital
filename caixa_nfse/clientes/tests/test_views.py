@@ -133,3 +133,35 @@ class TestClienteViews:
         self.client_obj.refresh_from_db()
         assert self.client_obj.razao_social == "Updated Name"
         assert self.client_obj.updated_by == self.user
+
+    def test_list_shows_cadastro_incompleto_badge(self):
+        self.client_obj.cadastro_completo = False
+        self.client_obj.save()
+
+        url = reverse("clientes:list")
+        response = self.client.get(url)
+        assert response.status_code == 200
+        assert "Incompleto" in response.content.decode()
+
+    def test_detail_shows_cadastro_incompleto_badge(self):
+        self.client_obj.cadastro_completo = False
+        self.client_obj.save()
+
+        url = reverse("clientes:detail", kwargs={"pk": self.client_obj.pk})
+        response = self.client.get(url)
+        assert response.status_code == 200
+        assert "Cadastro Incompleto" in response.content.decode()
+
+    def test_list_filter_cadastro_completo(self):
+        incomplete = ClienteFactory(
+            tenant=self.tenant,
+            created_by=self.user,
+            cadastro_completo=False,
+        )
+
+        url = reverse("clientes:list")
+        response = self.client.get(url, {"cadastro_completo": "false"})
+        assert response.status_code == 200
+        ids = [c.pk for c in response.context["object_list"]]
+        assert incomplete.pk in ids
+        assert self.client_obj.pk not in ids
