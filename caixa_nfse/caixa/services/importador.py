@@ -59,7 +59,7 @@ class ImportadorMovimentos:
         # valor
         "VALOR": "valor",
         "VALOR_PRINCIPAL": "valor",
-        "VALORRECEITAADICIONAL1": "valor_receita_adicional_1",
+        "VALORRECEITAADICIONAL1": "taxa_judiciaria",
         "VALORRECEITAADICIONAL2": "valor_receita_adicional_2",
         "VALOREMOLUMENTO": "emolumento",
         # emolumento
