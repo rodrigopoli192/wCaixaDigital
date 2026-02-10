@@ -50,7 +50,15 @@
                 const rotinaId = pair.split(':')[1];
                 (this.rotinaVarMap[rotinaId] || []).forEach(v => vars.add(v));
             });
-            return [...vars].sort();
+            return [...vars].sort((a, b) => {
+                const au = a.toUpperCase();
+                const bu = b.toUpperCase();
+                const aIsInicio = au.includes('INICIO') || au.includes('INITIAL');
+                const bIsInicio = bu.includes('INICIO') || bu.includes('INITIAL');
+                if (aIsInicio && !bIsInicio) return -1;
+                if (!aIsInicio && bIsInicio) return 1;
+                return a.localeCompare(b);
+            });
         },
         isDateVar(name) {
             const n = name.toUpperCase();
