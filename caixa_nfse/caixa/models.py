@@ -809,6 +809,13 @@ class MovimentoImportado(TenantAwareModel):
         blank=True,
     )
 
+    data_ato = models.DateField(
+        _("data do ato"),
+        null=True,
+        blank=True,
+        help_text=_("Data da confecção do ato (importada da SQL)"),
+    )
+
     TAXA_FIELDS = MovimentoCaixa.TAXA_FIELDS
 
     class Meta:

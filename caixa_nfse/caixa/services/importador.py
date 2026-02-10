@@ -3,6 +3,7 @@ Service layer for importing movements from external databases via Rotinas SQL.
 """
 
 import logging
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
@@ -72,6 +73,10 @@ class ImportadorMovimentos:
         "STATUS": "status_item",
         "STATUS_PAGAMENTO": "status_item",
         "DATA_PAGAMENTO": "status_item",
+        # data do ato
+        "DATA_ATO": "data_ato",
+        "DATAATO": "data_ato",
+        "DATA_CONFECCAO": "data_ato",
         # taxa_judiciaria
         "TAXA_JUDICIARIA": "taxa_judiciaria",
         "TX_JUDICIARIA": "taxa_judiciaria",
@@ -169,6 +174,25 @@ class ImportadorMovimentos:
             return Decimal(str(value).strip().replace(",", "."))
         except (InvalidOperation, ValueError):
             return Decimal("0.00")
+
+    @staticmethod
+    def _parse_date(value):
+        """Parse a date value from SQL into a Python date object."""
+        if value is None:
+            return None
+        if isinstance(value, date):
+            return value
+        if isinstance(value, datetime):
+            return value.date()
+        s = str(value).strip()
+        if not s:
+            return None
+        for fmt in ("%Y%m%d", "%d/%m/%Y", "%Y-%m-%d"):
+            try:
+                return datetime.strptime(s, fmt).date()
+            except ValueError:
+                continue
+        return None
 
     @staticmethod
     def salvar_importacao(abertura, conexao, rotina, headers, rows, user):
@@ -296,6 +320,11 @@ class ImportadorMovimentos:
                 kwargs["quantidade"] = int(q_val) if q_val else 1
             except (ValueError, TypeError):
                 kwargs["quantidade"] = 1
+
+            # data do ato
+            data_ato = ImportadorMovimentos._parse_date(first.get("data_ato"))
+            if data_ato:
+                kwargs["data_ato"] = data_ato
 
             importados.append(MovimentoImportado(**kwargs))
             if protocolo:

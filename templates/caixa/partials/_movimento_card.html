@@ -109,6 +109,12 @@
                     {{ mov.forma_pagamento.nome }}
                 </span>
                 {% endif %}
+                {% if mov.data_ato %}
+                <span class="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-0.5 shrink-0">
+                    <span class="material-symbols-outlined text-[10px]">calendar_today</span>
+                    Ato: {{ mov.data_ato|date:"d/m/Y" }}
+                </span>
+                {% endif %}
             </div>
         </div>
 
