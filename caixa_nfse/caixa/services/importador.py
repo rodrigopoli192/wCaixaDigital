@@ -187,7 +187,7 @@ class ImportadorMovimentos:
         s = str(value).strip()
         if not s:
             return None
-        for fmt in ("%Y%m%d", "%d/%m/%Y", "%Y-%m-%d"):
+        for fmt in ("%Y%m%d", "%d/%m/%Y", "%Y-%m-%d", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M:%S.%f"):
             try:
                 return datetime.strptime(s, fmt).date()
             except ValueError:
