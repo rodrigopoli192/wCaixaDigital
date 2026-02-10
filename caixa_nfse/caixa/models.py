@@ -450,6 +450,13 @@ class MovimentoCaixa(TenantAwareModel):
         default=timezone.now,
     )
 
+    data_ato = models.DateField(
+        _("data do ato"),
+        null=True,
+        blank=True,
+        help_text=_("Data da confecção do ato (importada da SQL)"),
+    )
+
     # Campos de taxa para iteração
     TAXA_FIELDS = [
         "iss",

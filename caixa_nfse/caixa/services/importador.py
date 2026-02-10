@@ -385,6 +385,7 @@ class ImportadorMovimentos:
                 "status_item": imp.status_item,
                 "quantidade": imp.quantidade,
                 "cliente": cliente,
+                "data_ato": imp.data_ato,
             }
 
             # Copy tax fields
