@@ -485,6 +485,8 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
         return AberturaCaixa.objects.filter(tenant=self.request.user.tenant, fechado=False)
 
     def get_context_data(self, **kwargs):
+        import json
+
         context = super().get_context_data(**kwargs)
         from caixa_nfse.backoffice.models import Rotina
         from caixa_nfse.core.models import ConexaoExterna
@@ -495,15 +497,15 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
         ).select_related("sistema")
 
         conexoes_tree = []
+        rotina_variaveis = {}  # {rotina_pk: [var_names]}
         for con in conexoes:
-            rotinas = list(
-                Rotina.objects.filter(sistema=con.sistema, ativo=True).values(
-                    "pk", "nome", "descricao"
-                )
-            )
+            rotinas = list(Rotina.objects.filter(sistema=con.sistema, ativo=True))
             if rotinas:
                 conexoes_tree.append({"conexao": con, "rotinas": rotinas})
+                for rot in rotinas:
+                    rotina_variaveis[str(rot.pk)] = rot.extrair_variaveis()
         context["conexoes_tree"] = conexoes_tree
+        context["rotina_variaveis"] = json.dumps(rotina_variaveis)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -528,14 +530,19 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
 
         # Step 1: Buscar (execute SQL and return preview)
         pairs_raw = request.POST.getlist("conexao_rotina_pairs")
-        data_inicio = request.POST.get("data_inicio")
-        data_fim = request.POST.get("data_fim")
 
-        if not pairs_raw or not data_inicio or not data_fim:
+        if not pairs_raw:
             return HttpResponse(
                 '<div class="p-4 text-red-500 text-sm">'
-                "Preencha todos os campos: conexão, rotinas e período.</div>"
+                "Selecione ao menos uma conexão e rotina.</div>"
             )
+
+        # Collect all dynamic params (param_XXX from form)
+        sql_params = {}
+        for key, value in request.POST.items():
+            if key.startswith("param_") and value:
+                param_name = key[6:]  # Remove "param_" prefix
+                sql_params[param_name] = value
 
         # Parse pairs into {conexao_id: [rotina_ids]}
         from collections import defaultdict
@@ -555,6 +562,11 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
         try:
             from caixa_nfse.caixa.models import MovimentoImportado
 
+            # Inject tenant-level system params
+            tenant = request.user.tenant
+            if tenant.chave_servico_andamento_ri:
+                sql_params["SERVICOANDAMENTO"] = tenant.chave_servico_andamento_ri
+
             all_logs = []
             preview_rows = []
 
@@ -562,9 +574,7 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
                 conexao = ConexaoExterna.objects.get(pk=con_id, tenant=request.user.tenant)
                 rotinas = Rotina.objects.filter(pk__in=rot_ids, ativo=True)
 
-                resultados = ImportadorMovimentos.executar_rotinas(
-                    conexao, rotinas, data_inicio, data_fim
-                )
+                resultados = ImportadorMovimentos.executar_rotinas(conexao, rotinas, sql_params)
 
                 # Duplicate detection per conexao
                 existing_by_rotina = {}

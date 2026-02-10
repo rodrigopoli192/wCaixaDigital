@@ -35,6 +35,11 @@ urlpatterns = [
     ),
     # Payment Methods
     path(
+        "settings/parametros/",
+        views.SettingsParametrosView.as_view(),
+        name="settings_parametros",
+    ),
+    path(
         "settings/formas-pagamento/",
         views.FormaPagamentoListView.as_view(),
         name="settings_formas_pagamento_list",

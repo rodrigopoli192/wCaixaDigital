@@ -5,8 +5,8 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-white tracking-tight">Configurações</h1>
-            <p class="text-slate-400 mt-1">Gerencie sua empresa e equipe</p>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Configurações</h1>
+            <p class="text-slate-500 dark:text-slate-400 mt-1">Gerencie sua empresa e equipe</p>
         </div>
     </div>
 
@@ -20,7 +20,7 @@
                     hx-get="{% url 'core:settings_users_list' %}" 
                     hx-target="#settings-content" 
                     hx-swap="innerHTML"
-                    :class="activeTab === 'users' ? 'bg-[#2B2C30] border border-orange-500/50 text-white shadow-sm' : 'text-slate-400 hover:bg-[#2B2C30] hover:text-slate-200'"
+                    :class="activeTab === 'users' ? 'bg-slate-100 dark:bg-[#2B2C30] border border-orange-500/50 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#2B2C30] hover:text-slate-700 dark:hover:text-slate-200'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left">
                     <span class="material-symbols-outlined" :class="activeTab === 'users' ? 'text-orange-500' : ''">group</span>
                     <span class="font-medium">Usuários</span>
@@ -32,7 +32,7 @@
                     hx-get="{% url 'core:settings_formas_pagamento_list' %}" 
                     hx-target="#settings-content" 
                     hx-swap="innerHTML"
-                    :class="activeTab === 'pagamento' ? 'bg-[#2B2C30] border border-orange-500/50 text-white shadow-sm' : 'text-slate-400 hover:bg-[#2B2C30] hover:text-slate-200'"
+                    :class="activeTab === 'pagamento' ? 'bg-slate-100 dark:bg-[#2B2C30] border border-orange-500/50 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#2B2C30] hover:text-slate-700 dark:hover:text-slate-200'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left">
                     <span class="material-symbols-outlined" :class="activeTab === 'pagamento' ? 'text-orange-500' : ''">payments</span>
                     <span class="font-medium">Formas de Pagamento</span>
@@ -44,18 +44,24 @@
                     hx-get="{% url 'core:settings_conexoes_list' %}" 
                     hx-target="#settings-content" 
                     hx-swap="innerHTML"
-                    :class="activeTab === 'conexoes' ? 'bg-[#2B2C30] border border-orange-500/50 text-white shadow-sm' : 'text-slate-400 hover:bg-[#2B2C30] hover:text-slate-200'"
+                    :class="activeTab === 'conexoes' ? 'bg-slate-100 dark:bg-[#2B2C30] border border-orange-500/50 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#2B2C30] hover:text-slate-700 dark:hover:text-slate-200'"
                     class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left">
                     <span class="material-symbols-outlined" :class="activeTab === 'conexoes' ? 'text-orange-500' : ''">database</span>
                     <span class="font-medium">Dados de Conexão</span>
                 </button>
 
-                <!-- Placeholder for future settings -->
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-[#2B2C30] hover:text-slate-200 rounded-lg transition-all opacity-50 cursor-not-allowed">
-                    <span class="material-symbols-outlined">store</span>
-                    <span class="font-medium">Empresa (Em Breve)</span>
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-[#2B2C30] hover:text-slate-200 rounded-lg transition-all opacity-50 cursor-not-allowed">
+                <!-- Parâmetros de Integração Tab -->
+                <button 
+                    @click="activeTab = 'parametros'"
+                    hx-get="{% url 'core:settings_parametros' %}" 
+                    hx-target="#settings-content" 
+                    hx-swap="innerHTML"
+                    :class="activeTab === 'parametros' ? 'bg-slate-100 dark:bg-[#2B2C30] border border-orange-500/50 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-[#2B2C30] hover:text-slate-700 dark:hover:text-slate-200'"
+                    class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left">
+                    <span class="material-symbols-outlined" :class="activeTab === 'parametros' ? 'text-orange-500' : ''">tune</span>
+                    <span class="font-medium">Parâmetros</span>
+                </button>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-100 dark:hover:bg-[#2B2C30] hover:text-slate-500 dark:hover:text-slate-200 rounded-lg transition-all opacity-50 cursor-not-allowed">
                     <span class="material-symbols-outlined">receipt_long</span>
                     <span class="font-medium">NFS-e (Em Breve)</span>
                 </a>
@@ -64,7 +70,7 @@
 
         <!-- Main Content Area -->
         <div class="lg:col-span-9">
-            <div id="settings-content" class="bg-[#2B2C30] rounded-xl border border-[#2d3544] overflow-hidden min-h-[600px]">
+            <div id="settings-content" class="bg-white dark:bg-[#2B2C30] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden min-h-[600px]">
                 <!-- Load Initial Tab Content -->
                 <div 
                     hx-get="{% if active_tab == 'pagamento' %}{% url 'core:settings_formas_pagamento_list' %}{% elif active_tab == 'conexoes' %}{% url 'core:settings_conexoes_list' %}{% else %}{% url 'core:settings_users_list' %}{% endif %}" 

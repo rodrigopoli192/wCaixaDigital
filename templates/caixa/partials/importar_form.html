@@ -1,12 +1,20 @@
 <!-- Import Movements Modal Form -->
+<script type="application/json" id="rotina-var-map">{{ rotina_variaveis|safe }}</script>
 <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto animate-scale-in"
      x-data="{ 
         selectedPairs: [],
-        dataInicio: '',
-        dataFim: '',
+        rotinaVarMap: {},
+        paramValues: {},
         init() {
-            this.dataInicio = localStorage.getItem('import_data_inicio') || '';
-            this.dataFim = localStorage.getItem('import_data_fim') || '';
+            // Load rotina variable map from script tag
+            try {
+                this.rotinaVarMap = JSON.parse(document.getElementById('rotina-var-map').textContent || '{}');
+            } catch(e) { this.rotinaVarMap = {}; }
+            // Load saved param values
+            try {
+                const saved = JSON.parse(localStorage.getItem('import_params') || '{}');
+                this.paramValues = saved;
+            } catch(e) { this.paramValues = {}; }
         },
         toggleConexao(conId, rotinaIds, checked) {
             if (checked) {
@@ -36,9 +44,20 @@
         isRotinaChecked(conId, rId) {
             return this.selectedPairs.includes(conId + ':' + rId);
         },
-        salvarDatas() {
-            localStorage.setItem('import_data_inicio', this.dataInicio);
-            localStorage.setItem('import_data_fim', this.dataFim);
+        get activeVars() {
+            const vars = new Set();
+            this.selectedPairs.forEach(pair => {
+                const rotinaId = pair.split(':')[1];
+                (this.rotinaVarMap[rotinaId] || []).forEach(v => vars.add(v));
+            });
+            return [...vars].sort();
+        },
+        isDateVar(name) {
+            const n = name.toUpperCase();
+            return n.includes('DATA') || n.includes('DATE');
+        },
+        salvarParams() {
+            localStorage.setItem('import_params', JSON.stringify(this.paramValues));
         }
      }">
     
@@ -62,7 +81,7 @@
           hx-target="#import-results"
           hx-swap="innerHTML"
           hx-indicator="#import-spinner"
-          @submit="salvarDatas()"
+          @submit="salvarParams()"
           class="p-6 space-y-5">
         {% csrf_token %}
 
@@ -113,19 +132,35 @@
             {% endif %}
         </div>
 
-        <!-- Data Range -->
-        <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1.5">
-                <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Data Início</label>
-                <input type="date" name="data_inicio" x-model="dataInicio" required
-                       class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary text-slate-900 dark:text-white transition-all outline-none">
+        <!-- Dynamic Parameters (auto-detected from SQL) -->
+        <template x-if="activeVars.length > 0">
+            <div class="space-y-3">
+                <label class="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm text-primary">tune</span>
+                    Parâmetros da Rotina
+                </label>
+                <div class="grid grid-cols-2 gap-3">
+                    <template x-for="varName in activeVars" :key="varName">
+                        <div class="space-y-1">
+                            <label class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide" x-text="varName.replace(/_/g, ' ')"></label>
+                            <template x-if="isDateVar(varName)">
+                                <input :type="'date'" 
+                                       :name="'param_' + varName" 
+                                       x-model="paramValues[varName]"
+                                       class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary text-slate-900 dark:text-white transition-all outline-none text-sm">
+                            </template>
+                            <template x-if="!isDateVar(varName)">
+                                <input type="text" 
+                                       :name="'param_' + varName" 
+                                       x-model="paramValues[varName]"
+                                       :placeholder="'@' + varName"
+                                       class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary text-slate-900 dark:text-white transition-all outline-none text-sm">
+                            </template>
+                        </div>
+                    </template>
+                </div>
             </div>
-            <div class="space-y-1.5">
-                <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Data Fim</label>
-                <input type="date" name="data_fim" x-model="dataFim" required
-                       class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary text-slate-900 dark:text-white transition-all outline-none">
-            </div>
-        </div>
+        </template>
 
         <!-- Actions -->
         <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-border-dark">

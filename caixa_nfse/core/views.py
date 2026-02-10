@@ -388,6 +388,34 @@ class SettingsView(LoginRequiredMixin, TenantAdminRequiredMixin, TemplateView):
         return context
 
 
+class SettingsParametrosView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
+    """GET/POST for tenant integration parameters (HTMX partial)."""
+
+    def get(self, request):
+        return render(
+            request,
+            "core/settings/parametros.html",
+            {
+                "tenant": request.user.tenant,
+            },
+        )
+
+    def post(self, request):
+        tenant = request.user.tenant
+        tenant.chave_servico_andamento_ri = request.POST.get(
+            "chave_servico_andamento_ri", ""
+        ).strip()
+        tenant.save(update_fields=["chave_servico_andamento_ri"])
+        return render(
+            request,
+            "core/settings/parametros.html",
+            {
+                "tenant": tenant,
+                "saved": True,
+            },
+        )
+
+
 class TenantUserListView(LoginRequiredMixin, TenantAdminRequiredMixin, ListView):
     """
     List users for the current tenant.

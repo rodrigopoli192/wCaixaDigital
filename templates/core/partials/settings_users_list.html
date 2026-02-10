@@ -1,9 +1,9 @@
 <div class="flex flex-col h-full">
     <!-- Toolbar -->
-    <div class="p-6 border-b border-[#2d3544] flex items-center justify-between bg-[#212224]/50">
+    <div class="p-6 border-b border-slate-200 dark:border-[#2d3544] flex items-center justify-between bg-slate-50 dark:bg-[#212224]/50">
         <div>
-            <h2 class="text-lg font-bold text-white">Gestão de Usuários</h2>
-            <p class="text-sm text-slate-400">Adicione e gerencie membros da sua equipe</p>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white">Gestão de Usuários</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Adicione e gerencie membros da sua equipe</p>
         </div>
         
         <button 
@@ -19,8 +19,8 @@
     <!-- Table -->
     <div class="flex-1 overflow-auto">
         <table class="w-full text-left border-collapse">
-            <thead class="sticky top-0 bg-[#212224] z-10">
-                <tr class="text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-[#2d3544]">
+            <thead class="sticky top-0 bg-slate-100 dark:bg-[#212224] z-10">
+                <tr class="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200 dark:border-[#2d3544]">
                     <th class="px-6 py-4">Usuário</th>
                     <th class="px-6 py-4">Contato</th>
                     <th class="px-6 py-4">Cargo/Função</th>
@@ -28,21 +28,21 @@
                     <th class="px-6 py-4 text-right">Ações</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-[#2d3544]">
+            <tbody class="divide-y divide-slate-200 dark:divide-[#2d3544]">
                 {% for user_obj in users %}
-                <tr class="hover:bg-[#2d3544]/30 transition-colors group">
+                <tr class="hover:bg-slate-50 dark:hover:bg-[#2d3544]/30 transition-colors group">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="size-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold text-sm">
+                            <div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-white font-bold text-sm">
                                 {{ user_obj.first_name|first }}{{ user_obj.last_name|first }}
                             </div>
                             <div>
-                                <div class="font-medium text-slate-200">{{ user_obj.get_full_name }}</div>
-                                <div class="text-xs text-slate-500 font-mono">
+                                <div class="font-medium text-slate-800 dark:text-slate-200">{{ user_obj.get_full_name }}</div>
+                                <div class="text-xs font-mono">
                                     {% if user_obj.is_superuser %}
-                                        <span class="text-purple-400">Super Admin</span>
+                                        <span class="text-purple-600 dark:text-purple-400">Super Admin</span>
                                     {% elif user_obj.pode_aprovar_fechamento %}
-                                        <span class="text-orange-400">Gestor</span>
+                                        <span class="text-orange-600 dark:text-orange-400">Gestor</span>
                                     {% else %}
                                         <span class="text-slate-500">Operador</span>
                                     {% endif %}
@@ -52,39 +52,39 @@
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex flex-col gap-1 text-sm">
-                            <div class="flex items-center gap-2 text-slate-300">
-                                <span class="material-symbols-outlined text-[16px] text-slate-500">mail</span>
+                            <div class="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                                <span class="material-symbols-outlined text-[16px] text-slate-400 dark:text-slate-500">mail</span>
                                 {{ user_obj.email }}
                             </div>
                             {% if user_obj.telefone %}
-                            <div class="flex items-center gap-2 text-slate-400">
-                                <span class="material-symbols-outlined text-[16px] text-slate-500">call</span>
+                            <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                                <span class="material-symbols-outlined text-[16px] text-slate-400 dark:text-slate-500">call</span>
                                 {{ user_obj.telefone }}
                             </div>
                             {% endif %}
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                        <span class="text-sm text-slate-300">{{ user_obj.cargo|default:"-" }}</span>
+                        <span class="text-sm text-slate-700 dark:text-slate-300">{{ user_obj.cargo|default:"-" }}</span>
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center justify-center gap-1">
                             {% if user_obj.pode_operar_caixa %}
                                 <span class="size-2 rounded-full bg-blue-500" title="Opera Caixa"></span>
                             {% else %}
-                                <span class="size-2 rounded-full bg-slate-700" title="Sem acesso ao Caixa"></span>
+                                <span class="size-2 rounded-full bg-slate-300 dark:bg-slate-700" title="Sem acesso ao Caixa"></span>
                             {% endif %}
 
                             {% if user_obj.pode_emitir_nfse %}
                                 <span class="size-2 rounded-full bg-emerald-500" title="Emite NFS-e"></span>
                             {% else %}
-                                <span class="size-2 rounded-full bg-slate-700" title="Sem acesso a NFS-e"></span>
+                                <span class="size-2 rounded-full bg-slate-300 dark:bg-slate-700" title="Sem acesso a NFS-e"></span>
                             {% endif %}
 
                             {% if user_obj.pode_aprovar_fechamento %}
                                 <span class="size-2 rounded-full bg-orange-500" title="Aprova Fechamento"></span>
                             {% else %}
-                                <span class="size-2 rounded-full bg-slate-700" title="Sem acesso Gerencial"></span>
+                                <span class="size-2 rounded-full bg-slate-300 dark:bg-slate-700" title="Sem acesso Gerencial"></span>
                             {% endif %}
                         </div>
                     </td>
@@ -93,7 +93,7 @@
                             hx-get="{% url 'core:settings_user_reset_password' user_obj.pk %}" 
                             hx-target="#modal-container" 
                             hx-swap="innerHTML"
-                            class="text-slate-400 hover:text-blue-400 p-2 hover:bg-[#2d3544] rounded-lg transition-all" 
+                            class="text-slate-400 hover:text-blue-500 p-2 hover:bg-slate-100 dark:hover:bg-[#2d3544] rounded-lg transition-all" 
                             title="Redefinir Senha">
                             <span class="material-symbols-outlined">key</span>
                         </button>
@@ -101,7 +101,7 @@
                             hx-get="{% url 'core:settings_user_edit' user_obj.pk %}" 
                             hx-target="#modal-container" 
                             hx-swap="innerHTML"
-                            class="text-slate-400 hover:text-white p-2 hover:bg-[#2d3544] rounded-lg transition-all" 
+                            class="text-slate-400 hover:text-slate-900 dark:hover:text-white p-2 hover:bg-slate-100 dark:hover:bg-[#2d3544] rounded-lg transition-all" 
                             title="Editar Usuário">
                             <span class="material-symbols-outlined">edit</span>
                         </button>

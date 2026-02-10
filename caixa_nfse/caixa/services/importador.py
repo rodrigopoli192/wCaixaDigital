@@ -17,21 +17,21 @@ class ImportadorMovimentos:
     """Orchestrates import of movements from external databases."""
 
     @staticmethod
-    def executar_rotinas(conexao, rotinas, data_inicio, data_fim):
+    def executar_rotinas(conexao, rotinas, params=None):
         """
         Execute multiple rotinas against an external connection.
+        Accepts dynamic params dict (e.g. {"DATA_INICIO": "...", "PROTOCOLO": "..."}).
         Returns list of (rotina, headers, rows, logs) tuples.
         """
+        if params is None:
+            params = {}
+
         resultados = []
         for rotina in rotinas:
             sql_parts = [rotina.sql_content.strip()]
             if rotina.sql_content_extra:
                 sql_parts.append(rotina.sql_content_extra.strip())
             sql = "\n".join(sql_parts).replace("\r", "")
-            params = {
-                "DATA_INICIO": data_inicio,
-                "DATA_FIM": data_fim,
-            }
             headers, rows, logs = SQLExecutor.execute_routine(conexao, sql, params)
             resultados.append((rotina, headers, rows, logs))
         return resultados

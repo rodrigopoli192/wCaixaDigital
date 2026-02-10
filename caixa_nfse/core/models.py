@@ -173,6 +173,18 @@ class Tenant(BaseModel):
         default=0,
     )
 
+    # Parâmetros de Integração
+    chave_servico_andamento_ri = models.CharField(
+        _("chave serviço andamento (RI)"),
+        max_length=50,
+        blank=True,
+        default="",
+        help_text=_(
+            "Chave do serviço de andamento para Registro de Imóveis. "
+            "Substituída automaticamente como @SERVICOANDAMENTO nas rotinas SQL."
+        ),
+    )
+
     # Status
     ativo = models.BooleanField(_("ativo"), default=True)
 
