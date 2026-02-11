@@ -63,7 +63,7 @@ class TestLancamentoListView:
 
     def test_list_lancamentos(self, client_logged, lancamento):
         """Should list entries for tenant."""
-        url = reverse("contabil:lancamento_list")
+        url = reverse("contabil:lancamentos")
         response = client_logged.get(url)
         assert response.status_code == 200
         assert lancamento in response.context["object_list"]

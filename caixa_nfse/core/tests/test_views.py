@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from django.urls import reverse
 from django.utils import timezone
@@ -73,8 +75,16 @@ class TestDashboardView:
 
         caixa = Caixa.objects.create(tenant=tenant, identificador="C01", ativo=True)
         operador = UserFactory(tenant=tenant)
-        abertura = AberturaCaixa.objects.create(caixa=caixa, operador=operador, tenant=tenant)
-        fechamento = FechamentoCaixa.objects.create(abertura=abertura, saldo_informado=100)
+        abertura = AberturaCaixa.objects.create(
+            caixa=caixa, operador=operador, tenant=tenant, saldo_abertura=Decimal("0")
+        )
+        fechamento = FechamentoCaixa.objects.create(
+            abertura=abertura,
+            saldo_informado=Decimal("100"),
+            saldo_sistema=Decimal("90"),
+            operador=operador,
+            tenant=tenant,
+        )
         assert fechamento.pk is not None
         assert fechamento.pk is not None
         # status defaults to PENDENTE_APROVACAO usually
@@ -82,17 +92,28 @@ class TestDashboardView:
         # 2. Caixa antigo (>12h)
         antigo_caixa = Caixa.objects.create(tenant=tenant, identificador="C02", ativo=True)
         antigo_abertura = AberturaCaixa.objects.create(
-            caixa=antigo_caixa, operador=operador, tenant=tenant
+            caixa=antigo_caixa, operador=operador, tenant=tenant, saldo_abertura=Decimal("0")
         )
         antigo_abertura.data_hora = timezone.now() - timezone.timedelta(hours=13)
         antigo_abertura.save()
 
         # 3. Movimentos para totais
+        from caixa_nfse.core.models import FormaPagamento
+
+        forma = FormaPagamento.objects.create(tenant=tenant, nome="Dinheiro", tipo="DINHEIRO")
         MovimentoCaixa.objects.create(
-            abertura=abertura, tipo="ENTRADA", valor=50, forma_pagamento=None
+            abertura=abertura,
+            tipo="ENTRADA",
+            valor=50,
+            forma_pagamento=forma,
+            tenant=tenant,
         )
         MovimentoCaixa.objects.create(
-            abertura=abertura, tipo="SAIDA", valor=10, forma_pagamento=None
+            abertura=abertura,
+            tipo="SAIDA",
+            valor=10,
+            forma_pagamento=forma,
+            tenant=tenant,
         )
 
         client.force_login(user)
@@ -127,9 +148,18 @@ class TestDashboardView:
         from caixa_nfse.caixa.models import AberturaCaixa, Caixa, MovimentoCaixa
 
         caixa = Caixa.objects.create(tenant=tenant, identificador="COP", ativo=True)
-        abertura = AberturaCaixa.objects.create(caixa=caixa, operador=user, tenant=tenant)
+        abertura = AberturaCaixa.objects.create(
+            caixa=caixa, operador=user, tenant=tenant, saldo_abertura=Decimal("0")
+        )
+        from caixa_nfse.core.models import FormaPagamento
+
+        forma = FormaPagamento.objects.create(tenant=tenant, nome="Dinheiro", tipo="DINHEIRO")
         MovimentoCaixa.objects.create(
-            abertura=abertura, tipo="ENTRADA", valor=100, forma_pagamento=None
+            abertura=abertura,
+            tipo="ENTRADA",
+            valor=100,
+            forma_pagamento=forma,
+            tenant=tenant,
         )
 
         client.force_login(user)

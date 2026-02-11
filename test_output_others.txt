@@ -1,0 +1,1143 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, cov-7.0.0, django-4.11.1
+collected 78 items
+
+caixa_nfse\contabil\tests\test_models.py ..........                      [ 12%]
+caixa_nfse\contabil\tests\test_views.py FFFF..                           [ 20%]
+caixa_nfse\nfse\tests\test_models.py .........                           [ 32%]
+caixa_nfse\nfse\tests\test_tasks.py .....                                [ 38%]
+caixa_nfse\nfse\tests\test_views.py .F..FF....                           [ 51%]
+caixa_nfse\relatorios\tests\test_exports.py FFFFFFFFFFFFFF               [ 69%]
+caixa_nfse\relatorios\tests\test_views.py ...FF........                  [ 85%]
+caixa_nfse\fiscal\tests\test_views.py EEEE                               [ 91%]
+caixa_nfse\relatorios\tests\test_services.py .......                     [100%]
+
+=================================== ERRORS ====================================
+__________ ERROR at setup of TestFiscalViews.test_livro_list_access ___________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: fiscal_livrofiscalservicos.valor_servicos
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\fiscal\tests\test_views.py:19: in setup_method
+    self.livro = LivroFiscalServicos.objects.create(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:669: in create
+    obj.save(force_insert=True, using=self.db)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: fiscal_livrofiscalservicos.valor_servicos
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\fiscal\tests\test_views.py:32: in setup_method
+    self.client.force_login(self.user)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:855: in force_login
+    self._login(user, backend)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:876: in _login
+    if self.session:
+       ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:812: in session
+    session.save()
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:121: in save
+    return self.create()
+           ^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:70: in create
+    self._session_key = self._get_new_session_key()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\base.py:198: in _get_new_session_key
+    if not self.exists(session_key):
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:63: in exists
+    return self.model.objects.filter(session_key=session_key).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1337: in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\query.py:681: in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1592: in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1624: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:99: in _execute
+    self.db.validate_no_broken_transaction()
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\base\base.py:521: in validate_no_broken_transaction
+    raise TransactionManagementError(
+E   django.db.transaction.TransactionManagementError: An error occurred in the current transaction. You can't execute queries until the end of the 'atomic' block.
+_________ ERROR at setup of TestFiscalViews.test_relatorio_iss_access _________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: fiscal_livrofiscalservicos.valor_servicos
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\fiscal\tests\test_views.py:19: in setup_method
+    self.livro = LivroFiscalServicos.objects.create(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:669: in create
+    obj.save(force_insert=True, using=self.db)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: fiscal_livrofiscalservicos.valor_servicos
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\fiscal\tests\test_views.py:32: in setup_method
+    self.client.force_login(self.user)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:855: in force_login
+    self._login(user, backend)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:876: in _login
+    if self.session:
+       ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:812: in session
+    session.save()
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:121: in save
+    return self.create()
+           ^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:70: in create
+    self._session_key = self._get_new_session_key()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\base.py:198: in _get_new_session_key
+    if not self.exists(session_key):
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:63: in exists
+    return self.model.objects.filter(session_key=session_key).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1337: in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\query.py:681: in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1592: in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1624: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:99: in _execute
+    self.db.validate_no_broken_transaction()
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\base\base.py:521: in validate_no_broken_transaction
+    raise TransactionManagementError(
+E   django.db.transaction.TransactionManagementError: An error occurred in the current transaction. You can't execute queries until the end of the 'atomic' block.
+_________ ERROR at setup of TestFiscalViews.test_export_fiscal_access _________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: fiscal_livrofiscalservicos.valor_servicos
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\fiscal\tests\test_views.py:19: in setup_method
+    self.livro = LivroFiscalServicos.objects.create(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:669: in create
+    obj.save(force_insert=True, using=self.db)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: fiscal_livrofiscalservicos.valor_servicos
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\fiscal\tests\test_views.py:32: in setup_method
+    self.client.force_login(self.user)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:855: in force_login
+    self._login(user, backend)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:876: in _login
+    if self.session:
+       ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:812: in session
+    session.save()
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:121: in save
+    return self.create()
+           ^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:70: in create
+    self._session_key = self._get_new_session_key()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\base.py:198: in _get_new_session_key
+    if not self.exists(session_key):
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:63: in exists
+    return self.model.objects.filter(session_key=session_key).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1337: in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\query.py:681: in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1592: in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1624: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:99: in _execute
+    self.db.validate_no_broken_transaction()
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\base\base.py:521: in validate_no_broken_transaction
+    raise TransactionManagementError(
+E   django.db.transaction.TransactionManagementError: An error occurred in the current transaction. You can't execute queries until the end of the 'atomic' block.
+_____ ERROR at setup of TestFiscalViews.test_livro_list_tenant_isolation ______
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   sqlite3.IntegrityError: NOT NULL constraint failed: fiscal_livrofiscalservicos.valor_servicos
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\fiscal\tests\test_views.py:19: in setup_method
+    self.livro = LivroFiscalServicos.objects.create(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:669: in create
+    obj.save(force_insert=True, using=self.db)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:874: in save
+    self.save_base(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:966: in save_base
+    updated = self._save_table(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1167: in _save_table
+    results = self._do_insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1218: in _do_insert
+    return manager._insert(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1918: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1925: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:100: in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\utils.py:94: in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:105: in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\sqlite3\base.py:359: in execute
+    return super().execute(query, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   django.db.utils.IntegrityError: NOT NULL constraint failed: fiscal_livrofiscalservicos.valor_servicos
+
+The above exception was the direct cause of the following exception:
+caixa_nfse\fiscal\tests\test_views.py:32: in setup_method
+    self.client.force_login(self.user)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:855: in force_login
+    self._login(user, backend)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:876: in _login
+    if self.session:
+       ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:812: in session
+    session.save()
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:121: in save
+    return self.create()
+           ^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:70: in create
+    self._session_key = self._get_new_session_key()
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\base.py:198: in _get_new_session_key
+    if not self.exists(session_key):
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\contrib\sessions\backends\db.py:63: in exists
+    return self.model.objects.filter(session_key=session_key).exists()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\query.py:1337: in exists
+    return self.query.has_results(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\query.py:681: in has_results
+    return compiler.has_results()
+           ^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1592: in has_results
+    return bool(self.execute_sql(SINGLE))
+                ^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\sql\compiler.py:1624: in execute_sql
+    cursor.execute(sql, params)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:79: in execute
+    return self._execute_with_wrappers(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:92: in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\utils.py:99: in _execute
+    self.db.validate_no_broken_transaction()
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\backends\base\base.py:521: in validate_no_broken_transaction
+    raise TransactionManagementError(
+E   django.db.transaction.TransactionManagementError: An error occurred in the current transaction. You can't execute queries until the end of the 'atomic' block.
+================================== FAILURES ===================================
+_______________ TestPlanoContasListView.test_list_plano_contas ________________
+caixa_nfse\contabil\tests\test_views.py:32: in test_list_plano_contas
+    response = client_logged.get(url)
+               ^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\base.py:221: in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:114: in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:92: in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\backends\django.py:107: in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:174: in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:160: in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:66: in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\defaulttags.py:511: in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'contas' not found. 'contas' is not a valid view function or pattern name.
+_________________ TestPlanoContasListView.test_filter_tenant __________________
+caixa_nfse\contabil\tests\test_views.py:42: in test_filter_tenant
+    response = client_logged.get(url)
+               ^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\base.py:221: in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:114: in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:92: in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\backends\django.py:107: in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:174: in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:160: in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:66: in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\defaulttags.py:511: in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'contas' not found. 'contas' is not a valid view function or pattern name.
+_____________ TestPlanoContasListView.test_access_without_tenant ______________
+caixa_nfse\contabil\tests\test_views.py:54: in test_access_without_tenant
+    response = client.get(url)
+               ^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\base.py:221: in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:114: in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:92: in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\backends\django.py:107: in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:174: in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:160: in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:66: in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\defaulttags.py:511: in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'contas' not found. 'contas' is not a valid view function or pattern name.
+________________ TestLancamentoListView.test_list_lancamentos _________________
+caixa_nfse\contabil\tests\test_views.py:66: in test_list_lancamentos
+    url = reverse("contabil:lancamento_list")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'lancamento_list' not found. 'lancamento_list' is not a valid view function or pattern name.
+______________________ TestNFSeViews.test_detail_access _______________________
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:965: in _resolve_lookup
+    current = current[bit]
+              ^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\context.py:91: in __getitem__
+    raise KeyError(key)
+E   KeyError: 'nota'
+
+During handling of the above exception, another exception occurred:
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:972: in _resolve_lookup
+    if isinstance(current, BaseContext) and getattr(
+E   AttributeError: type object 'RequestContext' has no attribute 'nota'
+
+During handling of the above exception, another exception occurred:
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:982: in _resolve_lookup
+    current = current[int(bit)]
+                      ^^^^^^^^
+E   ValueError: invalid literal for int() with base 10: 'nota'
+
+During handling of the above exception, another exception occurred:
+caixa_nfse\nfse\tests\test_views.py:43: in test_detail_access
+    response = self.client.get(url)
+               ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\base.py:221: in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:114: in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\response.py:92: in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\backends\django.py:107: in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:174: in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:160: in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\utils.py:114: in instrumented_test_render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\loader_tags.py:66: in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1091: in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1052: in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:1150: in render
+    output = self.filter_expression.resolve(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:809: in resolve
+    arg_vals.append(arg.resolve(context))
+                    ^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:928: in resolve
+    value = self._resolve_lookup(context)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\template\base.py:989: in _resolve_lookup
+    raise VariableDoesNotExist(
+E   django.template.base.VariableDoesNotExist: Failed lookup for key [nota] in [{'True': True, 'False': False, 'None': None}, {}, {}, {'object': <NotaFiscalServico: RPS 16>, 'notafiscalservico': <NotaFiscalServico: RPS 16>, 'view': <caixa_nfse.nfse.views.NFSeDetailView object at 0x0000014594077B60>}]
+___________________ TestNFSeViews.test_enviar_trigger_task ____________________
+caixa_nfse\nfse\tests\test_views.py:84: in test_enviar_trigger_task
+    with unittest.mock.patch("caixa_nfse.nfse.views.enviar_nfse") as mock_task:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1503: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1473: in get_original
+    raise AttributeError(
+E   AttributeError: <module 'caixa_nfse.nfse.views' from 'C:\\Users\\Rodrigo\\Projetos\\wCaixaDigital\\caixa_nfse\\nfse\\views.py'> does not have the attribute 'enviar_nfse'
+_________________ TestNFSeViews.test_enviar_fail_not_rascunho _________________
+caixa_nfse\nfse\tests\test_views.py:100: in test_enviar_fail_not_rascunho
+    with unittest.mock.patch("caixa_nfse.nfse.views.enviar_nfse"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1503: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1473: in get_original
+    raise AttributeError(
+E   AttributeError: <module 'caixa_nfse.nfse.views' from 'C:\\Users\\Rodrigo\\Projetos\\wCaixaDigital\\caixa_nfse\\nfse\\views.py'> does not have the attribute 'enviar_nfse'
+_______ TestAllExports.test_export_pdf_mocked[relatorios:movimentacoes] _______
+caixa_nfse\relatorios\tests\test_exports.py:67: in test_export_pdf_mocked
+    self.client.get(url, {"export": "pdf"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+_______ TestAllExports.test_export_pdf_mocked[relatorios:resumo_caixa] ________
+caixa_nfse\relatorios\tests\test_exports.py:67: in test_export_pdf_mocked
+    self.client.get(url, {"export": "pdf"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+_____ TestAllExports.test_export_pdf_mocked[relatorios:formas_pagamento] ______
+caixa_nfse\relatorios\tests\test_exports.py:67: in test_export_pdf_mocked
+    self.client.get(url, {"export": "pdf"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+___ TestAllExports.test_export_pdf_mocked[relatorios:performance_operador] ____
+caixa_nfse\relatorios\tests\test_exports.py:67: in test_export_pdf_mocked
+    self.client.get(url, {"export": "pdf"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+____ TestAllExports.test_export_pdf_mocked[relatorios:historico_aberturas] ____
+caixa_nfse\relatorios\tests\test_exports.py:67: in test_export_pdf_mocked
+    self.client.get(url, {"export": "pdf"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+_____ TestAllExports.test_export_pdf_mocked[relatorios:diferencas_caixa] ______
+caixa_nfse\relatorios\tests\test_exports.py:67: in test_export_pdf_mocked
+    self.client.get(url, {"export": "pdf"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+_________ TestAllExports.test_export_pdf_mocked[relatorios:log_acoes] _________
+caixa_nfse\relatorios\tests\test_exports.py:67: in test_export_pdf_mocked
+    self.client.get(url, {"export": "pdf"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+______ TestAllExports.test_export_xlsx_mocked[relatorios:movimentacoes] _______
+caixa_nfse\relatorios\tests\test_exports.py:92: in test_export_xlsx_mocked
+    self.client.get(url, {"export": "xlsx"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+_______ TestAllExports.test_export_xlsx_mocked[relatorios:resumo_caixa] _______
+caixa_nfse\relatorios\tests\test_exports.py:92: in test_export_xlsx_mocked
+    self.client.get(url, {"export": "xlsx"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+_____ TestAllExports.test_export_xlsx_mocked[relatorios:formas_pagamento] _____
+caixa_nfse\relatorios\tests\test_exports.py:92: in test_export_xlsx_mocked
+    self.client.get(url, {"export": "xlsx"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+___ TestAllExports.test_export_xlsx_mocked[relatorios:performance_operador] ___
+caixa_nfse\relatorios\tests\test_exports.py:92: in test_export_xlsx_mocked
+    self.client.get(url, {"export": "xlsx"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+___ TestAllExports.test_export_xlsx_mocked[relatorios:historico_aberturas] ____
+caixa_nfse\relatorios\tests\test_exports.py:92: in test_export_xlsx_mocked
+    self.client.get(url, {"export": "xlsx"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+_____ TestAllExports.test_export_xlsx_mocked[relatorios:diferencas_caixa] _____
+caixa_nfse\relatorios\tests\test_exports.py:92: in test_export_xlsx_mocked
+    self.client.get(url, {"export": "xlsx"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+________ TestAllExports.test_export_xlsx_mocked[relatorios:log_acoes] _________
+caixa_nfse\relatorios\tests\test_exports.py:92: in test_export_xlsx_mocked
+    self.client.get(url, {"export": "xlsx"})
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'str' object has no attribute 'get'
+_______________ TestMovimentacoesReportView.test_filter_by_date _______________
+caixa_nfse\relatorios\tests\test_views.py:77: in test_filter_by_date
+    assert self.movimento in movimentos
+E   assert <MovimentoCaixa: Entrada - R$ 100.0> in <QuerySet []>
+E    +  where <MovimentoCaixa: Entrada - R$ 100.0> = <caixa_nfse.relatorios.tests.test_views.TestMovimentacoesReportView object at 0x000001458FFEC7D0>.movimento
+_____________ TestMovimentacoesReportView.test_export_pdf_trigger _____________
+caixa_nfse\relatorios\tests\test_views.py:84: in test_export_pdf_trigger
+    response = self.client.get(url, {"export": "pdf"})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1124: in get
+    response = super().get(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:475: in get
+    return self.generic(
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:671: in generic
+    return self.request(**r)
+           ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:1087: in request
+    self.check_exception(response)
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py:802: in check_exception
+    raise exc_value
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py:55: in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\utils\deprecation.py:311: in __call__
+    response = self.process_response(request, response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\middleware\clickjacking.py:27: in process_response
+    if response.get("X-Frame-Options") is not None:
+       ^^^^^^^^^^^^
+E   AttributeError: 'bytes' object has no attribute 'get'
+============================== warnings summary ===============================
+caixa_nfse/contabil/tests/test_views.py: 1 warning
+caixa_nfse/nfse/tests/test_views.py: 10 warnings
+caixa_nfse/relatorios/tests/test_exports.py: 28 warnings
+caixa_nfse/relatorios/tests/test_views.py: 24 warnings
+caixa_nfse/fiscal/tests/test_views.py: 4 warnings
+  C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED caixa_nfse/contabil/tests/test_views.py::TestPlanoContasListView::test_list_plano_contas
+FAILED caixa_nfse/contabil/tests/test_views.py::TestPlanoContasListView::test_filter_tenant
+FAILED caixa_nfse/contabil/tests/test_views.py::TestPlanoContasListView::test_access_without_tenant
+FAILED caixa_nfse/contabil/tests/test_views.py::TestLancamentoListView::test_list_lancamentos
+FAILED caixa_nfse/nfse/tests/test_views.py::TestNFSeViews::test_detail_access
+FAILED caixa_nfse/nfse/tests/test_views.py::TestNFSeViews::test_enviar_trigger_task
+FAILED caixa_nfse/nfse/tests/test_views.py::TestNFSeViews::test_enviar_fail_not_rascunho
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_pdf_mocked[relatorios:movimentacoes]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_pdf_mocked[relatorios:resumo_caixa]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_pdf_mocked[relatorios:formas_pagamento]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_pdf_mocked[relatorios:performance_operador]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_pdf_mocked[relatorios:historico_aberturas]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_pdf_mocked[relatorios:diferencas_caixa]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_pdf_mocked[relatorios:log_acoes]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_xlsx_mocked[relatorios:movimentacoes]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_xlsx_mocked[relatorios:resumo_caixa]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_xlsx_mocked[relatorios:formas_pagamento]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_xlsx_mocked[relatorios:performance_operador]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_xlsx_mocked[relatorios:historico_aberturas]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_xlsx_mocked[relatorios:diferencas_caixa]
+FAILED caixa_nfse/relatorios/tests/test_exports.py::TestAllExports::test_export_xlsx_mocked[relatorios:log_acoes]
+FAILED caixa_nfse/relatorios/tests/test_views.py::TestMovimentacoesReportView::test_filter_by_date
+FAILED caixa_nfse/relatorios/tests/test_views.py::TestMovimentacoesReportView::test_export_pdf_trigger
+ERROR caixa_nfse/fiscal/tests/test_views.py::TestFiscalViews::test_livro_list_access
+ERROR caixa_nfse/fiscal/tests/test_views.py::TestFiscalViews::test_relatorio_iss_access
+ERROR caixa_nfse/fiscal/tests/test_views.py::TestFiscalViews::test_export_fiscal_access
+ERROR caixa_nfse/fiscal/tests/test_views.py::TestFiscalViews::test_livro_list_tenant_isolation
+============ 23 failed, 51 passed, 67 warnings, 4 errors in 4.48s =============

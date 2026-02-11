@@ -109,7 +109,8 @@ class TestNovoMovimentoView:
 
     def test_movimento_success(self, client_logged, abertura, forma_pagamento):
         """Should register movement successfully."""
-        # Ensure caixa is open
+        from unittest.mock import patch
+
         caixa = abertura.caixa
         caixa.status = StatusCaixa.ABERTO
         caixa.save()
@@ -121,14 +122,12 @@ class TestNovoMovimentoView:
             "valor": "50,00",
             "descricao": "Venda teste",
         }
-        response = client_logged.post(url, data)
-        assert (
-            response.status_code == 302
-        )  # HTMX might redirect or refresh, here we expect standard redirect logic
+        with patch("caixa_nfse.caixa.models.timezone") as mock_tz:
+            mock_tz.localdate.return_value = abertura.data_hora.date()
+            mock_tz.now.return_value = abertura.data_hora
+            response = client_logged.post(url, data)
+            assert response.status_code == 302
 
-        # Check if header triggers redirect or update
-        # Assuming implementation does a redirect or returns partial.
-        # Let's check DB side effect which is safer.
         assert abertura.movimentos.count() == 1
         mov = abertura.movimentos.first()
         assert mov.valor == Decimal("50.00")
@@ -136,6 +135,8 @@ class TestNovoMovimentoView:
 
     def test_movimento_invalid_form(self, client_logged, abertura):
         """Should show errors for invalid data."""
+        from unittest.mock import patch
+
         caixa = abertura.caixa
         caixa.status = StatusCaixa.ABERTO
         caixa.save()
@@ -145,10 +146,14 @@ class TestNovoMovimentoView:
             "tipo": "ENTRADA",
             "valor": "",  # Invalid
         }
-        response = client_logged.post(url, data)
-        assert response.status_code == 200
-        assert "form" in response.context
-        assert response.context["form"].errors
+        with patch("caixa_nfse.caixa.models.timezone") as mock_tz:
+            mock_tz.localdate.return_value = abertura.data_hora.date()
+            mock_tz.now.return_value = abertura.data_hora
+            response = client_logged.post(url, data)
+            # View re-renders form on invalid data
+            assert response.status_code == 200
+            assert "form" in response.context
+            assert response.context["form"].errors
 
 
 @pytest.mark.django_db

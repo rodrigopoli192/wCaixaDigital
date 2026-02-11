@@ -1,7 +1,7 @@
 # PLAN: Exibir Receita Adicional em todas as telas
 
 ## Problema
-Os campos `valor_receita_adicional_1` e `valor_receita_adicional_2` não aparecem na grid "Taxas Detalhadas" dos cards de movimentos (`_movimento_card.html`). 
+Os campos `valor_receita_adicional_1` não aparecem na grid "Taxas Detalhadas" dos cards de movimentos (`_movimento_card.html`). 
 Esta template é usada em todas as telas: pendentes, migrados, movimentos de caixa.
 
 ## Alteração

@@ -33,7 +33,6 @@ class TestImportadorMovimentos(TestCase):
 
         # Mock MovimentoImportado class (not just objects)
         with patch("caixa_nfse.caixa.models.MovimentoImportado") as MockMovimentoImportado:
-            mock_filter = MockMovimentoImportado.objects.filter
             MockMovimentoImportado.objects.bulk_create.return_value = [1]  # Dummy return
             MockMovimentoImportado.TAXA_FIELDS = ["iss"]  # Only need ISS for test
 

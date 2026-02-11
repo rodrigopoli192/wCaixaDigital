@@ -11,7 +11,7 @@
         <a href="{% url 'fiscal:relatorio_iss' %}" class="btn btn-outline-info">
             <i class="bi bi-bar-chart me-1"></i>Relatório ISS
         </a>
-        <a href="{% url 'fiscal:export' %}" class="btn btn-outline-secondary">
+        <a href="{% url 'fiscal:exportar' %}" class="btn btn-outline-secondary">
             <i class="bi bi-download me-1"></i>Exportar
         </a>
     </div>
@@ -47,7 +47,7 @@
                 <button type="submit" class="btn btn-outline-primary me-2">
                     <i class="bi bi-search me-1"></i>Filtrar
                 </button>
-                <a href="{% url 'fiscal:livros' %}" class="btn btn-outline-secondary">Limpar</a>
+                <a href="{% url 'fiscal:livro' %}" class="btn btn-outline-secondary">Limpar</a>
             </div>
         </form>
     </div>

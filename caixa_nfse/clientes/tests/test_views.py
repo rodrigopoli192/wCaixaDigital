@@ -64,23 +64,23 @@ class TestClienteViews:
         url = reverse("clientes:create")
         data = {
             "razao_social": "New Client Ltda",
-            "cpf_cnpj": "12345678901234",
+            "cpf_cnpj": "12345678000195",
             "email": "new@client.com",
-            # Add other required fields if any in factory defaults
             "tipo_pessoa": "PJ",
-            "status": "ATIVO",
+            "ativo": True,
         }
         response = self.client.post(url, data)
-        assert response.status_code == 302  # Redirect
+        assert response.status_code == 302
         assert Cliente.objects.filter(razao_social="New Client Ltda").exists()
 
     def test_create_post_htmx_success(self):
         url = reverse("clientes:create")
         data = {
             "razao_social": "HTMX Client",
-            "cpf_cnpj": "98765432109876",
+            "cpf_cnpj": "11444777000161",
             "email": "htmx@client.com",
             "tipo_pessoa": "PJ",
+            "ativo": True,
         }
         response = self.client.post(url, data, headers={"HX-Request": "true"})
         assert response.status_code == 204  # No Content

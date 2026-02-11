@@ -63,10 +63,11 @@ class TestTenantCRUD:
         data = {
             "razao_social": "New Corp",
             "nome_fantasia": "NewCorp",
-            "cnpj": "99999999000199",
+            "cnpj": "11444777000161",
             "cidade": "Rio",
             "uf": "RJ",
-            "regime_tributario": "LUCRO_REAL",
+            "regime_tributario": "REAL",
+            "codigo_ibge": "3304557",
             "logradouro": "Av B",
             "numero": "20",
             "bairro": "Sul",
@@ -81,14 +82,13 @@ class TestTenantCRUD:
 
     def test_delete_tenant(self):
         tenant = TenantFactory()
-        url = reverse("backoffice:tenant_delete", kwargs={"pk": tenant.pk})
+        tenant_pk = tenant.pk
+        url = reverse("backoffice:tenant_delete", kwargs={"pk": tenant_pk})
         response = self.client.post(url)
         assert response.status_code == 302
-        assert not tenant.pk  # Basic delete check, or refresh from db
-        # If it's real delete:
         from caixa_nfse.core.models import Tenant
 
-        assert not Tenant.objects.filter(pk=tenant.pk).exists()
+        assert not Tenant.objects.filter(pk=tenant_pk).exists()
 
 
 @pytest.mark.django_db

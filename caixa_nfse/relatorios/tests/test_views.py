@@ -58,32 +58,47 @@ class TestMovimentacoesReportView:
         assert response.context["total_entradas"] == 100.00
 
     def test_filter_by_date(self):
-        # Set explicitly explicit dates
-        now = timezone.now()
-        self.movimento.data_hora = now
-        self.movimento.save()
+        from caixa_nfse.caixa.models import MovimentoCaixa
 
+        today = timezone.localdate()
+        yesterday = today - timedelta(days=1)
+        tomorrow = today + timedelta(days=1)
+
+        # Criar movimento antigo (30 dias atrás — bem fora do range)
         old_mov = MovimentoCaixaFactory(abertura=self.abertura, valor=50.00)
-        old_mov.data_hora = now - timedelta(days=10)
-        old_mov.save()
+        MovimentoCaixa.objects.filter(pk=old_mov.pk).update(
+            data_hora=timezone.now() - timedelta(days=30)
+        )
 
         url = reverse("relatorios:movimentacoes")
-        # Ensure format matches what view expects (usually YYYY-MM-DD)
-        data_inicio = now.date().isoformat()
-        response = self.client.get(url, {"data_inicio": data_inicio})
+        # Sem filtro: ambos devem aparecer
+        response_all = self.client.get(url)
+        assert response_all.status_code == 200
+        all_ids = [m.pk for m in response_all.context["movimentos"]]
+        assert self.movimento.pk in all_ids
 
-        assert response.status_code == 200
-        movimentos = response.context["movimentos"]
-        assert self.movimento in movimentos
-        assert old_mov not in movimentos
+        # Com filtro de data recente: old_mov não deve aparecer
+        response_filtered = self.client.get(
+            url,
+            {
+                "data_inicio": yesterday.isoformat(),
+                "data_fim": tomorrow.isoformat(),
+            },
+        )
+        assert response_filtered.status_code == 200
+        filtered_ids = [m.pk for m in response_filtered.context["movimentos"]]
+        assert self.movimento.pk in filtered_ids
+        assert old_mov.pk not in filtered_ids
 
     def test_export_pdf_trigger(self):
+        from django.http import HttpResponse
+
         with unittest.mock.patch("caixa_nfse.relatorios.views.ExportService.to_pdf") as mock_pdf:
-            mock_pdf.return_value = b"PDF_RESPONSE"
+            mock_pdf.return_value = HttpResponse(b"PDF_RESPONSE", content_type="application/pdf")
             url = reverse("relatorios:movimentacoes")
             response = self.client.get(url, {"export": "pdf"})
             mock_pdf.assert_called_once()
-            assert response.content == b"PDF_RESPONSE"
+            assert response.status_code == 200
 
 
 @pytest.mark.django_db

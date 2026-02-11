@@ -10,21 +10,14 @@ class TestFiscalViews:
     def setup_method(self):
         self.tenant = TenantFactory()
         self.user = UserFactory(tenant=self.tenant)
-        # LivroFiscalServicos usually depends on NotaFiscalServico or Monthly closing
-        # Let's create a dummy entry if possible or mock queryset
-        # Assuming LivroFiscalServicos is created via signals or manual process
-        # Check model definition quickly? No, let's try creating object.
-        # If factory missing, create directly.
-        try:
-            self.livro = LivroFiscalServicos.objects.create(
-                tenant=self.tenant,
-                competencia="2023-01-01",
-                # Add other required fields if failures occur
-            )
-        except Exception:
-            # If model is complex, we might just test empty list for now as
-            # coverage is the goal and views are simple generic views
-            self.livro = None
+        self.livro = LivroFiscalServicos.objects.create(
+            tenant=self.tenant,
+            competencia="2023-01-01",
+            municipio_ibge="3550308",
+            valor_servicos="1000.00",
+            valor_iss="50.00",
+            valor_iss_retido="0.00",
+        )
 
         from django.test import Client
 
@@ -32,37 +25,34 @@ class TestFiscalViews:
         self.client.force_login(self.user)
 
     def test_livro_list_access(self):
-        url = reverse("fiscal:livro_list")
+        url = reverse("fiscal:livro")
         response = self.client.get(url)
         assert response.status_code == 200
-        if self.livro:
-            assert self.livro in response.context["object_list"]
+        assert self.livro in response.context["object_list"]
 
     def test_relatorio_iss_access(self):
         url = reverse("fiscal:relatorio_iss")
         response = self.client.get(url)
         assert response.status_code == 200
-        # Check context data if any
 
     def test_export_fiscal_access(self):
-        url = reverse("fiscal:export")
+        url = reverse("fiscal:exportar")
         response = self.client.get(url)
         assert response.status_code == 200
         assert "Exportação em desenvolvimento" in response.content.decode("utf-8")
 
     def test_livro_list_tenant_isolation(self):
         other_tenant = TenantFactory()
-        # Create object only if model allows, assuming competencia is the field
-        # Using try/except to avoid crashing if model differs from assumption
-        try:
-            other_livro = LivroFiscalServicos.objects.create(
-                tenant=other_tenant, competencia="2023-02-01"
-            )
-        except Exception:
-            other_livro = None
+        other_livro = LivroFiscalServicos.objects.create(
+            tenant=other_tenant,
+            competencia="2023-02-01",
+            municipio_ibge="3550308",
+            valor_servicos="500.00",
+            valor_iss="25.00",
+            valor_iss_retido="0.00",
+        )
 
-        url = reverse("fiscal:livro_list")
+        url = reverse("fiscal:livro")
         response = self.client.get(url)
         assert response.status_code == 200
-        if other_livro:
-            assert other_livro not in response.context["object_list"]
+        assert other_livro not in response.context["object_list"]

@@ -34,6 +34,7 @@ class NFSeListView(LoginRequiredMixin, TenantMixin, ListView):
 class NFSeDetailView(LoginRequiredMixin, TenantMixin, DetailView):
     model = NotaFiscalServico
     template_name = "nfse/nfse_detail.html"
+    context_object_name = "nota"
 
 
 class NFSeCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):

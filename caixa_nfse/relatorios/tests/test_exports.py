@@ -1,6 +1,7 @@
 import unittest
 
 import pytest
+from django.http import HttpResponse
 from django.urls import reverse
 
 from caixa_nfse.tests.factories import (
@@ -28,7 +29,6 @@ class TestAllExports:
         self.abertura = AberturaCaixaFactory(caixa=self.caixa, tenant=self.tenant)
 
         # Create Data for all reports
-        # Movimentacoes / Formas Pagamento / Performance / Dashboard
         self.fp = FormaPagamentoFactory(tenant=self.tenant, nome="Dinheiro")
         self.movimento = MovimentoCaixaFactory(
             abertura=self.abertura, valor=100.00, tipo="ENTRADA", forma_pagamento=self.fp
@@ -63,12 +63,10 @@ class TestAllExports:
     def test_export_pdf_mocked(self, view_name):
         url = reverse(view_name)
         with unittest.mock.patch("caixa_nfse.relatorios.views.ExportService.to_pdf") as mock_pdf:
-            mock_pdf.return_value = "PDF_CONTENT"
-            self.client.get(url, {"export": "pdf"})
+            mock_pdf.return_value = HttpResponse(b"PDF_CONTENT", content_type="application/pdf")
+            response = self.client.get(url, {"export": "pdf"})
+            assert response.status_code == 200
             assert mock_pdf.called
-            # Ensure get_export_data was called by checking call args if possible,
-            # or just rely on coverage.
-            # We can verify that data was passed to to_pdf
             call_kwargs = mock_pdf.call_args[1]
             rows = call_kwargs.get("rows", [])
             assert len(rows) > 0, f"No rows exported for {view_name}"
@@ -88,8 +86,12 @@ class TestAllExports:
     def test_export_xlsx_mocked(self, view_name):
         url = reverse(view_name)
         with unittest.mock.patch("caixa_nfse.relatorios.views.ExportService.to_xlsx") as mock_xlsx:
-            mock_xlsx.return_value = "XLSX_CONTENT"
-            self.client.get(url, {"export": "xlsx"})
+            mock_xlsx.return_value = HttpResponse(
+                b"XLSX_CONTENT",
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+            response = self.client.get(url, {"export": "xlsx"})
+            assert response.status_code == 200
             assert mock_xlsx.called
             call_kwargs = mock_xlsx.call_args[1]
             rows = call_kwargs.get("rows", [])

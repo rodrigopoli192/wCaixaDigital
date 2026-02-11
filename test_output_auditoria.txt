@@ -1,0 +1,116 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, cov-7.0.0, django-4.11.1
+collected 20 items
+
+caixa_nfse\auditoria\tests\test_internals.py FFFF.                       [ 25%]
+caixa_nfse\auditoria\tests\test_models.py .F...FF.F                      [ 70%]
+caixa_nfse\auditoria\tests\test_views.py FFFFFF                          [100%]
+
+================================== FAILURES ===================================
+______________ TestAuditoriaInternals.test_signal_user_logged_in ______________
+caixa_nfse\auditoria\tests\test_internals.py:25: in test_signal_user_logged_in
+    assert log is not None
+E   assert None is not None
+_____________ TestAuditoriaInternals.test_signal_user_logged_out ______________
+caixa_nfse\auditoria\tests\test_internals.py:35: in test_signal_user_logged_out
+    assert log is not None
+E   assert None is not None
+_______________ TestAuditoriaInternals.test_signal_login_failed _______________
+caixa_nfse\auditoria\tests\test_internals.py:47: in test_signal_login_failed
+    assert log is not None
+E   assert None is not None
+_________ TestAuditoriaInternals.test_decorator_audit_action_success __________
+caixa_nfse\auditoria\tests\test_internals.py:66: in test_decorator_audit_action_success
+    assert log is not None
+E   assert None is not None
+__________________ TestRegistroAuditoriaModel.test_chaining ___________________
+caixa_nfse\auditoria\tests\test_models.py:23: in test_chaining
+    assert r2.hash_anterior == r1.hash_registro
+E   AssertionError: assert '369ae81475ae...ae0e38ed0d2d0' == 'd8f428e343f6...dfa4ac881cff0'
+E     
+E     - d8f428e343f6fa8486afe51ab045adf89dc24f504b532a91733dfa4ac881cff0
+E     + 369ae81475ae2d304604f1bffeafe5a3dea34512023b15bfd4cae0e38ed0d2d0
+___________ TestRegistroAuditoriaModel.test_registrar_with_request ____________
+caixa_nfse\auditoria\tests\test_models.py:57: in test_registrar_with_request
+    record = RegistroAuditoria.registrar(
+caixa_nfse\auditoria\models.py:216: in registrar
+    session_id = request.session.session_key or ""
+                 ^^^^^^^^^^^^^^^
+E   AttributeError: 'WSGIRequest' object has no attribute 'session'
+__________ TestRegistroAuditoriaModel.test_integridade_tenant_filter __________
+caixa_nfse\auditoria\tests\test_models.py:73: in test_integridade_tenant_filter
+    assert valid is True
+E   assert False is True
+_____________ TestRegistroAuditoriaModel.test_integridade_broken ______________
+caixa_nfse\auditoria\tests\test_models.py:89: in test_integridade_broken
+    assert r2.hash_anterior == r1.hash_registro
+E   AssertionError: assert '7bd7b6a4d5c5...454cd6d7e1b38' == '82ef1c91e7d5...ed83874214d5d'
+E     
+E     - 82ef1c91e7d59846e2d30b520e4a7e8f52e353a71af810f060ded83874214d5d
+E     + 7bd7b6a4d5c5afd7a070c3fb06ffdeef90ae1518519d1978129454cd6d7e1b38
+_____________________ TestAuditoriaViews.test_list_access _____________________
+caixa_nfse\auditoria\tests\test_views.py:49: in test_list_access
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+____________________ TestAuditoriaViews.test_list_filters _____________________
+caixa_nfse\auditoria\tests\test_views.py:57: in test_list_filters
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+____________________ TestAuditoriaViews.test_detail_access ____________________
+caixa_nfse\auditoria\tests\test_views.py:86: in test_detail_access
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+_____________________ TestAuditoriaViews.test_export_csv ______________________
+caixa_nfse\auditoria\tests\test_views.py:92: in test_export_csv
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+________________ TestAuditoriaViews.test_integrity_check_json _________________
+caixa_nfse\auditoria\tests\test_views.py:100: in test_integrity_check_json
+    url = reverse("auditoria:integrity")
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\base.py:98: in reverse
+    resolved_url = resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\urls\resolvers.py:842: in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+E   django.urls.exceptions.NoReverseMatch: Reverse for 'integrity' not found. 'integrity' is not a valid view function or pattern name.
+________________ TestAuditoriaViews.test_integrity_report_fail ________________
+caixa_nfse\auditoria\tests\test_views.py:112: in test_integrity_report_fail
+    self.registro.save()
+caixa_nfse\auditoria\models.py:146: in save
+    raise ValueError("Registros de auditoria nÒo podem ser alterados.")
+E   ValueError: Registros de auditoria nÒo podem ser alterados.
+============================== warnings summary ===============================
+caixa_nfse/auditoria/tests/test_internals.py: 5 warnings
+caixa_nfse/auditoria/tests/test_models.py: 13 warnings
+caixa_nfse/auditoria/tests/test_views.py: 6 warnings
+  C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED caixa_nfse/auditoria/tests/test_internals.py::TestAuditoriaInternals::test_signal_user_logged_in
+FAILED caixa_nfse/auditoria/tests/test_internals.py::TestAuditoriaInternals::test_signal_user_logged_out
+FAILED caixa_nfse/auditoria/tests/test_internals.py::TestAuditoriaInternals::test_signal_login_failed
+FAILED caixa_nfse/auditoria/tests/test_internals.py::TestAuditoriaInternals::test_decorator_audit_action_success
+FAILED caixa_nfse/auditoria/tests/test_models.py::TestRegistroAuditoriaModel::test_chaining
+FAILED caixa_nfse/auditoria/tests/test_models.py::TestRegistroAuditoriaModel::test_registrar_with_request
+FAILED caixa_nfse/auditoria/tests/test_models.py::TestRegistroAuditoriaModel::test_integridade_tenant_filter
+FAILED caixa_nfse/auditoria/tests/test_models.py::TestRegistroAuditoriaModel::test_integridade_broken
+FAILED caixa_nfse/auditoria/tests/test_views.py::TestAuditoriaViews::test_list_access
+FAILED caixa_nfse/auditoria/tests/test_views.py::TestAuditoriaViews::test_list_filters
+FAILED caixa_nfse/auditoria/tests/test_views.py::TestAuditoriaViews::test_detail_access
+FAILED caixa_nfse/auditoria/tests/test_views.py::TestAuditoriaViews::test_export_csv
+FAILED caixa_nfse/auditoria/tests/test_views.py::TestAuditoriaViews::test_integrity_check_json
+FAILED caixa_nfse/auditoria/tests/test_views.py::TestAuditoriaViews::test_integrity_report_fail
+================== 14 failed, 6 passed, 24 warnings in 2.04s ==================

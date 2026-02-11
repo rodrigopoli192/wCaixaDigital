@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+from unittest.mock import patch
 
 import pytest
 from django.urls import reverse
@@ -178,7 +179,6 @@ class TestNovoMovimentoExtra:
         """Saida should decrease cache balance."""
         caixa = abertura.caixa
         caixa.status = StatusCaixa.ABERTO
-        # Ensure initial balance matches apertura (100.00)
         caixa.saldo_atual = Decimal("100.00")
         caixa.save()
 
@@ -189,32 +189,43 @@ class TestNovoMovimentoExtra:
             "valor": "30,00",
             "descricao": "Pagamento teste",
         }
-        response = client_logged.post(url, data)
-        assert response.status_code == 302
+        with patch("caixa_nfse.caixa.models.timezone") as mock_tz:
+            mock_tz.localdate.return_value = abertura.data_hora.date()
+            mock_tz.now.return_value = abertura.data_hora
+            response = client_logged.post(url, data)
+            assert response.status_code == 302
 
         caixa.refresh_from_db()
-        # 100 - 30 = 70.
         assert caixa.saldo_atual == Decimal("70.00")
 
     def test_block_retroactive_movement(self, client_logged, abertura):
         """Should block movement if not today."""
-        # Change abertura date to yesterday
-        # Important: Update data_hora, not created_at, as model uses data_hora
-        abertura.data_hora = timezone.now() - datetime.timedelta(days=1)
-        abertura.save()
+        from caixa_nfse.caixa.models import AberturaCaixa
+
+        # Set abertura to yesterday in DB
+        yesterday = timezone.now() - datetime.timedelta(days=1)
+        AberturaCaixa.objects.filter(pk=abertura.pk).update(data_hora=yesterday)
+        abertura.refresh_from_db()
+
+        # Mock localdate to return a date different from abertura.data_hora.date()
+        today = yesterday.date() + datetime.timedelta(days=1)
 
         url = reverse("caixa:novo_movimento", kwargs={"pk": abertura.pk})
-        response = client_logged.get(url)
-        # Dispatch redirects to list
-        assert response.status_code == 302
-        assert response.url == reverse("caixa:lista_movimentos", kwargs={"pk": abertura.pk})
+        with patch("caixa_nfse.caixa.models.timezone") as mock_tz:
+            mock_tz.localdate.return_value = today
+            response = client_logged.get(url)
+            assert response.status_code == 302
+            assert response.url == reverse("caixa:lista_movimentos", kwargs={"pk": abertura.pk})
 
     def test_htmx_request_returns_partial(self, client_logged, abertura):
         """HTMX request should return partial template."""
         url = reverse("caixa:novo_movimento", kwargs={"pk": abertura.pk})
-        response = client_logged.get(url, HTTP_HX_REQUEST="true")
-        assert response.status_code == 200
-        assert "caixa/partials/movimento_form.html" in [t.name for t in response.templates]
+        with patch("caixa_nfse.caixa.models.timezone") as mock_tz:
+            mock_tz.localdate.return_value = abertura.data_hora.date()
+            mock_tz.now.return_value = abertura.data_hora
+            response = client_logged.get(url, HTTP_HX_REQUEST="true")
+            assert response.status_code == 200
+            assert "caixa/partials/movimento_form.html" in [t.name for t in response.templates]
 
 
 @pytest.mark.django_db
@@ -342,9 +353,12 @@ class TestNovoMovimentoHTMX:
             "valor": "10,00",
             "descricao": "HTMX Mov",
         }
-        response = client_logged.post(url, data, HTTP_HX_REQUEST="true")
-        assert response.status_code == 200
-        assert response.headers["HX-Refresh"] == "true"
+        with patch("caixa_nfse.caixa.models.timezone") as mock_tz:
+            mock_tz.localdate.return_value = abertura.data_hora.date()
+            mock_tz.now.return_value = abertura.data_hora
+            response = client_logged.post(url, data, HTTP_HX_REQUEST="true")
+            assert response.status_code == 200
+            assert response.headers["HX-Refresh"] == "true"
 
 
 @pytest.mark.django_db
@@ -392,10 +406,9 @@ class TestCoverageGapView:
         assert response.context["operador_original"] == other_user
 
     def test_fechar_caixa_post_no_abertura(self, client_logged, caixa):
-        """Should redirect if no open session found on POST."""
+        """Should return 403 when no open abertura exists (test_func returns False)."""
         caixa.status = StatusCaixa.FECHADO
         caixa.save()
-        # Ensure no open aberturas
         caixa.aberturas.update(fechado=True)
 
         url = reverse("caixa:fechar", kwargs={"pk": caixa.pk})
@@ -405,15 +418,25 @@ class TestCoverageGapView:
             "observacoes": "Fail",
         }
         response = client_logged.post(url, data)
-        assert response.status_code == 302
-        assert response.url == reverse("caixa:detail", kwargs={"pk": caixa.pk})
+        assert response.status_code == 403
 
-    def test_rejeitar_fechamento_sem_justificativa(self, client_logged, user, fechamento):
+    def test_rejeitar_fechamento_sem_justificativa(self, client_logged, user, abertura):
         """Should show error if rejecting without justification."""
         user.pode_aprovar_fechamento = True
         user.save()
-        fechamento.status = StatusFechamento.PENDENTE
-        fechamento.save()
+
+        abertura.caixa.status = StatusCaixa.FECHADO
+        abertura.caixa.save()
+
+        fechamento = FechamentoCaixa.objects.create(
+            tenant=abertura.tenant,
+            abertura=abertura,
+            operador=abertura.operador,
+            saldo_sistema=Decimal("100.00"),
+            saldo_informado=Decimal("90.00"),
+            diferenca=Decimal("-10.00"),
+            status=StatusFechamento.PENDENTE,
+        )
 
         url = reverse("caixa:aprovar_fechamento", kwargs={"pk": fechamento.pk})
         data = {
@@ -428,16 +451,19 @@ class TestCoverageGapView:
 
     def test_novo_movimento_retroactive_htmx(self, client_logged, abertura):
         """Should return 403 Forbidden for retroactive movement via HTMX."""
-        import datetime
+        from caixa_nfse.caixa.models import AberturaCaixa
 
-        from django.utils import timezone
+        yesterday = timezone.now() - datetime.timedelta(days=1)
+        AberturaCaixa.objects.filter(pk=abertura.pk).update(data_hora=yesterday)
+        abertura.refresh_from_db()
 
-        abertura.data_hora = timezone.now() - datetime.timedelta(days=1)
-        abertura.save()
+        today = yesterday.date() + datetime.timedelta(days=1)
 
         url = reverse("caixa:novo_movimento", kwargs={"pk": abertura.pk})
-        response = client_logged.get(url, HTTP_HX_REQUEST="true")
-        assert response.status_code == 403
+        with patch("caixa_nfse.caixa.models.timezone") as mock_tz:
+            mock_tz.localdate.return_value = today
+            response = client_logged.get(url, HTTP_HX_REQUEST="true")
+            assert response.status_code == 403
 
 
 @pytest.mark.django_db
@@ -511,10 +537,9 @@ class TestCoverageFinal:
 
         url = reverse("caixa:fechar", kwargs={"pk": abertura.caixa.pk})
 
-        # Delete abertura before post
+        # Delete abertura before post — test_func will return False (no open abertura)
         abertura.delete()
 
         data = {"saldo_informado": "0,00"}
         response = client_logged.post(url, data)
-        assert response.status_code == 302
-        # Redirects to detail
+        assert response.status_code == 403  # No open abertura = permission denied

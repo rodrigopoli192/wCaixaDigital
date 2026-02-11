@@ -88,7 +88,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         nfses_emitidas = nfses.filter(data_emissao=hoje).count()
         nfses_pendentes = nfses.filter(status="RASCUNHO").count()
 
-        fechamentos_pendentes = fechamentos.filter(status="PENDENTE_APROVACAO").count()
+        fechamentos_pendentes = fechamentos.filter(status="PENDENTE").count()
 
         # Alertas
         alertas = []
@@ -610,7 +610,7 @@ class FormaPagamentoDeleteView(LoginRequiredMixin, TenantAdminRequiredMixin, Vie
             forma.updated_by = request.user
             forma.save(update_fields=["ativo", "updated_by", "updated_at"])
             return JsonResponse({"status": "success"}, status=200)
-            return JsonResponse({"status": "error", "message": "Não encontrado"}, status=404)
+        return JsonResponse({"status": "error", "message": "Não encontrado"}, status=404)
 
 
 # =============================================================================

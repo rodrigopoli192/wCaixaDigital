@@ -21,11 +21,16 @@ class TestClienteModel:
     def test_valid_documents(self):
         """Should validate correct CPF and CNPJ."""
         # PF
-        c_pf = ClienteFactory.build(tipo_pessoa=TipoPessoa.PF)  # Factory uses valid CPF
+        tenant = TenantFactory()
+        c_pf = ClienteFactory.build(tipo_pessoa=TipoPessoa.PF, tenant=tenant)
+        c_pf.tenant = tenant
         c_pf.full_clean()  # Should result in validation success (return True)
 
         # PJ
-        c_pj = ClienteFactory.build(tipo_pessoa=TipoPessoa.PJ, cpf_cnpj="59461148000109")
+        c_pj = ClienteFactory.build(
+            tipo_pessoa=TipoPessoa.PJ, cpf_cnpj="12345678000195", tenant=tenant
+        )
+        c_pj.tenant = tenant
         c_pj.full_clean()
 
     def test_create_cliente_pj(self):

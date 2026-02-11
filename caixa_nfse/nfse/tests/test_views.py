@@ -42,7 +42,7 @@ class TestNFSeViews:
         url = reverse("nfse:detail", kwargs={"pk": self.nota.pk})
         response = self.client.get(url)
         assert response.status_code == 200
-        assert response.context["object"] == self.nota
+        assert response.context["nota"] == self.nota
 
     def test_create_success(self):
         url = reverse("nfse:create")
@@ -81,7 +81,7 @@ class TestNFSeViews:
     def test_enviar_trigger_task(self):
         url = reverse("nfse:enviar", kwargs={"pk": self.nota.pk})
 
-        with unittest.mock.patch("caixa_nfse.nfse.views.enviar_nfse") as mock_task:
+        with unittest.mock.patch("caixa_nfse.nfse.tasks.enviar_nfse") as mock_task:
             response = self.client.post(url)
             assert response.status_code == 302
             mock_task.delay.assert_called_once_with(str(self.nota.pk))
@@ -96,10 +96,6 @@ class TestNFSeViews:
 
         response = self.client.post(url)
         assert response.status_code == 302
-        # Should redirect back to detail and show error, task not called
-        with unittest.mock.patch("caixa_nfse.nfse.views.enviar_nfse"):
-            # Just to be safe, though not called
-            pass
 
         self.nota.refresh_from_db()
         assert self.nota.status == StatusNFSe.AUTORIZADA

@@ -15,7 +15,7 @@ class TenantMixin:
 
 class LivroFiscalListView(LoginRequiredMixin, TenantMixin, ListView):
     model = LivroFiscalServicos
-    template_name = "fiscal/livro_list.html"
+    template_name = "fiscal/livro_servicos.html"
 
 
 class RelatorioISSView(LoginRequiredMixin, TemplateView):

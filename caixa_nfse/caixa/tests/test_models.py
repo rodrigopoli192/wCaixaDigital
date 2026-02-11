@@ -133,7 +133,11 @@ class TestAberturaCaixaModel:
 
     def test_is_operacional_hoje(self, abertura):
         """Abertura created today should be operacional."""
-        assert abertura.is_operacional_hoje is True
+        from unittest.mock import patch
+
+        with patch("caixa_nfse.caixa.models.timezone") as mock_tz:
+            mock_tz.localdate.return_value = abertura.data_hora.date()
+            assert abertura.is_operacional_hoje is True
 
 
 @pytest.mark.django_db

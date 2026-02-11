@@ -1,0 +1,37 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, cov-7.0.0, django-4.11.1
+collected 11 items
+
+caixa_nfse\backoffice\tests\test_forms.py ...                            [ 27%]
+caixa_nfse\backoffice\tests\test_views.py ...FF...                       [100%]
+
+================================== FAILURES ===================================
+___________________ TestTenantCRUD.test_create_tenant_flow ____________________
+caixa_nfse\backoffice\tests\test_views.py:80: in test_create_tenant_flow
+    assert response.status_code == 302  # Redirects to dashboard
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   assert 200 == 302
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+______________________ TestTenantCRUD.test_delete_tenant ______________________
+caixa_nfse\backoffice\tests\test_views.py:87: in test_delete_tenant
+    assert not tenant.pk  # Basic delete check, or refresh from db
+    ^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: assert not UUID('2d25b22a-5c13-4563-96d0-4c442ea27e98')
+E    +  where UUID('2d25b22a-5c13-4563-96d0-4c442ea27e98') = <Tenant: Empresa 8 Ltda (00000000000008)>.pk
+============================== warnings summary ===============================
+caixa_nfse/backoffice/tests/test_forms.py: 1 warning
+caixa_nfse/backoffice/tests/test_views.py: 9 warnings
+  C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED caixa_nfse/backoffice/tests/test_views.py::TestTenantCRUD::test_create_tenant_flow
+FAILED caixa_nfse/backoffice/tests/test_views.py::TestTenantCRUD::test_delete_tenant
+================== 2 failed, 9 passed, 10 warnings in 2.13s ===================

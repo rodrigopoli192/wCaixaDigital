@@ -27,10 +27,9 @@ class TestCaixaViewSet:
 
         response = self.client.get(self.url)
         assert response.status_code == status.HTTP_200_OK
-        ids = [i["id"] for i in response.data]
-        assert c1.id in ids
-        assert c1.id in ids
-        assert c2.id not in ids
+        ids = [i["id"] for i in response.data["results"]]
+        assert str(c1.id) in ids
+        assert str(c2.id) not in ids
 
     def test_list_no_tenant_user(self):
         """Usuário sem tenant não deve ver nada."""
@@ -41,19 +40,12 @@ class TestCaixaViewSet:
 
         response = client.get(self.url)
         assert response.status_code == status.HTTP_200_OK
-        assert len(response.data) == 0
+        assert len(response.data["results"]) == 0
 
     def test_create_caixa(self):
         data = {"identificador": "NEW01", "tipo": "FISICO", "status": "FECHADO", "ativo": True}
         response = self.client.post(self.url, data)
         assert response.status_code == status.HTTP_201_CREATED
-        # Note: ViewSet create default won't automatically associate tenant if model doesn't handle it in save()
-        # or viewset perform_create.
-        # Check TenantFilterMixin... it filters GET but doesn't set tenant on POST?
-        # Let's check existing models. Models usually require tenant.
-        # If viewset generic create is used, it might fail if tenant is required and not in data.
-        # If current TenantFilterMixin doesn't inject tenant, this test might fail 400 Bad Request.
-        # Let's see results.
 
 
 @pytest.mark.django_db
@@ -71,9 +63,9 @@ class TestClienteViewSet:
 
         response = self.client.get(self.url)
         assert response.status_code == status.HTTP_200_OK
-        ids = [i["id"] for i in response.data]
-        assert c1.id in ids
-        assert c2.id not in ids
+        ids = [i["id"] for i in response.data["results"]]
+        assert str(c1.id) in ids
+        assert str(c2.id) not in ids
 
     def test_create_cliente(self):
         data = {
@@ -104,25 +96,34 @@ class TestNotaFiscalViewSet:
         n2 = NotaFiscalServicoFactory(tenant=TenantFactory())
         response = self.client.get(self.url)
         assert response.status_code == status.HTTP_200_OK
-        ids = [i["id"] for i in response.data]
-        assert n1.id in ids
-        assert n2.id not in ids
+        ids = [i["id"] for i in response.data["results"]]
+        assert str(n1.id) in ids
+        assert str(n2.id) not in ids
 
     def test_create_nota_simple(self):
         """Test basic create to cover perform_create."""
         from django.utils import timezone
 
+        from caixa_nfse.nfse.models import ServicoMunicipal
+
+        servico = ServicoMunicipal.objects.create(
+            codigo_lc116="1.01",
+            descricao="Análise e desenvolvimento de sistemas",
+            municipio_ibge="3550308",
+        )
+
         cliente = ClienteFactory(tenant=self.tenant)
         data = {
             "cliente": cliente.id,
-            "numero_rps": "123",
-            "numero_nfse": 99900,
-            "status": "EMITIDA",
-            "competencia": timezone.now().date(),
-            "data_emissao": timezone.now().date(),
+            "numero_rps": 123,
+            "serie_rps": "1",
+            "servico": servico.id,
+            "discriminacao": "Serviços de TI",
+            "competencia": str(timezone.now().date()),
+            "data_emissao": str(timezone.now().date()),
             "valor_servicos": "100.00",
-            "valor_iss": "5.00",
-            "valor_liquido": "95.00",
+            "aliquota_iss": "0.0500",
+            "local_prestacao_ibge": "3550308",
         }
         response = self.client.post(self.url, data)
         assert response.status_code == status.HTTP_201_CREATED

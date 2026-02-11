@@ -1,0 +1,44 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, cov-7.0.0, django-4.11.1
+collected 27 items
+
+caixa_nfse\clientes\tests\test_models.py .F...........                   [ 48%]
+caixa_nfse\clientes\tests\test_views.py ......FF......                   [100%]
+
+================================== FAILURES ===================================
+____________________ TestClienteModel.test_valid_documents ____________________
+caixa_nfse\clientes\tests\test_models.py:25: in test_valid_documents
+    c_pf.full_clean()  # Should result in validation success (return True)
+    ^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\db\models\base.py:1710: in full_clean
+    raise ValidationError(errors)
+E   django.core.exceptions.ValidationError: {'tenant': ["A instÔncia de empresa com id UUID('97b440ee-92f7-403c-a159-6cc4bceca9d3') nÒo Ú uma escolha vßlida."]}
+__________________ TestClienteViews.test_create_post_success __________________
+caixa_nfse\clientes\tests\test_views.py:74: in test_create_post_success
+    assert response.status_code == 302  # Redirect
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   assert 200 == 302
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+_______________ TestClienteViews.test_create_post_htmx_success ________________
+caixa_nfse\clientes\tests\test_views.py:86: in test_create_post_htmx_success
+    assert response.status_code == 204  # No Content
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   assert 200 == 204
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+============================== warnings summary ===============================
+caixa_nfse/clientes/tests/test_views.py: 14 warnings
+  C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED caixa_nfse/clientes/tests/test_models.py::TestClienteModel::test_valid_documents
+FAILED caixa_nfse/clientes/tests/test_views.py::TestClienteViews::test_create_post_success
+FAILED caixa_nfse/clientes/tests/test_views.py::TestClienteViews::test_create_post_htmx_success
+================== 3 failed, 24 passed, 14 warnings in 2.17s ==================

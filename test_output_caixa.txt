@@ -1,0 +1,90 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 6.0.1, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, cov-7.0.0, django-4.11.1
+collected 76 items
+
+caixa_nfse\caixa\tests\test_forms.py ..............                      [ 18%]
+caixa_nfse\caixa\tests\test_models.py ...........F..........             [ 47%]
+caixa_nfse\caixa\tests\test_services_importacao.py .                     [ 48%]
+caixa_nfse\caixa\tests\test_views.py .......FF...                        [ 64%]
+caixa_nfse\caixa\tests\test_views_extra.py .......FFF.......F...FEF..F   [100%]
+
+=================================== ERRORS ====================================
+_ ERROR at setup of TestCoverageGapView.test_rejeitar_fechamento_sem_justificativa _
+file C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py, line 411
+      def test_rejeitar_fechamento_sem_justificativa(self, client_logged, user, fechamento):
+E       fixture 'fechamento' not found
+>       available fixtures: _dj_autoclear_mailbox, _django_clear_site_cache, _django_db_helper, _django_db_marker, _django_set_urlconf, _django_setup_unittest, _fail_for_invalid_template_variable, _live_server_helper, _session_faker, _template_string_if_invalid_marker, abertura, admin_client, admin_user, anyio_backend, anyio_backend_name, anyio_backend_options, async_client, async_rf, cache, caixa, capfd, capfdbinary, caplog, capsys, capsysbinary, capteesys, client, client_logged, cov, db, django_assert_max_num_queries, django_assert_num_queries, django_capture_on_commit_callbacks, django_db_blocker, django_db_createdb, django_db_keepdb, django_db_modify_db_settings, django_db_modify_db_settings_parallel_suffix, django_db_modify_db_settings_tox_suffix, django_db_modify_db_settings_xdist_suffix, django_db_reset_sequences, django_db_serialized_rollback, django_db_setup, django_db_use_migrations, django_mail_dnsname, django_mail_patch_dns, django_test_environment, django_user_model, django_username_field, doctest_namespace, faker, forma_pagamento, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, live_server, mailoutbox, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, rf, settings, subtests, tenant, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory, transactional_db, user
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_extra.py:411
+================================== FAILURES ===================================
+_______________ TestAberturaCaixaModel.test_is_operacional_hoje _______________
+caixa_nfse\caixa\tests\test_models.py:136: in test_is_operacional_hoje
+    assert abertura.is_operacional_hoje is True
+E   assert False is True
+E    +  where False = <AberturaCaixa: Abertura CAIXA-01 - 11/02/2026 00:01>.is_operacional_hoje
+________________ TestNovoMovimentoView.test_movimento_success _________________
+caixa_nfse\caixa\tests\test_views.py:132: in test_movimento_success
+    assert abertura.movimentos.count() == 1
+E   assert 0 == 1
+E    +  where 0 = count()
+E    +    where count = <django.db.models.fields.related_descriptors.create_reverse_many_to_one_manager.<locals>.RelatedManager object at 0x0000026FA4CC7E50>.count
+E    +      where <django.db.models.fields.related_descriptors.create_reverse_many_to_one_manager.<locals>.RelatedManager object at 0x0000026FA4CC7E50> = <AberturaCaixa: Abertura CAIXA-01 - 11/02/2026 00:01>.movimentos
+______________ TestNovoMovimentoView.test_movimento_invalid_form ______________
+caixa_nfse\caixa\tests\test_views.py:149: in test_movimento_invalid_form
+    assert response.status_code == 200
+E   assert 302 == 200
+E    +  where 302 = <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/caixa/abertura/c49d3659-6455-46cb-8b7f-df9553eac444/movimentos/">.status_code
+________ TestNovoMovimentoExtra.test_movimento_saida_decreases_balance ________
+caixa_nfse\caixa\tests\test_views_extra.py:197: in test_movimento_saida_decreases_balance
+    assert caixa.saldo_atual == Decimal("70.00")
+E   AssertionError: assert Decimal('100.00') == Decimal('70.00')
+E    +  where Decimal('100.00') = <Caixa: CAIXA-01 (Aberto)>.saldo_atual
+E    +  and   Decimal('70.00') = Decimal('70.00')
+___________ TestNovoMovimentoExtra.test_block_retroactive_movement ____________
+caixa_nfse\caixa\tests\test_views_extra.py:209: in test_block_retroactive_movement
+    assert response.status_code == 302
+E   assert 200 == 302
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+__________ TestNovoMovimentoExtra.test_htmx_request_returns_partial ___________
+caixa_nfse\caixa\tests\test_views_extra.py:216: in test_htmx_request_returns_partial
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+___________ TestNovoMovimentoHTMX.test_movimento_htmx_post_success ____________
+caixa_nfse\caixa\tests\test_views_extra.py:346: in test_movimento_htmx_post_success
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+___________ TestCoverageGapView.test_fechar_caixa_post_no_abertura ____________
+caixa_nfse\caixa\tests\test_views_extra.py:408: in test_fechar_caixa_post_no_abertura
+    assert response.status_code == 302
+E   assert 403 == 302
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+__________ TestCoverageGapView.test_novo_movimento_retroactive_htmx ___________
+caixa_nfse\caixa\tests\test_views_extra.py:440: in test_novo_movimento_retroactive_htmx
+    assert response.status_code == 403
+E   assert 200 == 403
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+___________ TestCoverageFinal.test_fechar_caixa_post_race_condition ___________
+caixa_nfse\caixa\tests\test_views_extra.py:519: in test_fechar_caixa_post_race_condition
+    assert response.status_code == 302
+E   assert 403 == 302
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+=========================== short test summary info ===========================
+FAILED caixa_nfse/caixa/tests/test_models.py::TestAberturaCaixaModel::test_is_operacional_hoje
+FAILED caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_success
+FAILED caixa_nfse/caixa/tests/test_views.py::TestNovoMovimentoView::test_movimento_invalid_form
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_movimento_saida_decreases_balance
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_block_retroactive_movement
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoExtra::test_htmx_request_returns_partial
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestNovoMovimentoHTMX::test_movimento_htmx_post_success
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_fechar_caixa_post_no_abertura
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_novo_movimento_retroactive_htmx
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageFinal::test_fechar_caixa_post_race_condition
+ERROR caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_rejeitar_fechamento_sem_justificativa
+=================== 10 failed, 65 passed, 1 error in 2.57s ====================

@@ -51,15 +51,21 @@ class NotaFiscalSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "numero_rps",
+            "serie_rps",
             "numero_nfse",
             "status",
             "cliente",
             "cliente_nome",
+            "servico",
+            "discriminacao",
             "data_emissao",
             "competencia",
             "valor_servicos",
+            "aliquota_iss",
+            "local_prestacao_ibge",
             "valor_iss",
             "valor_liquido",
+            "base_calculo",
             "created_at",
         ]
         read_only_fields = [
@@ -68,5 +74,6 @@ class NotaFiscalSerializer(serializers.ModelSerializer):
             "status",
             "valor_iss",
             "valor_liquido",
+            "base_calculo",
             "created_at",
         ]
