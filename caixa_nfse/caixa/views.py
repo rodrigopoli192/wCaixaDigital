@@ -1030,14 +1030,28 @@ class ItensAtoView(LoginRequiredMixin, TenantMixin, DetailView):
         parent = self.object
         itens = list(parent.itens.all())
 
+        # Funds-only fields (everything except emolumento, iss, taxa_judiciaria)
+        fundos_fields = [
+            f for f in parent.TAXA_FIELDS if f not in ("emolumento", "iss", "taxa_judiciaria")
+        ]
+
         ctx["parent"] = parent
         ctx["itens"] = itens
 
         if itens:
-            ctx["total_valor"] = sum(i.valor or Decimal("0.00") for i in itens)
+            for i in itens:
+                i.total_taxas = sum(getattr(i, f) or Decimal("0.00") for f in fundos_fields)
+                i.total_ato = (
+                    (i.emolumento or Decimal("0.00"))
+                    + (i.iss or Decimal("0.00"))
+                    + (i.taxa_judiciaria or Decimal("0.00"))
+                    + i.total_taxas
+                )
+
             ctx["total_emolumento"] = sum(i.emolumento or Decimal("0.00") for i in itens)
-            ctx["total_taxa_jud"] = sum(i.taxa_judiciaria or Decimal("0.00") for i in itens)
             ctx["total_iss"] = sum(i.iss or Decimal("0.00") for i in itens)
-            ctx["total_taxas"] = sum(i.valor_total_taxas for i in itens)
+            ctx["total_taxa_jud"] = sum(i.taxa_judiciaria or Decimal("0.00") for i in itens)
+            ctx["total_taxas"] = sum(i.total_taxas for i in itens)
+            ctx["total_ato"] = sum(i.total_ato for i in itens)
 
         return ctx

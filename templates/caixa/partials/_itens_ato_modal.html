@@ -1,7 +1,7 @@
 <!-- Itens de Ato - Modal Content -->
-<!-- Loaded via HTMX into the existing modal container -->
+<!-- Loaded via fetch() into the existing modal container -->
 
-<div class="bg-white dark:bg-[#23242a] rounded-2xl border border-slate-200 dark:border-[#2d3544] w-full max-w-3xl mx-auto">
+<div class="bg-white dark:bg-[#23242a] rounded-2xl border border-slate-200 dark:border-[#2d3544] w-full max-w-4xl mx-auto">
     <!-- Header -->
     <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-[#2d3544]">
         <div class="flex items-center gap-3">
@@ -36,11 +36,11 @@
                     <tr class="bg-slate-50 dark:bg-[#2B2C30] text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold">
                         <th class="px-3 py-2 text-left w-8">#</th>
                         <th class="px-3 py-2 text-left">Descrição</th>
-                        <th class="px-3 py-2 text-right">Valor</th>
                         <th class="px-3 py-2 text-right">Emolumento</th>
                         <th class="px-3 py-2 text-right">ISS</th>
                         <th class="px-3 py-2 text-right">Tx Jud.</th>
                         <th class="px-3 py-2 text-right">Total Taxas</th>
+                        <th class="px-3 py-2 text-right">Total Ato</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-[#2d3544]">
@@ -48,22 +48,22 @@
                     <tr class="hover:bg-slate-50 dark:hover:bg-[#2B2C30]/50 transition-colors">
                         <td class="px-3 py-2.5 text-slate-400 font-mono text-xs">{{ forloop.counter }}</td>
                         <td class="px-3 py-2.5 text-slate-700 dark:text-slate-200 max-w-[220px] truncate" title="{{ item.descricao }}">{{ item.descricao|default:"—" }}</td>
-                        <td class="px-3 py-2.5 text-right font-mono text-slate-700 dark:text-slate-200">R$ {{ item.valor|floatformat:2 }}</td>
                         <td class="px-3 py-2.5 text-right font-mono text-slate-600 dark:text-slate-300">R$ {{ item.emolumento|default:"0"|floatformat:2 }}</td>
                         <td class="px-3 py-2.5 text-right font-mono text-slate-600 dark:text-slate-300">R$ {{ item.iss|default:"0"|floatformat:2 }}</td>
                         <td class="px-3 py-2.5 text-right font-mono text-slate-600 dark:text-slate-300">R$ {{ item.taxa_judiciaria|default:"0"|floatformat:2 }}</td>
-                        <td class="px-3 py-2.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">R$ {{ item.valor_total_taxas|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono text-slate-600 dark:text-slate-300">R$ {{ item.total_taxas|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">R$ {{ item.total_ato|floatformat:2 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr class="bg-slate-50 dark:bg-[#2B2C30] font-bold text-xs">
                         <td colspan="2" class="px-3 py-2.5 text-slate-500 dark:text-slate-400 uppercase">Totais</td>
-                        <td class="px-3 py-2.5 text-right font-mono text-slate-900 dark:text-white">R$ {{ total_valor|floatformat:2 }}</td>
                         <td class="px-3 py-2.5 text-right font-mono text-slate-700 dark:text-slate-200">R$ {{ total_emolumento|floatformat:2 }}</td>
                         <td class="px-3 py-2.5 text-right font-mono text-slate-700 dark:text-slate-200">R$ {{ total_iss|floatformat:2 }}</td>
                         <td class="px-3 py-2.5 text-right font-mono text-slate-700 dark:text-slate-200">R$ {{ total_taxa_jud|floatformat:2 }}</td>
-                        <td class="px-3 py-2.5 text-right font-mono font-bold text-primary">R$ {{ total_taxas|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono text-slate-700 dark:text-slate-200">R$ {{ total_taxas|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono font-bold text-primary">R$ {{ total_ato|floatformat:2 }}</td>
                     </tr>
                 </tfoot>
             </table>
