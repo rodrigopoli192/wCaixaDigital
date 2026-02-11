@@ -4,7 +4,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Recibo - Protocolo {{ movimento.protocolo }}</title>
+<title>Recibo - Protocolo {{ protocolo_display }}</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -50,6 +50,15 @@
     .info-grid .value {
         color: #1e293b;
         font-size: 12px;
+        font-weight: 700;
+    }
+    .section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #e2e8f0;
     }
     table {
         width: 100%;
@@ -104,8 +113,21 @@
         color: #6366f1;
         font-family: 'Consolas', monospace;
     }
+    .summary-item .value.green { color: #16a34a; }
+    .summary-item .value.red { color: #dc2626; }
+    .comprovante {
+        margin-top: 24px;
+        padding: 12px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 13px;
+        color: #1e293b;
+        letter-spacing: 0.05em;
+        border-top: 2px solid #6366f1;
+        border-bottom: 2px solid #6366f1;
+    }
     .footer {
-        margin-top: 32px;
+        margin-top: 20px;
         padding-top: 12px;
         border-top: 1px solid #e2e8f0;
         text-align: center;
@@ -134,7 +156,7 @@
 <div class="info-grid">
     <div>
         <div class="label">Protocolo</div>
-        <div class="value">{{ movimento.protocolo|default:"—" }}</div>
+        <div class="value">{{ protocolo_display }}</div>
     </div>
     <div>
         <div class="label">Data</div>
@@ -149,8 +171,8 @@
         <div class="value">{{ movimento.forma_pagamento|default:"—" }}</div>
     </div>
     <div>
-        <div class="label">Descrição</div>
-        <div class="value">{{ movimento.descricao|default:"—" }}</div>
+        <div class="label">Sistema - Rotina</div>
+        <div class="value">{{ sistema_rotina }}</div>
     </div>
     <div>
         <div class="label">Caixa</div>
@@ -159,16 +181,17 @@
 </div>
 
 {% if itens %}
+<h3 class="section-title">Itens do Pedido</h3>
 <table>
     <thead>
         <tr>
             <th style="width: 5%">#</th>
-            <th style="width: 35%">Descrição do Ato</th>
-            <th class="right" style="width: 12%">Valor</th>
-            <th class="right" style="width: 12%">Emolumento</th>
-            <th class="right" style="width: 12%">Taxa Jud.</th>
-            <th class="right" style="width: 12%">ISS</th>
-            <th class="right" style="width: 12%">Total Taxas</th>
+            <th style="width: 30%">Descrição do Ato</th>
+            <th class="right" style="width: 13%">Emolumento</th>
+            <th class="right" style="width: 10%">ISS</th>
+            <th class="right" style="width: 12%">Tx Jud.</th>
+            <th class="right" style="width: 15%">Total Taxas</th>
+            <th class="right" style="width: 15%">Total Ato</th>
         </tr>
     </thead>
     <tbody>
@@ -176,20 +199,20 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ item.descricao|default:"—" }}</td>
-            <td class="right">{{ item.valor|localize }}</td>
-            <td class="right">{{ item.emolumento|localize }}</td>
-            <td class="right">{{ item.taxa_judiciaria|localize }}</td>
-            <td class="right">{{ item.iss|localize }}</td>
-            <td class="right">{{ item.valor_total_taxas|localize }}</td>
+            <td class="right">{{ item.emolumento|default:"0"|floatformat:2 }}</td>
+            <td class="right">{{ item.iss|default:"0"|floatformat:2 }}</td>
+            <td class="right">{{ item.taxa_judiciaria|default:"0"|floatformat:2 }}</td>
+            <td class="right">{{ item.total_taxas|floatformat:2 }}</td>
+            <td class="right"><strong>{{ item.total_ato|floatformat:2 }}</strong></td>
         </tr>
         {% endfor %}
         <tr class="totals-row">
-            <td colspan="2"><strong>TOTALS</strong></td>
-            <td class="right">{{ total_valor|localize }}</td>
-            <td class="right">{{ total_emolumento|localize }}</td>
-            <td class="right">{{ total_taxa_jud|localize }}</td>
-            <td class="right">{{ total_iss|localize }}</td>
-            <td class="right">{{ total_taxas|localize }}</td>
+            <td colspan="2"><strong>TOTAIS</strong></td>
+            <td class="right">{{ total_emolumento|floatformat:2 }}</td>
+            <td class="right">{{ total_iss|floatformat:2 }}</td>
+            <td class="right">{{ total_taxa_jud|floatformat:2 }}</td>
+            <td class="right">{{ total_taxas|floatformat:2 }}</td>
+            <td class="right"><strong>{{ total_ato|floatformat:2 }}</strong></td>
         </tr>
     </tbody>
 </table>
@@ -197,24 +220,25 @@
 <div class="no-items">
     Este movimento não possui detalhamento de atos individuais.
 </div>
-
-<div class="summary">
-    <div class="summary-item">
-        <div class="label">Valor</div>
-        <div class="value">{{ movimento.valor|localize }}</div>
-    </div>
-    <div class="summary-item">
-        <div class="label">Total Taxas</div>
-        <div class="value">{{ movimento.valor_total_taxas|localize }}</div>
-    </div>
-</div>
 {% endif %}
 
 <div class="summary">
     <div class="summary-item">
-        <div class="label">Valor Total do Protocolo</div>
-        <div class="value">{{ movimento.valor|localize }}</div>
+        <div class="label">Total</div>
+        <div class="value">R$ {{ total_ato|floatformat:2 }}</div>
     </div>
+    <div class="summary-item">
+        <div class="label">Total Pago</div>
+        <div class="value green">R$ {{ total_pago|floatformat:2 }}</div>
+    </div>
+    <div class="summary-item">
+        <div class="label">Valor a Receber</div>
+        <div class="value {% if valor_a_receber > 0 %}red{% endif %}">R$ {{ valor_a_receber|floatformat:2 }}</div>
+    </div>
+</div>
+
+<div class="comprovante">
+    RECIBO VÁLIDO COMO COMPROVANTE DE PAGAMENTO
 </div>
 
 <div class="footer">

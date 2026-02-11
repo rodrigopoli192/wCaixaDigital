@@ -966,17 +966,54 @@ class ReciboDetalhadoView(LoginRequiredMixin, DetailView):
         movimento = self.object
         itens = list(movimento.itens.all())
 
+        # Resolve sistema - rotina via reverse FK
+        importado = movimento.importacao_origem.select_related("rotina__sistema").first()
+        if importado and importado.rotina:
+            sistema_rotina = f"{importado.rotina.sistema.nome} - {importado.rotina.nome}"
+        else:
+            sistema_rotina = "Lançamento Manual"
+
+        # Funds-only fields (everything except emolumento, iss, taxa_judiciaria)
+        fundos_fields = [
+            f for f in movimento.TAXA_FIELDS if f not in ("emolumento", "iss", "taxa_judiciaria")
+        ]
+
         ctx["movimento"] = movimento
         ctx["itens"] = itens
         ctx["tenant_name"] = getattr(self.request.user.tenant, "nome", "")
         ctx["now"] = timezone.now()
+        ctx["sistema_rotina"] = sistema_rotina
+
+        # Strip decimal from protocolo (e.g. "12345.00" → "12345")
+        protocolo = movimento.protocolo or ""
+        if "." in protocolo:
+            try:
+                protocolo = str(int(float(protocolo)))
+            except (ValueError, TypeError):
+                pass
+        ctx["protocolo_display"] = protocolo or "—"
 
         if itens:
-            ctx["total_valor"] = sum(i.valor or Decimal("0.00") for i in itens)
+            for i in itens:
+                i.total_taxas = sum(getattr(i, f) or Decimal("0.00") for f in fundos_fields)
+                i.total_ato = (
+                    (i.emolumento or Decimal("0.00"))
+                    + (i.iss or Decimal("0.00"))
+                    + (i.taxa_judiciaria or Decimal("0.00"))
+                    + i.total_taxas
+                )
+
             ctx["total_emolumento"] = sum(i.emolumento or Decimal("0.00") for i in itens)
-            ctx["total_taxa_jud"] = sum(i.taxa_judiciaria or Decimal("0.00") for i in itens)
             ctx["total_iss"] = sum(i.iss or Decimal("0.00") for i in itens)
-            ctx["total_taxas"] = sum(i.valor_total_taxas for i in itens)
+            ctx["total_taxa_jud"] = sum(i.taxa_judiciaria or Decimal("0.00") for i in itens)
+            ctx["total_taxas"] = sum(i.total_taxas for i in itens)
+            ctx["total_ato"] = sum(i.total_ato for i in itens)
+            ctx["total_pago"] = movimento.valor
+            ctx["valor_a_receber"] = ctx["total_ato"] - ctx["total_pago"]
+        else:
+            ctx["total_ato"] = movimento.valor_total_taxas
+            ctx["total_pago"] = movimento.valor
+            ctx["valor_a_receber"] = ctx["total_ato"] - ctx["total_pago"]
 
         return ctx
 
