@@ -6,7 +6,7 @@
 
 {% block content %}
 <!-- Wrapper com Alpine.js -->
-<div class="p-6 w-full space-y-6" x-data="{ open: false }">
+<div id="movimentos-root" class="p-6 w-full space-y-6" x-data="{ open: false }">
     
     <!-- Modal Container -->
     <div x-show="open" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -203,7 +203,7 @@
     <!-- 4. Movements Cards Section -->
     <div class="space-y-2">
         {% for mov in object_list %}
-        {% include "caixa/partials/_movimento_card.html" with mov=mov show_tipo=True show_checkbox=False show_origem=False show_caixa=False %}
+        {% include "caixa/partials/_movimento_card.html" with mov=mov show_tipo=True show_checkbox=False show_origem=False show_caixa=False model_type="movimento" %}
         {% empty %}
         <div class="bg-white dark:bg-[#2B2C30] rounded-2xl border border-slate-200 dark:border-[#2d3544] shadow-sm dark:shadow-none p-16">
             <div class="flex flex-col items-center justify-center text-slate-500">
@@ -278,4 +278,16 @@
     {% endif %}
 
 </div>
+
+<script>
+// Open modal whenever HTMX swaps content into #modal-content
+document.body.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target && evt.detail.target.id === 'modal-content') {
+        var root = document.getElementById('movimentos-root');
+        if (root && window.Alpine) {
+            Alpine.$data(root).open = true;
+        }
+    }
+});
+</script>
 {% endblock %}

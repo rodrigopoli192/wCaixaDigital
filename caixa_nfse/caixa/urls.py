@@ -62,4 +62,10 @@ urlpatterns = [
         views.AprovarFechamentoView.as_view(),
         name="aprovar_fechamento",
     ),
+    # Itens de ato (HTMX modal)
+    path(
+        "itens-ato/<str:model_type>/<uuid:pk>/",
+        views.ItensAtoView.as_view(),
+        name="itens_ato",
+    ),
 ]

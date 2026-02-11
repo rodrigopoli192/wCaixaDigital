@@ -118,6 +118,16 @@
             </div>
         </div>
 
+        <!-- Ver Atos Button (only if has children) -->
+        {% if mov.itens_count %}
+        <button type="button"
+           onclick="(function(btn){var url='{% url 'caixa:itens_ato' model_type=model_type pk=mov.pk %}';fetch(url,{headers:{'X-Requested-With':'XMLHttpRequest'}}).then(function(r){return r.text()}).then(function(html){var mc=document.getElementById('modal-content');if(mc)mc.innerHTML=html;var root=document.getElementById('movimentos-root');if(root&&window.Alpine)Alpine.$data(root).open=true;}).catch(function(e){console.error('Ver Atos error:',e)})})(this)"
+           class="shrink-0 p-1.5 rounded-lg hover:bg-primary/10 transition-colors group"
+           title="Ver atos detalhados ({{ mov.itens_count }})">
+            <span class="material-symbols-outlined text-primary text-lg group-hover:scale-110 transition-transform">list_alt</span>
+        </button>
+        {% endif %}
+
         <!-- Expand Toggle -->
         <button @click="details = !details" class="shrink-0 p-1 rounded hover:bg-slate-100 dark:hover:bg-[#2d3544] transition-colors">
             <span class="material-symbols-outlined text-slate-400 text-lg transition-transform" :class="details ? 'rotate-180' : ''">expand_more</span>

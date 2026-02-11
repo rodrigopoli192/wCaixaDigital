@@ -74,7 +74,7 @@
     <!-- Cards -->
     <div class="space-y-2">
         {% for imp in importados %}
-        {% include "caixa/partials/_movimento_card.html" with mov=imp show_checkbox=True show_tipo=False show_origem=True show_caixa=False %}
+        {% include "caixa/partials/_movimento_card.html" with mov=imp show_checkbox=True show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
         {% endfor %}
     </div>
 

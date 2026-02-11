@@ -1,0 +1,80 @@
+<!-- Itens de Ato - Modal Content -->
+<!-- Loaded via HTMX into the existing modal container -->
+
+<div class="bg-white dark:bg-[#23242a] rounded-2xl border border-slate-200 dark:border-[#2d3544] w-full max-w-3xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-[#2d3544]">
+        <div class="flex items-center gap-3">
+            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-xl">list_alt</span>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white">Atos do Protocolo</h3>
+                <span class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ parent.protocolo|default:"—" }}</span>
+            </div>
+        </div>
+        <button @click="open = false" class="size-8 rounded-lg hover:bg-slate-100 dark:hover:bg-[#2d3544] flex items-center justify-center transition-colors">
+            <span class="material-symbols-outlined text-slate-400 text-lg">close</span>
+        </button>
+    </div>
+
+    <!-- Body -->
+    <div class="px-6 py-4">
+        {% if itens %}
+        <!-- Parent summary -->
+        <div class="flex items-center gap-4 mb-4 text-xs text-slate-500 dark:text-slate-400">
+            <span><strong class="text-slate-700 dark:text-slate-200">{{ itens|length }}</strong> ato(s)</span>
+            {% if parent.descricao %}
+            <span class="truncate max-w-[300px]" title="{{ parent.descricao }}">{{ parent.descricao }}</span>
+            {% endif %}
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-[#2d3544]">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-[#2B2C30] text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold">
+                        <th class="px-3 py-2 text-left w-8">#</th>
+                        <th class="px-3 py-2 text-left">Descrição</th>
+                        <th class="px-3 py-2 text-right">Valor</th>
+                        <th class="px-3 py-2 text-right">Emolumento</th>
+                        <th class="px-3 py-2 text-right">ISS</th>
+                        <th class="px-3 py-2 text-right">Tx Jud.</th>
+                        <th class="px-3 py-2 text-right">Total Taxas</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-[#2d3544]">
+                    {% for item in itens %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-[#2B2C30]/50 transition-colors">
+                        <td class="px-3 py-2.5 text-slate-400 font-mono text-xs">{{ forloop.counter }}</td>
+                        <td class="px-3 py-2.5 text-slate-700 dark:text-slate-200 max-w-[220px] truncate" title="{{ item.descricao }}">{{ item.descricao|default:"—" }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono text-slate-700 dark:text-slate-200">R$ {{ item.valor|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono text-slate-600 dark:text-slate-300">R$ {{ item.emolumento|default:"0"|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono text-slate-600 dark:text-slate-300">R$ {{ item.iss|default:"0"|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono text-slate-600 dark:text-slate-300">R$ {{ item.taxa_judiciaria|default:"0"|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">R$ {{ item.valor_total_taxas|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="bg-slate-50 dark:bg-[#2B2C30] font-bold text-xs">
+                        <td colspan="2" class="px-3 py-2.5 text-slate-500 dark:text-slate-400 uppercase">Totais</td>
+                        <td class="px-3 py-2.5 text-right font-mono text-slate-900 dark:text-white">R$ {{ total_valor|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono text-slate-700 dark:text-slate-200">R$ {{ total_emolumento|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono text-slate-700 dark:text-slate-200">R$ {{ total_iss|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono text-slate-700 dark:text-slate-200">R$ {{ total_taxa_jud|floatformat:2 }}</td>
+                        <td class="px-3 py-2.5 text-right font-mono font-bold text-primary">R$ {{ total_taxas|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% else %}
+        <!-- Empty state -->
+        <div class="flex flex-col items-center justify-center py-10 text-slate-500">
+            <span class="material-symbols-outlined text-3xl opacity-30 mb-2">info</span>
+            <p class="text-sm">Nenhum ato detalhado registrado para este protocolo.</p>
+            <p class="text-xs text-slate-400 mt-1">Os valores consolidados estão no card principal.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>

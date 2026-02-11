@@ -7,7 +7,7 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -401,7 +401,11 @@ class ListaMovimentosView(LoginRequiredMixin, TenantMixin, SingleTableMixin, Fil
 
     def get_queryset(self):
         qs = super().get_queryset()
-        return qs.filter(abertura_id=self.kwargs["pk"]).select_related("cliente", "forma_pagamento")
+        return (
+            qs.filter(abertura_id=self.kwargs["pk"])
+            .select_related("cliente", "forma_pagamento")
+            .annotate(itens_count=Count("itens"))
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -832,11 +836,15 @@ class ListaImportadosView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     def get_queryset(self):
         from caixa_nfse.caixa.models import MovimentoImportado
 
-        return MovimentoImportado.objects.filter(
-            abertura_id=self.kwargs["pk"],
-            tenant=self.request.user.tenant,
-            confirmado=False,
-        ).select_related("rotina", "conexao")
+        return (
+            MovimentoImportado.objects.filter(
+                abertura_id=self.kwargs["pk"],
+                tenant=self.request.user.tenant,
+                confirmado=False,
+            )
+            .select_related("rotina", "conexao")
+            .annotate(itens_count=Count("itens"))
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -999,3 +1007,37 @@ class ReciboDetalhadoView(LoginRequiredMixin, DetailView):
         response = HttpResponse(pdf_file, content_type="application/pdf")
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
+
+
+class ItensAtoView(LoginRequiredMixin, TenantMixin, DetailView):
+    """HTMX endpoint: returns child items table for a movement."""
+
+    template_name = "caixa/partials/_itens_ato_modal.html"
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.model_type = kwargs.get("model_type", "movimento")
+
+    def get_queryset(self):
+        if self.model_type == "importado":
+            from caixa_nfse.caixa.models import MovimentoImportado
+
+            return MovimentoImportado.objects.filter(tenant=self.request.user.tenant)
+        return MovimentoCaixa.objects.filter(tenant=self.request.user.tenant)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        parent = self.object
+        itens = list(parent.itens.all())
+
+        ctx["parent"] = parent
+        ctx["itens"] = itens
+
+        if itens:
+            ctx["total_valor"] = sum(i.valor or Decimal("0.00") for i in itens)
+            ctx["total_emolumento"] = sum(i.emolumento or Decimal("0.00") for i in itens)
+            ctx["total_taxa_jud"] = sum(i.taxa_judiciaria or Decimal("0.00") for i in itens)
+            ctx["total_iss"] = sum(i.iss or Decimal("0.00") for i in itens)
+            ctx["total_taxas"] = sum(i.valor_total_taxas for i in itens)
+
+        return ctx
