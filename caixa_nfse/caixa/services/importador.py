@@ -198,10 +198,11 @@ class ImportadorMovimentos:
     def salvar_importacao(abertura, conexao, rotina, headers, rows, user):
         """
         Map and save multiple rows as MovimentoImportado records.
+        Also creates ItemAtoImportado children for each individual row.
         Returns tuple (created_count, skipped_count).
         Skips rows whose protocolo already exists for the same sistema+rotina.
         """
-        from caixa_nfse.caixa.models import MovimentoImportado
+        from caixa_nfse.caixa.models import ItemAtoImportado, MovimentoImportado
 
         DECIMAL_FIELDS = set(MovimentoImportado.TAXA_FIELDS) | {"valor"}
 
@@ -236,7 +237,7 @@ class ImportadorMovimentos:
                 skipped += 1
                 continue
 
-            # Key for grouping: usage of protocol. If no protocol, use unique key to avoid grouping
+            # Key for grouping
             group_key = protocolo if protocolo else f"NO_PROTO_{len(grouped_data)}"
 
             if group_key not in grouped_data:
@@ -245,7 +246,8 @@ class ImportadorMovimentos:
                     "valor": Decimal("0.00"),
                     "taxas": {f: Decimal("0.00") for f in DECIMAL_FIELDS if f != "valor"},
                     "descricoes": [],
-                    "first_mapped": mapped,  # Store first occurrence for non-summable
+                    "first_mapped": mapped,
+                    "raw_items": [],  # Store each row for child creation
                 }
 
             # Accumulate values
@@ -260,28 +262,28 @@ class ImportadorMovimentos:
                 val_tax = ImportadorMovimentos._parse_decimal(mapped.get(tax_field))
                 group["taxas"][tax_field] += val_tax
 
-            # Collect description (avoid duplicates if exact same string)
+            # Collect description (avoid duplicates)
             desc = normalize_desc(mapped.get("descricao"))
             if desc and desc not in group["descricoes"]:
-                # If grouping by protocol, we append.
-                # If grouping by unique/no_proto, we append (it's list of 1 usually).
                 group["descricoes"].append(desc)
 
-        # 2. Second pass: Create objects
+            # Store raw mapped row for children
+            group["raw_items"].append(mapped)
+
+        # 2. Second pass: Create parent objects
         importados = []
+        importados_raw = []  # parallel list of raw_items for each parent
         for _, data in grouped_data.items():
             first = data["first_mapped"]
             protocolo = data["protocolo"]
 
-            # Format description: "{Rotina} - {Desc1}; {Desc2}"
+            # Format description
             desc_list = data["descricoes"]
             if desc_list:
                 combined_desc = "; ".join(desc_list)
                 final_descricao = f"{rotina.nome} - {combined_desc}"
             else:
                 final_descricao = f"{rotina.nome}"
-
-            # Truncate description if needed (max 500 chars)
             final_descricao = final_descricao[:500]
 
             kwargs = {
@@ -300,37 +302,57 @@ class ImportadorMovimentos:
                 kwargs[tax_field] = tax_val
 
             # Populate non-summable fields from first record
-            # cliente_nome
             kwargs["cliente_nome"] = str(first.get("cliente_nome") or "")[:200]
-
-            # status_item
             kwargs["status_item"] = str(first.get("status_item") or "")[:100]
 
-            # quantidade (use first or sum? User didn't specify, but usually quantity 1 makes sense for protocol group or sum.
-            # Given user said "values" are summable, quantity might be.
-            # However, looking at tax/cartorial context, quantity is often 1 per acto.
-            # I will use first record's quantity logic for now as it wasn't explicitly requested to sum quantity,
-            # and 'valores' usually implies currency in this context.
-            # But let's check: "fazer uma soma dos valores".
-            # I'll stick to first record for quantity to be safe or maybe set to 1 if it's a grouped act.
-            # The existing code had explicit logic for quantity.
-            # Let's preserve using the first record's quantity logic.
             q_val = first.get("quantidade")
             try:
                 kwargs["quantidade"] = int(q_val) if q_val else 1
             except (ValueError, TypeError):
                 kwargs["quantidade"] = 1
 
-            # data do ato
             data_ato = ImportadorMovimentos._parse_date(first.get("data_ato"))
             if data_ato:
                 kwargs["data_ato"] = data_ato
 
             importados.append(MovimentoImportado(**kwargs))
+            importados_raw.append(data["raw_items"])
             if protocolo:
                 existing.add(protocolo)
 
         created = MovimentoImportado.objects.bulk_create(importados)
+
+        # 3. Third pass: Create child ItemAtoImportado records
+        child_items = []
+        for parent, raw_items in zip(created, importados_raw, strict=True):
+            for mapped in raw_items:
+                item_kwargs = {
+                    "tenant": user.tenant,
+                    "movimento_importado": parent,
+                    "descricao": normalize_desc(mapped.get("descricao"))[:500],
+                    "valor": ImportadorMovimentos._parse_decimal(mapped.get("valor")),
+                    "cliente_nome": str(mapped.get("cliente_nome") or "")[:200],
+                    "status_item": str(mapped.get("status_item") or "")[:100],
+                }
+                # Quantity
+                q = mapped.get("quantidade")
+                try:
+                    item_kwargs["quantidade"] = int(q) if q else 1
+                except (ValueError, TypeError):
+                    item_kwargs["quantidade"] = 1
+                # Date
+                d = ImportadorMovimentos._parse_date(mapped.get("data_ato"))
+                if d:
+                    item_kwargs["data_ato"] = d
+                # Tax fields
+                for tf in MovimentoImportado.TAXA_FIELDS:
+                    item_kwargs[tf] = ImportadorMovimentos._parse_decimal(mapped.get(tf))
+
+                child_items.append(ItemAtoImportado(**item_kwargs))
+
+        if child_items:
+            ItemAtoImportado.objects.bulk_create(child_items)
+
         return len(created), skipped
 
     @staticmethod
@@ -338,13 +360,28 @@ class ImportadorMovimentos:
     def confirmar_movimentos(ids, abertura, forma_pagamento, tipo, user):
         """
         Migrate selected MovimentoImportado records to MovimentoCaixa.
+        Also copies ItemAtoImportado children to ItemAtoMovimento.
         Auto-registers Cliente from apresentante name if available.
         Returns count of confirmed movements.
         """
-        from caixa_nfse.caixa.models import MovimentoCaixa, MovimentoImportado
+        from caixa_nfse.caixa.models import (
+            ItemAtoMovimento,
+            MovimentoCaixa,
+            MovimentoImportado,
+        )
         from caixa_nfse.clientes.models import Cliente
 
-        importados = MovimentoImportado.objects.filter(
+        # Fields to copy from ItemAtoImportado to ItemAtoMovimento
+        item_copy_fields = [
+            "descricao",
+            "valor",
+            "quantidade",
+            "data_ato",
+            "status_item",
+            "cliente_nome",
+        ] + MovimentoCaixa.TAXA_FIELDS
+
+        importados = MovimentoImportado.objects.prefetch_related("itens").filter(
             pk__in=ids,
             abertura=abertura,
             confirmado=False,
@@ -358,7 +395,6 @@ class ImportadorMovimentos:
             # Auto-register client from apresentante name
             cliente = None
             if imp.cliente_nome:
-                # No CPF/CNPJ from import → always create new (homonyms allowed)
                 cliente = Cliente.objects.create(
                     tenant=user.tenant,
                     razao_social=imp.cliente_nome.strip(),
@@ -393,6 +429,26 @@ class ImportadorMovimentos:
                 mov_kwargs[field] = getattr(imp, field) or Decimal("0.00")
 
             movimento = MovimentoCaixa.objects.create(**mov_kwargs)
+
+            # Copy child items: ItemAtoImportado → ItemAtoMovimento
+            child_items = []
+            for item in imp.itens.all():
+                item_data = {"tenant": user.tenant, "movimento": movimento}
+                for f in item_copy_fields:
+                    val = getattr(item, f, None)
+                    if val is None or val == "":
+                        if f in MovimentoImportado.TAXA_FIELDS or f == "valor":
+                            val = Decimal("0.00")
+                        elif f in ("data_ato",):
+                            val = None
+                        elif f == "quantidade":
+                            val = 1
+                        else:
+                            val = ""
+                    item_data[f] = val
+                child_items.append(ItemAtoMovimento(**item_data))
+            if child_items:
+                ItemAtoMovimento.objects.bulk_create(child_items)
 
             # Update caixa balance
             if movimento.is_entrada:

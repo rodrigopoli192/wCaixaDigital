@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db import transaction
 from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -940,4 +941,61 @@ class ExcluirImportadosView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
         response = HttpResponse()
         response["HX-Refresh"] = "true"
         messages.success(request, f"{deleted} item(ns) excluído(s).")
+        return response
+
+
+class ReciboDetalhadoView(LoginRequiredMixin, DetailView):
+    """Recibo detalhado de um movimento com itens de ato individuais."""
+
+    model = MovimentoCaixa
+    template_name = "caixa/recibo_detalhado.html"
+
+    def get_queryset(self):
+        return MovimentoCaixa.objects.filter(tenant=self.request.user.tenant)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        movimento = self.object
+        itens = list(movimento.itens.all())
+
+        ctx["movimento"] = movimento
+        ctx["itens"] = itens
+        ctx["tenant_name"] = getattr(self.request.user.tenant, "nome", "")
+        ctx["now"] = timezone.now()
+
+        if itens:
+            ctx["total_valor"] = sum(i.valor or Decimal("0.00") for i in itens)
+            ctx["total_emolumento"] = sum(i.emolumento or Decimal("0.00") for i in itens)
+            ctx["total_taxa_jud"] = sum(i.taxa_judiciaria or Decimal("0.00") for i in itens)
+            ctx["total_iss"] = sum(i.iss or Decimal("0.00") for i in itens)
+            ctx["total_taxas"] = sum(i.valor_total_taxas for i in itens)
+
+        return ctx
+
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.GET.get("pdf"):
+            return self._render_pdf(context)
+        return super().render_to_response(context, **response_kwargs)
+
+    def _render_pdf(self, context):
+        from django.template.loader import render_to_string
+
+        try:
+            from weasyprint import HTML
+
+            has_weasyprint = True
+        except ImportError:
+            has_weasyprint = False
+
+        if not has_weasyprint:
+            return HttpResponse("WeasyPrint não está instalado.", status=500)
+
+        html_string = render_to_string(self.template_name, context, request=self.request)
+        pdf_file = HTML(string=html_string).write_pdf()
+
+        protocolo = self.object.protocolo or "sem_protocolo"
+        filename = f"recibo_{protocolo}.pdf"
+
+        response = HttpResponse(pdf_file, content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response

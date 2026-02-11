@@ -5,7 +5,15 @@ Caixa admin configuration.
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import AberturaCaixa, Caixa, FechamentoCaixa, MovimentoCaixa
+from .models import (
+    AberturaCaixa,
+    Caixa,
+    FechamentoCaixa,
+    ItemAtoImportado,
+    ItemAtoMovimento,
+    MovimentoCaixa,
+    MovimentoImportado,
+)
 
 
 @admin.register(Caixa)
@@ -62,6 +70,16 @@ class AberturaCaixaAdmin(admin.ModelAdmin):
     date_hierarchy = "data_hora"
 
 
+class ItemAtoMovimentoInline(admin.TabularInline):
+    """Inline for ItemAtoMovimento in MovimentoCaixa."""
+
+    model = ItemAtoMovimento
+    extra = 0
+    readonly_fields = ["descricao", "valor", "emolumento", "taxa_judiciaria", "iss"]
+    can_delete = False
+    show_change_link = False
+
+
 @admin.register(MovimentoCaixa)
 class MovimentoCaixaAdmin(admin.ModelAdmin):
     """Admin for MovimentoCaixa."""
@@ -71,6 +89,28 @@ class MovimentoCaixaAdmin(admin.ModelAdmin):
     search_fields = ["descricao"]
     readonly_fields = ["id", "created_at", "hash_registro", "hash_anterior"]
     date_hierarchy = "data_hora"
+    inlines = [ItemAtoMovimentoInline]
+
+
+class ItemAtoImportadoInline(admin.TabularInline):
+    """Inline for ItemAtoImportado in MovimentoImportado."""
+
+    model = ItemAtoImportado
+    extra = 0
+    readonly_fields = ["descricao", "valor", "emolumento", "taxa_judiciaria", "iss"]
+    can_delete = False
+    show_change_link = False
+
+
+@admin.register(MovimentoImportado)
+class MovimentoImportadoAdmin(admin.ModelAdmin):
+    """Admin for MovimentoImportado."""
+
+    list_display = ["protocolo", "descricao", "valor", "confirmado", "importado_em"]
+    list_filter = ["confirmado", "abertura__caixa__tenant"]
+    search_fields = ["protocolo", "descricao"]
+    readonly_fields = ["id", "created_at"]
+    inlines = [ItemAtoImportadoInline]
 
 
 @admin.register(FechamentoCaixa)

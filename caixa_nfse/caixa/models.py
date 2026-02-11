@@ -843,3 +843,201 @@ class MovimentoImportado(TenantAwareModel):
     def valor_total_fundos(self) -> Decimal:
         """Soma de taxas e fundos (sem emolumento)."""
         return sum(getattr(self, f) or Decimal("0.00") for f in self.FUNDOS_FIELDS)
+
+
+class ItemAtoImportado(TenantAwareModel):
+    """
+    Detalhe individual de cada ato dentro de um MovimentoImportado agrupado.
+    Preserva os dados granulares de cada linha SQL antes do agrupamento.
+    """
+
+    movimento_importado = models.ForeignKey(
+        MovimentoImportado,
+        on_delete=models.CASCADE,
+        related_name="itens",
+        verbose_name=_("movimento importado"),
+    )
+    descricao = models.CharField(_("descrição"), max_length=500, blank=True, default="")
+    valor = models.DecimalField(
+        _("valor"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    quantidade = models.PositiveIntegerField(_("quantidade"), default=1, blank=True, null=True)
+    data_ato = models.DateField(_("data do ato"), null=True, blank=True)
+    status_item = models.CharField(_("status do item"), max_length=100, blank=True, default="")
+    cliente_nome = models.CharField(
+        _("nome do apresentante"), max_length=200, blank=True, default=""
+    )
+
+    # Tax fields (same as parent)
+    iss = models.DecimalField(
+        _("ISS"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fundesp = models.DecimalField(
+        _("FUNDESP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funesp = models.DecimalField(
+        _("FUNESP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    estado = models.DecimalField(
+        _("Estado"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fesemps = models.DecimalField(
+        _("FESEMPS"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funemp = models.DecimalField(
+        _("FUNEMP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funcomp = models.DecimalField(
+        _("FUNCOMP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fepadsaj = models.DecimalField(
+        _("FEPADSAJ"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funproge = models.DecimalField(
+        _("FUNPROGE"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fundepeg = models.DecimalField(
+        _("FUNDEPEG"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fundaf = models.DecimalField(
+        _("FUNDAF"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    femal = models.DecimalField(
+        _("FEMAL"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fecad = models.DecimalField(
+        _("FECAD"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    emolumento = models.DecimalField(
+        _("emolumento"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    taxa_judiciaria = models.DecimalField(
+        _("taxa judiciária"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    valor_receita_adicional_1 = models.DecimalField(
+        _("Receita Adicional 1"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    valor_receita_adicional_2 = models.DecimalField(
+        _("Receita Adicional 2"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+
+    TAXA_FIELDS = MovimentoCaixa.TAXA_FIELDS
+
+    class Meta:
+        verbose_name = _("item de ato importado")
+        verbose_name_plural = _("itens de atos importados")
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Item #{self.pk} - {self.descricao[:50] or 'S/D'}"
+
+    @property
+    def valor_total_taxas(self) -> Decimal:
+        return sum(getattr(self, f) or Decimal("0.00") for f in self.TAXA_FIELDS)
+
+
+class ItemAtoMovimento(TenantAwareModel):
+    """
+    Detalhe individual de cada ato dentro de um MovimentoCaixa confirmado.
+    Persistência permanente para recibos detalhados.
+    """
+
+    movimento = models.ForeignKey(
+        MovimentoCaixa,
+        on_delete=models.CASCADE,
+        related_name="itens",
+        verbose_name=_("movimento"),
+    )
+    descricao = models.CharField(_("descrição"), max_length=500, blank=True, default="")
+    valor = models.DecimalField(
+        _("valor"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    quantidade = models.PositiveIntegerField(_("quantidade"), default=1, blank=True, null=True)
+    data_ato = models.DateField(_("data do ato"), null=True, blank=True)
+    status_item = models.CharField(_("status do item"), max_length=100, blank=True, default="")
+    cliente_nome = models.CharField(
+        _("nome do apresentante"), max_length=200, blank=True, default=""
+    )
+
+    # Tax fields (same as parent)
+    iss = models.DecimalField(
+        _("ISS"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fundesp = models.DecimalField(
+        _("FUNDESP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funesp = models.DecimalField(
+        _("FUNESP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    estado = models.DecimalField(
+        _("Estado"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fesemps = models.DecimalField(
+        _("FESEMPS"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funemp = models.DecimalField(
+        _("FUNEMP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funcomp = models.DecimalField(
+        _("FUNCOMP"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fepadsaj = models.DecimalField(
+        _("FEPADSAJ"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    funproge = models.DecimalField(
+        _("FUNPROGE"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fundepeg = models.DecimalField(
+        _("FUNDEPEG"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fundaf = models.DecimalField(
+        _("FUNDAF"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    femal = models.DecimalField(
+        _("FEMAL"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    fecad = models.DecimalField(
+        _("FECAD"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    emolumento = models.DecimalField(
+        _("emolumento"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    taxa_judiciaria = models.DecimalField(
+        _("taxa judiciária"), max_digits=14, decimal_places=2, default=Decimal("0.00"), blank=True
+    )
+    valor_receita_adicional_1 = models.DecimalField(
+        _("Receita Adicional 1"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+    valor_receita_adicional_2 = models.DecimalField(
+        _("Receita Adicional 2"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        blank=True,
+    )
+
+    TAXA_FIELDS = MovimentoCaixa.TAXA_FIELDS
+
+    class Meta:
+        verbose_name = _("item de ato do movimento")
+        verbose_name_plural = _("itens de atos do movimento")
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Item #{self.pk} - {self.descricao[:50] or 'S/D'}"
+
+    @property
+    def valor_total_taxas(self) -> Decimal:
+        return sum(getattr(self, f) or Decimal("0.00") for f in self.TAXA_FIELDS)

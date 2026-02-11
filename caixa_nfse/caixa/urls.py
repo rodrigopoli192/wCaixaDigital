@@ -45,6 +45,12 @@ urlpatterns = [
         views.ExcluirImportadosView.as_view(),
         name="excluir_importados",
     ),
+    # Recibo detalhado
+    path(
+        "movimento/<uuid:pk>/recibo/",
+        views.ReciboDetalhadoView.as_view(),
+        name="recibo_detalhado",
+    ),
     # Fechamentos pendentes de aprovação
     path(
         "fechamentos/pendentes/",
