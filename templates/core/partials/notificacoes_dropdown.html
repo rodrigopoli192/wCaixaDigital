@@ -1,0 +1,48 @@
+<!-- Notifications Dropdown (HTMX partial) -->
+<div class="py-2 w-80 max-h-96 overflow-y-auto">
+    {% if notificacoes %}
+    <div class="flex items-center justify-between px-4 pb-2 border-b border-slate-200 dark:border-border-dark">
+        <span class="text-xs font-semibold text-slate-500 uppercase">{{ total_nao_lidas }} não lida{{ total_nao_lidas|pluralize:"s" }}</span>
+        <button hx-post="{% url 'core:notificacoes_marcar_todas_lidas' %}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                hx-swap="outerHTML"
+                hx-target="#notif-dropdown-content"
+                hx-trigger="click"
+                class="text-xs text-primary hover:underline">
+            Marcar todas como lidas
+        </button>
+    </div>
+    {% for n in notificacoes %}
+    <div class="px-4 py-3 hover:bg-slate-50 dark:hover:bg-surface-dark border-b border-slate-100 dark:border-border-dark last:border-0 flex gap-3 items-start"
+         id="notif-{{ n.pk }}">
+        <span class="mt-0.5 material-symbols-outlined text-lg
+            {% if n.tipo == 'PROTOCOLO_VENCIDO' %}text-danger
+            {% elif n.tipo == 'PROTOCOLO_VENCENDO' %}text-warning
+            {% else %}text-primary{% endif %}">
+            {% if n.tipo == 'PROTOCOLO_VENCIDO' %}error
+            {% elif n.tipo == 'PROTOCOLO_VENCENDO' %}schedule
+            {% elif n.tipo == 'FECHAMENTO_PENDENTE' %}pending_actions
+            {% else %}notifications{% endif %}
+        </span>
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium truncate">{{ n.titulo }}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">{{ n.mensagem }}</p>
+            <p class="text-[10px] text-slate-400 mt-1">{{ n.created_at|timesince }} atrás</p>
+        </div>
+        <button hx-post="{% url 'core:notificacao_marcar_lida' n.pk %}"
+                hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                hx-target="#notif-{{ n.pk }}"
+                hx-swap="outerHTML"
+                class="p-1 rounded hover:bg-slate-200 dark:hover:bg-border-dark text-slate-400"
+                title="Marcar como lida">
+            <span class="material-symbols-outlined text-base">check</span>
+        </button>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="px-4 py-8 text-center">
+        <span class="material-symbols-outlined text-3xl text-slate-300 dark:text-slate-600 mb-2">notifications_off</span>
+        <p class="text-sm text-slate-400">Nenhuma notificação</p>
+    </div>
+    {% endif %}
+</div>

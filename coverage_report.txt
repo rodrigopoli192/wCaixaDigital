@@ -55,7 +55,7 @@ caixa_nfse\nfse\tests\test_webhook.py ..............                     [ 70%]
 caixa_nfse\nfse\tests\test_xml_builder.py ..................             [ 72%]
 caixa_nfse\relatorios\tests\test_exports.py ..............               [ 74%]
 caixa_nfse\relatorios\tests\test_views.py .............                  [ 76%]
-caixa_nfse\tests\test_100_coverage.py .................................. [ 80%]
+caixa_nfse\tests\test_100_coverage.py ..........................F....... [ 80%]
 ........                                                                 [ 81%]
 caixa_nfse\tests\test_access_control.py .....................            [ 84%]
 caixa_nfse\tests\test_coverage_gaps.py ................................. [ 88%]
@@ -70,6 +70,10 @@ caixa_nfse\nfse\tests\test_portal_backend.py ..........                  [ 97%]
 caixa_nfse\nfse\tests\test_xml_signer.py ..........                      [ 99%]
 caixa_nfse\relatorios\tests\test_services.py .......                     [100%]
 
+================================== FAILURES ===================================
+E   assert 403 == 200
+     +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+c:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\tests\test_100_coverage.py:339: assert 403 == 200
 ============================== warnings summary ===============================
 caixa_nfse/api/tests/test_views.py: 8 warnings
 caixa_nfse/auditoria/tests/test_internals.py: 5 warnings
@@ -202,4 +206,6 @@ caixa_nfse\settings\base.py                                  52      0   100%
 caixa_nfse\settings\test.py                                  14      0   100%
 ---------------------------------------------------------------------------------------
 TOTAL                                                      5055    123    98%
-===================== 752 passed, 209 warnings in 10.94s ======================
+=========================== short test summary info ===========================
+FAILED caixa_nfse/tests/test_100_coverage.py::TestNfseNoTenant::test_nfse_list_no_tenant
+================ 1 failed, 751 passed, 209 warnings in 11.84s =================

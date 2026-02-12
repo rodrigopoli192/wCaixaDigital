@@ -160,6 +160,16 @@ class AbrirCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             caixa.saldo_atual = abertura.saldo_abertura
             caixa.save()
 
+            # Migrar pendentes de sessões anteriores (cross-caixa)
+            from caixa_nfse.caixa.services.importador import ImportadorMovimentos
+
+            migrados = ImportadorMovimentos.migrar_pendentes_para_nova_abertura(abertura)
+            if migrados:
+                messages.info(
+                    self.request,
+                    f"{migrados} protocolo(s) pendente(s) migrado(s) de sessões anteriores.",
+                )
+
         messages.success(self.request, f"Caixa {caixa.identificador} aberto com sucesso!")
 
         if self.request.headers.get("HX-Request"):
@@ -834,30 +844,41 @@ class ListaImportadosView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return self.request.user.pode_operar_caixa
 
     def get_queryset(self):
-        from caixa_nfse.caixa.models import MovimentoImportado
+        from caixa_nfse.caixa.models import MovimentoImportado, StatusRecebimento
 
         return (
             MovimentoImportado.objects.filter(
                 abertura_id=self.kwargs["pk"],
                 tenant=self.request.user.tenant,
-                confirmado=False,
             )
+            .exclude(status_recebimento=StatusRecebimento.QUITADO)
             .select_related("rotina", "conexao")
+            .prefetch_related("parcelas", "parcelas__forma_pagamento", "parcelas__recebido_por")
             .annotate(itens_count=Count("itens"))
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["abertura"] = get_object_or_404(
+        abertura = get_object_or_404(
             AberturaCaixa,
             pk=self.kwargs["pk"],
             tenant=self.request.user.tenant,
         )
+        context["abertura"] = abertura
         from caixa_nfse.core.models import FormaPagamento
 
         context["formas_pagamento"] = FormaPagamento.objects.filter(
             tenant=self.request.user.tenant, ativo=True
         )
+
+        # Split imports into "previous sessions" vs "current session"
+        importados = list(context["importados"])
+        pendentes_anteriores = [i for i in importados if i.importado_em < abertura.data_hora]
+        importados_sessao_atual = [i for i in importados if i.importado_em >= abertura.data_hora]
+
+        if pendentes_anteriores or importados_sessao_atual:
+            context["pendentes_anteriores"] = pendentes_anteriores
+            context["importados_sessao_atual"] = importados_sessao_atual
         return context
 
 
@@ -892,12 +913,28 @@ class ConfirmarImportadosView(LoginRequiredMixin, UserPassesTestMixin, DetailVie
                 "Selecione ao menos um item e a forma de pagamento.</div>"
             )
 
+        # Build parcelas_map from per-item valor inputs
+        parcelas_map = {}
+        for imp_id in ids:
+            valor_str = request.POST.get(f"valor_parcela_{imp_id}")
+            if valor_str:
+                try:
+                    valor_str = valor_str.replace(".", "").replace(",", ".")
+                    parcelas_map[imp_id] = Decimal(valor_str)
+                except Exception:
+                    pass
+
         try:
             forma_pagamento = FormaPagamento.objects.get(
                 pk=forma_pagamento_id, tenant=request.user.tenant
             )
             count = ImportadorMovimentos.confirmar_movimentos(
-                ids, abertura, forma_pagamento, tipo, request.user
+                ids,
+                abertura,
+                forma_pagamento,
+                tipo,
+                request.user,
+                parcelas_map=parcelas_map if parcelas_map else None,
             )
 
             response = HttpResponse()
@@ -1008,10 +1045,31 @@ class ReciboDetalhadoView(LoginRequiredMixin, DetailView):
             ctx["total_taxa_jud"] = sum(i.taxa_judiciaria or Decimal("0.00") for i in itens)
             ctx["total_taxas"] = sum(i.total_taxas for i in itens)
             ctx["total_ato"] = sum(i.total_ato for i in itens)
-            ctx["total_pago"] = movimento.valor
-            ctx["valor_a_receber"] = ctx["total_ato"] - ctx["total_pago"]
         else:
             ctx["total_ato"] = movimento.valor_total_taxas
+
+        # Partial payment: calculate total_pago from all installments
+        if importado:
+            from caixa_nfse.caixa.models import ParcelaRecebimento
+
+            parcelas = list(
+                ParcelaRecebimento.objects.filter(movimento_importado=importado)
+                .select_related("forma_pagamento", "recebido_por")
+                .order_by("numero_parcela")
+            )
+            ctx["total_pago"] = sum(p.valor for p in parcelas) if parcelas else movimento.valor
+            ctx["valor_a_receber"] = ctx["total_ato"] - ctx["total_pago"]
+
+            # Find current parcela for this specific movement
+            parcela_atual = next(
+                (p for p in parcelas if str(p.movimento_caixa_id) == str(movimento.pk)), None
+            )
+            ctx["parcela_atual"] = parcela_atual
+            ctx["total_parcelas"] = len(parcelas)
+            ctx["historico_parcelas"] = parcelas
+            ctx["importado"] = importado
+            ctx["is_parcial"] = importado.status_recebimento in ("PARCIAL", "PENDENTE")
+        else:
             ctx["total_pago"] = movimento.valor
             ctx["valor_a_receber"] = ctx["total_ato"] - ctx["total_pago"]
 

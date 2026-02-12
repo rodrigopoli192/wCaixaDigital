@@ -36,4 +36,10 @@ urlpatterns = [
         views.FechamentosPendentesView.as_view(),
         name="fechamentos_pendentes",
     ),
+    # Protocolos Pendentes
+    path(
+        "protocolos-pendentes/",
+        views.ProtocolosPendentesView.as_view(),
+        name="protocolos_pendentes",
+    ),
 ]

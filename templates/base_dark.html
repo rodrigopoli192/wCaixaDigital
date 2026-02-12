@@ -179,17 +179,34 @@
                     <input class="w-full bg-slate-100 dark:bg-surface-dark border-none rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary transition-all outline-none" placeholder="Buscar lançamentos, auditorias..." type="text"/>
                 </div>
                 
-                <!-- Notification -->
+                <!-- Notification Bell -->
                 <div class="flex items-center gap-2">
                     <button @click="toggleTheme()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500 dark:text-slate-400">
                         <span class="material-symbols-outlined" x-show="!darkMode">dark_mode</span>
                         <span class="material-symbols-outlined" x-show="darkMode" style="display: none;">light_mode</span>
                     </button>
 
-                    <button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-dark relative">
-                        <span class="material-symbols-outlined text-slate-500 dark:text-slate-400">notifications</span>
-                        <span class="absolute top-2 right-2 size-2 bg-danger rounded-full border-2 border-white dark:border-background-dark"></span>
-                    </button>
+                    <div class="relative" x-data="{ notifOpen: false }">
+                        <button @click="notifOpen = !notifOpen"
+                                hx-get="{% url 'core:notificacoes_dropdown' %}"
+                                hx-target="#notif-dropdown-content"
+                                hx-trigger="click once"
+                                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-dark relative">
+                            <span class="material-symbols-outlined text-slate-500 dark:text-slate-400">notifications</span>
+                            {% if notificacoes_nao_lidas %}
+                            <span class="absolute top-1.5 right-1.5 size-2.5 bg-danger rounded-full border-2 border-white dark:border-background-dark animate-pulse"></span>
+                            {% endif %}
+                        </button>
+                        <div x-show="notifOpen" @click.away="notifOpen = false" x-transition
+                             class="absolute right-0 top-full mt-2 bg-white dark:bg-surface-dark rounded-xl shadow-xl border border-slate-200 dark:border-border-dark z-50"
+                             style="display: none;">
+                            <div id="notif-dropdown-content">
+                                <div class="px-4 py-8 text-center w-80">
+                                    <span class="material-symbols-outlined text-2xl text-slate-300 animate-spin">sync</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- User Profile Dropdown -->

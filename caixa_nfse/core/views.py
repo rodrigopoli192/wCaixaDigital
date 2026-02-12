@@ -54,8 +54,16 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def _get_admin_context(self, user):
         """Context for admin dashboard with KPIs and alerts."""
-        from caixa_nfse.caixa.models import AberturaCaixa, Caixa, FechamentoCaixa, MovimentoCaixa
+        from caixa_nfse.caixa.models import (
+            AberturaCaixa,
+            Caixa,
+            FechamentoCaixa,
+            MovimentoCaixa,
+            MovimentoImportado,
+            StatusRecebimento,
+        )
         from caixa_nfse.clientes.models import Cliente
+        from caixa_nfse.core.models import Notificacao
         from caixa_nfse.nfse.models import NotaFiscalServico
 
         tenant = user.tenant
@@ -194,6 +202,51 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 }
             )
 
+        # Protocolos pendentes/parciais/vencidos (global do tenant)
+        if tenant:
+            importados_qs = MovimentoImportado.objects.filter(tenant=tenant)
+        else:
+            importados_qs = MovimentoImportado.objects.all()
+
+        protocolos_pendentes = importados_qs.filter(
+            status_recebimento__in=[
+                StatusRecebimento.PENDENTE,
+                StatusRecebimento.PARCIAL,
+            ]
+        ).count()
+        protocolos_vencidos = importados_qs.filter(
+            status_recebimento=StatusRecebimento.VENCIDO
+        ).count()
+
+        # Unread notifications
+        if tenant:
+            notificacoes_count = Notificacao.objects.filter(tenant=tenant, lida=False).count()
+        else:
+            notificacoes_count = 0
+
+        if protocolos_vencidos > 0:
+            alertas.append(
+                {
+                    "tipo": "danger",
+                    "titulo": "Protocolos Vencidos",
+                    "mensagem": f"{protocolos_vencidos} protocolo(s) com prazo de pagamento vencido",
+                }
+            )
+
+        # Top pending protocols for mini-table
+        ultimos_pendentes = (
+            importados_qs.filter(
+                status_recebimento__in=[
+                    StatusRecebimento.PENDENTE,
+                    StatusRecebimento.PARCIAL,
+                    StatusRecebimento.VENCIDO,
+                ]
+            )
+            .select_related("abertura__caixa")
+            .prefetch_related("parcelas")
+            .order_by("prazo_quitacao", "-created_at")[:5]
+        )
+
         return {
             "page_title": "Dashboard",
             "is_admin": True,
@@ -210,11 +263,21 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "retencoes_mes": retencoes_mes,
             "caixas_lista": caixas_lista,
             "hoje": hoje,
+            "protocolos_pendentes": protocolos_pendentes,
+            "protocolos_vencidos": protocolos_vencidos,
+            "notificacoes_count": notificacoes_count,
+            "ultimos_pendentes": ultimos_pendentes,
         }
 
     def _get_operador_context(self, user):
         """Context for operator dashboard with current caixa focus."""
-        from caixa_nfse.caixa.models import AberturaCaixa, Caixa, MovimentoCaixa, MovimentoImportado
+        from caixa_nfse.caixa.models import (
+            AberturaCaixa,
+            Caixa,
+            MovimentoCaixa,
+            MovimentoImportado,
+            StatusRecebimento,
+        )
 
         tenant = user.tenant
         caixa_atual = None
@@ -246,9 +309,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 total_entradas = totais["entradas"] or 0
                 total_saidas = totais["saidas"] or 0
 
-                pendentes_count = MovimentoImportado.objects.filter(
-                    abertura=abertura_atual, tenant=tenant, confirmado=False
-                ).count()
+                pendentes_count = (
+                    MovimentoImportado.objects.filter(
+                        abertura=abertura_atual,
+                        tenant=tenant,
+                    )
+                    .exclude(status_recebimento=StatusRecebimento.QUITADO)
+                    .count()
+                )
 
             # All active caixas (available and in use)
             todos_caixas = (
@@ -1094,3 +1162,55 @@ class ConexaoExternaTestView(View):
         return JsonResponse(
             {"status": "success", "message": f"Conexão Bem-Sucedida! {details}", "logs": logs}
         )
+
+
+class NotificacoesDropdownView(LoginRequiredMixin, TemplateView):
+    """HTMX partial: dropdown with recent unread notifications."""
+
+    template_name = "core/partials/notificacoes_dropdown.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        from caixa_nfse.core.models import Notificacao
+
+        qs = Notificacao.objects.filter(tenant=self.request.user.tenant)
+        # Show user-specific OR broadcast (destinatario=null)
+        qs = qs.filter(
+            models.Q(destinatario=self.request.user) | models.Q(destinatario__isnull=True)
+        )
+        ctx["notificacoes"] = qs.filter(lida=False).order_by("-created_at")[:10]
+        ctx["total_nao_lidas"] = qs.filter(lida=False).count()
+        return ctx
+
+
+class NotificacaoMarcarLidaView(LoginRequiredMixin, View):
+    """Mark single notification as read."""
+
+    def post(self, request, pk):
+        from django.http import HttpResponse
+
+        from caixa_nfse.core.models import Notificacao
+
+        try:
+            notif = Notificacao.objects.get(pk=pk, tenant=request.user.tenant)
+            notif.marcar_lida()
+        except Notificacao.DoesNotExist:
+            pass
+        return HttpResponse(status=204)
+
+
+class NotificacoesMarcarTodasLidasView(LoginRequiredMixin, View):
+    """Mark all notifications as read for the user's tenant."""
+
+    def post(self, request):
+        from django.http import HttpResponse
+
+        from caixa_nfse.core.models import Notificacao
+
+        Notificacao.objects.filter(
+            tenant=request.user.tenant,
+            lida=False,
+        ).filter(models.Q(destinatario=request.user) | models.Q(destinatario__isnull=True)).update(
+            lida=True, lida_em=timezone.now()
+        )
+        return HttpResponse(status=204)

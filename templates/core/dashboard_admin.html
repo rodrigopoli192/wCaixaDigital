@@ -226,6 +226,72 @@
             </div>
         </div>
 
+        <!-- Protocolos Pendentes -->
+        {% if protocolos_pendentes or protocolos_vencidos %}
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden w-full">
+            <div class="p-6 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-warning">receipt_long</span>
+                    <div>
+                        <h4 class="font-bold text-lg">Protocolos Pendentes</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">{{ protocolos_pendentes }} pendente{{ protocolos_pendentes|pluralize:"s" }}{% if protocolos_vencidos %} · <span class="text-danger font-bold">{{ protocolos_vencidos }} vencido{{ protocolos_vencidos|pluralize:"s" }}</span>{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <th class="px-6 py-3">Protocolo</th>
+                            <th class="px-6 py-3">Descrição</th>
+                            <th class="px-6 py-3">Status</th>
+                            <th class="px-6 py-3 text-right">Valor Total</th>
+                            <th class="px-6 py-3 text-right">Recebido</th>
+                            <th class="px-6 py-3">Progresso</th>
+                            <th class="px-6 py-3">Prazo</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                        {% for imp in ultimos_pendentes %}
+                        <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                            <td class="px-6 py-3">
+                                <span class="text-sm font-bold">{{ imp.protocolo }}</span>
+                            </td>
+                            <td class="px-6 py-3">
+                                <p class="text-sm truncate max-w-[200px]">{{ imp.descricao|default:"—" }}</p>
+                            </td>
+                            <td class="px-6 py-3">
+                                {% if imp.status_recebimento == 'VENCIDO' %}
+                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">Vencido</span>
+                                {% elif imp.status_recebimento == 'PARCIAL' %}
+                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">Parcial</span>
+                                {% else %}
+                                <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">Pendente</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-3 text-sm text-right font-medium">R$ {{ imp.valor|floatformat:2 }}</td>
+                            <td class="px-6 py-3 text-sm text-right font-bold text-success">R$ {{ imp.valor_recebido|floatformat:2 }}</td>
+                            <td class="px-6 py-3">
+                                <div class="w-24 bg-slate-200 dark:bg-border-dark rounded-full h-1.5">
+                                    <div class="h-1.5 rounded-full {% if imp.status_recebimento == 'VENCIDO' %}bg-danger{% else %}bg-primary{% endif %}" style="width: {{ imp.percentual_recebido }}%"></div>
+                                </div>
+                                <span class="text-[10px] text-slate-400 mt-0.5">{{ imp.percentual_recebido }}%</span>
+                            </td>
+                            <td class="px-6 py-3 text-sm {% if imp.prazo_vencido %}text-danger font-bold{% else %}text-slate-500{% endif %}">
+                                {% if imp.prazo_quitacao %}{{ imp.prazo_quitacao|date:"d/m/Y" }}{% else %}—{% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-6 text-center text-sm text-slate-400">Nenhum protocolo pendente.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- NFS-e Emitidas -->
         <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden w-full">
             <div class="p-6 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">

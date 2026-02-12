@@ -798,3 +798,121 @@ class DashboardAnaliticoView(GerenteRequiredMixin, TemplateView):
             }
         )
         return context
+
+
+class ProtocolosPendentesView(ExportMixin, GerenteRequiredMixin, TemplateView):
+    """Relatório de protocolos com pagamento pendente/parcial/vencido."""
+
+    template_name = "relatorios/financeiros/protocolos_pendentes.html"
+    export_title = "Protocolos Pendentes"
+    export_columns = [
+        {"key": "protocolo", "label": "Protocolo", "align": "left"},
+        {"key": "descricao", "label": "Descrição", "align": "left"},
+        {"key": "status", "label": "Status", "align": "center"},
+        {"key": "caixa", "label": "Caixa", "align": "left"},
+        {"key": "data_importacao", "label": "Importação", "align": "left"},
+        {"key": "prazo", "label": "Prazo", "align": "left"},
+        {"key": "valor_total", "label": "Valor Total", "align": "right"},
+        {"key": "valor_recebido", "label": "Recebido", "align": "right"},
+        {"key": "saldo", "label": "Saldo", "align": "right"},
+    ]
+
+    def get_queryset(self):
+        from caixa_nfse.caixa.models import MovimentoImportado, StatusRecebimento
+
+        tenant = self.request.user.tenant
+        status = self.request.GET.get("status", "")
+        data_inicio = self.request.GET.get("data_inicio", "")
+        data_fim = self.request.GET.get("data_fim", "")
+        caixa_id = self.request.GET.get("caixa", "")
+
+        qs = (
+            MovimentoImportado.objects.filter(
+                tenant=tenant,
+                status_recebimento__in=[
+                    StatusRecebimento.PENDENTE,
+                    StatusRecebimento.PARCIAL,
+                    StatusRecebimento.VENCIDO,
+                ],
+            )
+            .select_related("abertura__caixa")
+            .prefetch_related("parcelas")
+        )
+
+        if status:
+            qs = qs.filter(status_recebimento=status)
+        if data_inicio:
+            qs = qs.filter(created_at__date__gte=data_inicio)
+        if data_fim:
+            qs = qs.filter(created_at__date__lte=data_fim)
+        if caixa_id:
+            qs = qs.filter(abertura__caixa__pk=caixa_id)
+
+        return qs.order_by("prazo_quitacao", "-created_at")
+
+    def get_export_data(self):
+        rows = []
+        for imp in self.get_queryset()[:500]:
+            rows.append(
+                {
+                    "protocolo": imp.protocolo or "-",
+                    "descricao": (imp.descricao or "-")[:40],
+                    "status": imp.get_status_recebimento_display(),
+                    "caixa": imp.abertura.caixa.identificador if imp.abertura else "-",
+                    "data_importacao": imp.created_at.strftime("%d/%m/%Y"),
+                    "prazo": imp.prazo_quitacao.strftime("%d/%m/%Y") if imp.prazo_quitacao else "-",
+                    "valor_total": format_currency(imp.valor),
+                    "valor_recebido": format_currency(imp.valor_recebido),
+                    "saldo": format_currency(imp.saldo_pendente),
+                }
+            )
+        return rows
+
+    def get_export_totals(self):
+        qs = self.get_queryset()
+        total_valor = sum(imp.valor or 0 for imp in qs)
+        total_recebido = sum(imp.valor_recebido for imp in qs)
+        total_saldo = total_valor - total_recebido
+        return {
+            "valor_total": format_currency(total_valor),
+            "valor_recebido": format_currency(total_recebido),
+            "saldo": format_currency(total_saldo),
+        }
+
+    def get_export_filters(self):
+        filters = {}
+        status = self.request.GET.get("status", "")
+        if status:
+            filters["Status"] = status
+        for key in ["data_inicio", "data_fim", "caixa"]:
+            value = self.request.GET.get(key, "")
+            if value:
+                filters[key.replace("_", " ").title()] = value
+        return filters
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tenant = self.request.user.tenant
+        protocolos = self.get_queryset()
+
+        total_valor = sum(imp.valor or 0 for imp in protocolos)
+        total_recebido = sum(imp.valor_recebido for imp in protocolos)
+
+        caixas = Caixa.objects.filter(tenant=tenant, ativo=True)
+
+        context.update(
+            {
+                "page_title": self.export_title,
+                "protocolos": protocolos[:100],
+                "total_protocolos": protocolos.count(),
+                "total_valor": total_valor,
+                "total_recebido": total_recebido,
+                "total_saldo": total_valor - total_recebido,
+                "caixas": caixas,
+                "filtro_status": self.request.GET.get("status", ""),
+                "filtro_data_inicio": self.request.GET.get("data_inicio", ""),
+                "filtro_data_fim": self.request.GET.get("data_fim", ""),
+                "filtro_caixa": self.request.GET.get("caixa", ""),
+            }
+        )
+        return context

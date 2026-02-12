@@ -1,0 +1,137 @@
+{% extends "relatorios/base_relatorio.html" %}
+
+{% block export_buttons %}
+{% include "relatorios/includes/export_buttons.html" %}
+{% endblock %}
+
+{% block report_content %}
+<!-- Filtros -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Status</label>
+            <select name="status" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+                <option value="">Todos</option>
+                <option value="PENDENTE" {% if filtro_status == 'PENDENTE' %}selected{% endif %}>Pendente</option>
+                <option value="PARCIAL" {% if filtro_status == 'PARCIAL' %}selected{% endif %}>Parcial</option>
+                <option value="VENCIDO" {% if filtro_status == 'VENCIDO' %}selected{% endif %}>Vencido</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Início</label>
+            <input type="date" name="data_inicio" value="{{ filtro_data_inicio }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Fim</label>
+            <input type="date" name="data_fim" value="{{ filtro_data_fim }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Caixa</label>
+            <select name="caixa" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+                <option value="">Todos os caixas</option>
+                {% for c in caixas %}
+                <option value="{{ c.pk }}" {% if filtro_caixa == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.identificador }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="w-full px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors">
+                <span class="material-symbols-outlined text-sm align-middle mr-1">filter_alt</span>
+                Filtrar
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- KPIs -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+        <p class="text-sm text-slate-500 mb-1">Total de Protocolos</p>
+        <p class="text-2xl font-bold">{{ total_protocolos }}</p>
+    </div>
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+        <p class="text-sm text-slate-500 mb-1">Valor Total</p>
+        <p class="text-2xl font-bold">R$ {{ total_valor|floatformat:2 }}</p>
+    </div>
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+        <p class="text-sm text-slate-500 mb-1">Total Recebido</p>
+        <p class="text-2xl font-bold text-success">R$ {{ total_recebido|floatformat:2 }}</p>
+    </div>
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+        <p class="text-sm text-slate-500 mb-1">Saldo Pendente</p>
+        <p class="text-2xl font-bold text-warning">R$ {{ total_saldo|floatformat:2 }}</p>
+    </div>
+</div>
+
+<!-- Tabela -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50 dark:bg-background-dark text-xs uppercase text-slate-500">
+                <tr>
+                    <th class="px-6 py-3 text-left">Protocolo</th>
+                    <th class="px-6 py-3 text-left">Descrição</th>
+                    <th class="px-6 py-3 text-center">Status</th>
+                    <th class="px-6 py-3 text-left">Caixa</th>
+                    <th class="px-6 py-3 text-left">Importação</th>
+                    <th class="px-6 py-3 text-left">Prazo</th>
+                    <th class="px-6 py-3 text-right">Valor Total</th>
+                    <th class="px-6 py-3 text-right">Recebido</th>
+                    <th class="px-6 py-3 text-center">Progresso</th>
+                    <th class="px-6 py-3 text-right">Saldo</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+                {% for imp in protocolos %}
+                <tr class="hover:bg-slate-50 dark:hover:bg-background-dark">
+                    <td class="px-6 py-4 text-sm font-bold">{{ imp.protocolo|default:"-" }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500 truncate max-w-[200px]">{{ imp.descricao|default:"-"|truncatechars:35 }}</td>
+                    <td class="px-6 py-4 text-center">
+                        {% if imp.status_recebimento == 'VENCIDO' %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">Vencido</span>
+                        {% elif imp.status_recebimento == 'PARCIAL' %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">Parcial</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">Pendente</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm">{{ imp.abertura.caixa.identificador }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-500">{{ imp.created_at|date:"d/m/Y" }}</td>
+                    <td class="px-6 py-4 text-sm {% if imp.prazo_vencido %}text-danger font-bold{% else %}text-slate-500{% endif %}">
+                        {% if imp.prazo_quitacao %}{{ imp.prazo_quitacao|date:"d/m/Y" }}{% else %}—{% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right text-sm font-medium">R$ {{ imp.valor|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-bold text-success">R$ {{ imp.valor_recebido|floatformat:2 }}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-16 bg-slate-200 dark:bg-border-dark rounded-full h-1.5">
+                                <div class="h-1.5 rounded-full {% if imp.status_recebimento == 'VENCIDO' %}bg-danger{% else %}bg-primary{% endif %}" style="width: {{ imp.percentual_recebido }}%"></div>
+                            </div>
+                            <span class="text-[10px] text-slate-400">{{ imp.percentual_recebido }}%</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right text-sm font-bold text-warning">R$ {{ imp.saldo_pendente|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="px-6 py-8 text-center text-slate-500">
+                        Nenhum protocolo pendente encontrado com os filtros aplicados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot class="bg-slate-100 dark:bg-background-dark border-t-2 border-slate-300 dark:border-border-dark">
+                <tr class="font-bold">
+                    <td colspan="6" class="px-6 py-4 text-sm uppercase">Total</td>
+                    <td class="px-6 py-4 text-right text-sm">R$ {{ total_valor|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm text-success">R$ {{ total_recebido|floatformat:2 }}</td>
+                    <td class="px-6 py-4"></td>
+                    <td class="px-6 py-4 text-right text-sm text-warning">R$ {{ total_saldo|floatformat:2 }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -36,11 +36,29 @@
                 {% else %}
                 <!-- Status Badge (MovimentoImportado) -->
                 <span class="text-[10px] px-2 py-0.5 rounded-full shrink-0
-                    {% if mov.status_item == 'Aberto' or not mov.status_item %}bg-emerald-500/20 text-emerald-600 dark:text-emerald-400
+                {% if mov.status_item == 'Aberto' or not mov.status_item %}bg-emerald-500/20 text-emerald-600 dark:text-emerald-400
                     {% elif mov.status_item == 'Cancelado' %}bg-red-500/20 text-red-600 dark:text-red-400
                     {% else %}bg-blue-500/20 text-blue-600 dark:text-blue-400{% endif %} font-bold">
                     {{ mov.status_item|default:"Aberto" }}
                 </span>
+
+                <!-- Status Recebimento Badge -->
+                {% if mov.status_recebimento == 'PARCIAL' %}
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold shrink-0 flex items-center gap-0.5">
+                    <span class="material-symbols-outlined text-[10px]">hourglass_top</span>
+                    PARCIAL ({{ mov.percentual_recebido }}%)
+                </span>
+                {% elif mov.status_recebimento == 'QUITADO' %}
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold shrink-0 flex items-center gap-0.5">
+                    <span class="material-symbols-outlined text-[10px]">check_circle</span>
+                    QUITADO
+                </span>
+                {% elif mov.status_recebimento == 'VENCIDO' %}
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-600 dark:text-red-400 font-bold shrink-0 flex items-center gap-0.5">
+                    <span class="material-symbols-outlined text-[10px]">warning</span>
+                    VENCIDO
+                </span>
+                {% endif %}
                 {% endif %}
 
                 <!-- Values -->
@@ -62,6 +80,19 @@
                         {% endwith %}
                     </div>
                 </div>
+
+                <!-- Partial payment: per-item valor input (only for importados, not quitados) -->
+                {% if show_origem and mov.status_recebimento != 'QUITADO' %}
+                <div class="shrink-0 w-[120px]" x-show="selected.includes('{{ mov.pk }}')" x-transition>
+                    <label class="text-[9px] uppercase text-slate-400 dark:text-slate-500 block leading-none mb-0.5">Valor Parcela</label>
+                    <input type="text" 
+                           data-parcela-id="{{ mov.pk }}"
+                           name="valor_parcela_{{ mov.pk }}"
+                           placeholder="{{ mov.saldo_pendente|floatformat:2 }}"
+                           class="w-full h-7 bg-white dark:bg-[#1E1F23] border border-slate-200 dark:border-[#2d3544] rounded px-2 text-xs font-mono text-right text-slate-700 dark:text-slate-200 focus:border-primary outline-none placeholder:text-slate-400"
+                           title="Deixe vazio para pagar o saldo total">
+                </div>
+                {% endif %}
 
                 {% if show_origem %}
                 <!-- Origem badge (importados) -->
@@ -116,6 +147,18 @@
                 </span>
                 {% endif %}
             </div>
+
+            <!-- Progress Bar (for PARCIAL status) -->
+            {% if mov.status_recebimento == 'PARCIAL' %}
+            <div class="flex items-center gap-2 pl-0">
+                <div class="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-amber-500 rounded-full transition-all" style="width: {{ mov.percentual_recebido }}%"></div>
+                </div>
+                <span class="text-[10px] text-amber-600 dark:text-amber-400 font-mono shrink-0">
+                    R$ {{ mov.valor_recebido|floatformat:2 }} / {{ mov.valor|floatformat:2 }}
+                </span>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Ver Atos Button (only if has children) -->
@@ -188,6 +231,24 @@
                 {% endif %}
                 {% endif %}
             </div>
+
+            <!-- Installment History (for PARCIAL imports) -->
+            {% if show_origen and mov.parcelas.all %}
+            <div class="mt-2">
+                <span class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold block mb-1">Histórico de Parcelas</span>
+                <div class="space-y-1">
+                    {% for p in mov.parcelas.all %}
+                    <div class="flex items-center gap-3 text-xs py-1 px-2 rounded bg-slate-50 dark:bg-[#1E1F23]">
+                        <span class="font-bold text-primary w-[60px]">Parcela {{ p.numero_parcela }}</span>
+                        <span class="font-mono text-slate-700 dark:text-slate-200">R$ {{ p.valor|floatformat:2 }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">{{ p.recebido_em|date:"d/m/Y H:i" }}</span>
+                        <span class="text-slate-400 dark:text-slate-500">{{ p.forma_pagamento.nome }}</span>
+                        <span class="text-slate-400 dark:text-slate-500 ml-auto">{{ p.recebido_por.first_name|default:p.recebido_por.email }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
 
             <!-- Row 2: All Taxes Grid -->
             <div>

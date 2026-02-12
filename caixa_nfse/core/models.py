@@ -480,3 +480,56 @@ def generate_hash(data: dict[str, Any], previous_hash: str = "") -> str:
     content = json.dumps(data, sort_keys=True, default=str)
     content = f"{previous_hash}{content}"
     return hashlib.sha256(content.encode()).hexdigest()
+
+
+class TipoNotificacao(models.TextChoices):
+    """Types of system notifications."""
+
+    PROTOCOLO_VENCENDO = "PROTOCOLO_VENCENDO", _("Protocolo vencendo")
+    PROTOCOLO_VENCIDO = "PROTOCOLO_VENCIDO", _("Protocolo vencido")
+    FECHAMENTO_PENDENTE = "FECHAMENTO_PENDENTE", _("Fechamento pendente")
+    GERAL = "GERAL", _("Geral")
+
+
+class Notificacao(TenantAwareModel):
+    """System notification for operators and managers."""
+
+    tipo = models.CharField(
+        _("tipo"),
+        max_length=30,
+        choices=TipoNotificacao.choices,
+        default=TipoNotificacao.GERAL,
+    )
+    titulo = models.CharField(_("título"), max_length=200)
+    mensagem = models.TextField(_("mensagem"))
+    destinatario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notificacoes",
+        verbose_name=_("destinatário"),
+        null=True,
+        blank=True,
+        help_text=_("Se nulo, a notificação é para todos do tenant"),
+    )
+    lida = models.BooleanField(_("lida"), default=False)
+    lida_em = models.DateTimeField(_("lida em"), null=True, blank=True)
+    link = models.CharField(_("link"), max_length=500, blank=True)
+    referencia_id = models.CharField(
+        _("referência"),
+        max_length=100,
+        blank=True,
+        help_text=_("ID do objeto referenciado (ex: protocolo)"),
+    )
+
+    class Meta:
+        verbose_name = _("notificação")
+        verbose_name_plural = _("notificações")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"[{self.get_tipo_display()}] {self.titulo}"
+
+    def marcar_lida(self):
+        self.lida = True
+        self.lida_em = timezone.now()
+        self.save(update_fields=["lida", "lida_em"])

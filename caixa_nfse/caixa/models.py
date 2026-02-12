@@ -2,6 +2,7 @@
 Caixa models - Cash register operations.
 """
 
+from datetime import date
 from decimal import Decimal
 
 from django.conf import settings
@@ -44,6 +45,15 @@ class StatusFechamento(models.TextChoices):
     PENDENTE = "PENDENTE", _("Pendente de Aprovação")
     APROVADO = "APROVADO", _("Aprovado")
     REJEITADO = "REJEITADO", _("Rejeitado")
+
+
+class StatusRecebimento(models.TextChoices):
+    """Status de recebimento parcial de protocolo."""
+
+    PENDENTE = "PENDENTE", _("Pendente")
+    PARCIAL = "PARCIAL", _("Parcial")
+    QUITADO = "QUITADO", _("Quitado")
+    VENCIDO = "VENCIDO", _("Vencido")
 
 
 class Caixa(TenantAwareModel):
@@ -823,6 +833,20 @@ class MovimentoImportado(TenantAwareModel):
         help_text=_("Data da confecção do ato (importada da SQL)"),
     )
 
+    # --- Recebimento Parcial ---
+    status_recebimento = models.CharField(
+        _("status de recebimento"),
+        max_length=20,
+        choices=StatusRecebimento.choices,
+        default=StatusRecebimento.PENDENTE,
+    )
+    prazo_quitacao = models.DateField(
+        _("prazo de quitação"),
+        null=True,
+        blank=True,
+        help_text=_("Data limite para quitação total do protocolo"),
+    )
+
     TAXA_FIELDS = MovimentoCaixa.TAXA_FIELDS
 
     class Meta:
@@ -843,6 +867,93 @@ class MovimentoImportado(TenantAwareModel):
     def valor_total_fundos(self) -> Decimal:
         """Soma de taxas e fundos (sem emolumento)."""
         return sum(getattr(self, f) or Decimal("0.00") for f in self.FUNDOS_FIELDS)
+
+    @property
+    def valor_recebido(self) -> Decimal:
+        """Soma de todas as parcelas recebidas."""
+        from django.db.models import Sum
+
+        return self.parcelas.aggregate(total=Sum("valor"))["total"] or Decimal("0.00")
+
+    @property
+    def saldo_pendente(self) -> Decimal:
+        """Valor restante a receber."""
+        return (self.valor or Decimal("0.00")) - self.valor_recebido
+
+    @property
+    def percentual_recebido(self) -> int:
+        """Percentual recebido (0-100)."""
+        if not self.valor:
+            return 0
+        return int((self.valor_recebido / self.valor) * 100)
+
+    @property
+    def prazo_vencido(self) -> bool:
+        """True se prazo de quitação passou e não está quitado."""
+        if not self.prazo_quitacao:
+            return False
+        return date.today() > self.prazo_quitacao and self.status_recebimento != StatusRecebimento.QUITADO
+
+
+class ParcelaRecebimento(TenantAwareModel):
+    """Registro de cada parcela recebida de um protocolo."""
+
+    movimento_importado = models.ForeignKey(
+        MovimentoImportado,
+        on_delete=models.CASCADE,
+        related_name="parcelas",
+        verbose_name=_("movimento importado"),
+    )
+    movimento_caixa = models.ForeignKey(
+        MovimentoCaixa,
+        on_delete=models.PROTECT,
+        related_name="parcela_recebimento",
+        verbose_name=_("movimento de caixa"),
+    )
+    abertura = models.ForeignKey(
+        AberturaCaixa,
+        on_delete=models.PROTECT,
+        related_name="parcelas_recebidas",
+        verbose_name=_("abertura"),
+    )
+    forma_pagamento = models.ForeignKey(
+        "core.FormaPagamento",
+        on_delete=models.PROTECT,
+        related_name="parcelas_recebimento",
+        verbose_name=_("forma de pagamento"),
+    )
+    valor = models.DecimalField(
+        _("valor da parcela"),
+        max_digits=14,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    numero_parcela = models.PositiveIntegerField(
+        _("número da parcela"),
+        default=1,
+    )
+    recebido_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="parcelas_recebidas",
+        verbose_name=_("recebido por"),
+    )
+    recebido_em = models.DateTimeField(
+        _("recebido em"),
+        default=timezone.now,
+    )
+    observacao = models.TextField(
+        _("observação"),
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = _("parcela de recebimento")
+        verbose_name_plural = _("parcelas de recebimento")
+        ordering = ["numero_parcela"]
+
+    def __str__(self):
+        return f"Parcela {self.numero_parcela} - R$ {self.valor}"
 
 
 class ItemAtoImportado(TenantAwareModel):

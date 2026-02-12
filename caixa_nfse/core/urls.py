@@ -105,4 +105,20 @@ urlpatterns = [
         views.RotinasJsonView.as_view(),
         name="api_rotinas_json",
     ),
+    # Notifications
+    path(
+        "notificacoes/dropdown/",
+        views.NotificacoesDropdownView.as_view(),
+        name="notificacoes_dropdown",
+    ),
+    path(
+        "notificacoes/<pk>/lida/",
+        views.NotificacaoMarcarLidaView.as_view(),
+        name="notificacao_marcar_lida",
+    ),
+    path(
+        "notificacoes/todas-lidas/",
+        views.NotificacoesMarcarTodasLidasView.as_view(),
+        name="notificacoes_marcar_todas_lidas",
+    ),
 ]

@@ -357,9 +357,11 @@ class ImportadorMovimentos:
 
     @staticmethod
     @transaction.atomic
-    def confirmar_movimentos(ids, abertura, forma_pagamento, tipo, user):
+    def confirmar_movimentos(ids, abertura, forma_pagamento, tipo, user, parcelas_map=None):
         """
         Migrate selected MovimentoImportado records to MovimentoCaixa.
+        Supports partial payments via parcelas_map: {importado_id: valor_parcela}.
+        If parcelas_map is None, pays the full remaining balance.
         Also copies ItemAtoImportado children to ItemAtoMovimento.
         Auto-registers Cliente from apresentante name if available.
         Returns count of confirmed movements.
@@ -368,8 +370,13 @@ class ImportadorMovimentos:
             ItemAtoMovimento,
             MovimentoCaixa,
             MovimentoImportado,
+            ParcelaRecebimento,
+            StatusRecebimento,
         )
         from caixa_nfse.clientes.models import Cliente
+
+        if parcelas_map is None:
+            parcelas_map = {}
 
         # Fields to copy from ItemAtoImportado to ItemAtoMovimento
         item_copy_fields = [
@@ -381,11 +388,14 @@ class ImportadorMovimentos:
             "cliente_nome",
         ] + MovimentoCaixa.TAXA_FIELDS
 
-        importados = MovimentoImportado.objects.prefetch_related("itens").filter(
-            pk__in=ids,
-            abertura=abertura,
-            confirmado=False,
-            tenant=user.tenant,
+        importados = (
+            MovimentoImportado.objects.prefetch_related("itens", "parcelas")
+            .filter(
+                pk__in=ids,
+                abertura=abertura,
+                tenant=user.tenant,
+            )
+            .exclude(status_recebimento=StatusRecebimento.QUITADO)
         )
 
         count = 0
@@ -393,9 +403,29 @@ class ImportadorMovimentos:
         movimentos_para_nfse = []
 
         for imp in importados:
-            # Auto-register client from apresentante name
+            # Determine payment value
+            str_id = str(imp.pk)
+            if str_id in parcelas_map:
+                valor_parcela = Decimal(str(parcelas_map[str_id]))
+            elif imp.pk in parcelas_map:
+                valor_parcela = Decimal(str(parcelas_map[imp.pk]))
+            else:
+                valor_parcela = imp.saldo_pendente
+
+            # Validate
+            saldo = imp.saldo_pendente
+            if valor_parcela <= Decimal("0.00"):
+                continue
+            if valor_parcela > saldo:
+                valor_parcela = saldo
+
+            # Determine if this is full payment
+            is_quitacao = valor_parcela >= saldo
+            numero_parcela = imp.parcelas.count() + 1
+
+            # Auto-register client from apresentante name (only on first parcela)
             cliente = None
-            if imp.cliente_nome:
+            if imp.cliente_nome and numero_parcela == 1:
                 cliente = Cliente.objects.create(
                     tenant=user.tenant,
                     razao_social=imp.cliente_nome.strip(),
@@ -408,6 +438,8 @@ class ImportadorMovimentos:
                 parts.append(imp.descricao)
             if not parts:
                 parts.append(f"Protocolo {imp.protocolo}")
+            if not is_quitacao:
+                parts.append(f"Parcela {numero_parcela}")
             descricao = " — ".join(parts)
 
             mov_kwargs = {
@@ -415,7 +447,7 @@ class ImportadorMovimentos:
                 "abertura": abertura,
                 "tipo": tipo,
                 "forma_pagamento": forma_pagamento,
-                "valor": imp.valor or imp.valor_total_taxas,
+                "valor": valor_parcela,
                 "descricao": descricao,
                 "created_by": user,
                 "protocolo": imp.protocolo,
@@ -425,31 +457,47 @@ class ImportadorMovimentos:
                 "data_ato": imp.data_ato,
             }
 
-            # Copy tax fields
+            # Copy tax fields only on the first parcela
             for field in MovimentoImportado.TAXA_FIELDS:
-                mov_kwargs[field] = getattr(imp, field) or Decimal("0.00")
+                if numero_parcela == 1:
+                    mov_kwargs[field] = getattr(imp, field) or Decimal("0.00")
+                else:
+                    mov_kwargs[field] = Decimal("0.00")
 
             movimento = MovimentoCaixa.objects.create(**mov_kwargs)
 
-            # Copy child items: ItemAtoImportado → ItemAtoMovimento
-            child_items = []
-            for item in imp.itens.all():
-                item_data = {"tenant": user.tenant, "movimento": movimento}
-                for f in item_copy_fields:
-                    val = getattr(item, f, None)
-                    if val is None or val == "":
-                        if f in MovimentoImportado.TAXA_FIELDS or f == "valor":
-                            val = Decimal("0.00")
-                        elif f in ("data_ato",):
-                            val = None
-                        elif f == "quantidade":
-                            val = 1
-                        else:
-                            val = ""
-                    item_data[f] = val
-                child_items.append(ItemAtoMovimento(**item_data))
-            if child_items:
-                ItemAtoMovimento.objects.bulk_create(child_items)
+            # Copy child items: ItemAtoImportado → ItemAtoMovimento (only on first parcela)
+            if numero_parcela == 1:
+                child_items = []
+                for item in imp.itens.all():
+                    item_data = {"tenant": user.tenant, "movimento": movimento}
+                    for f in item_copy_fields:
+                        val = getattr(item, f, None)
+                        if val is None or val == "":
+                            if f in MovimentoImportado.TAXA_FIELDS or f == "valor":
+                                val = Decimal("0.00")
+                            elif f in ("data_ato",):
+                                val = None
+                            elif f == "quantidade":
+                                val = 1
+                            else:
+                                val = ""
+                        item_data[f] = val
+                    child_items.append(ItemAtoMovimento(**item_data))
+                if child_items:
+                    ItemAtoMovimento.objects.bulk_create(child_items)
+
+            # Create ParcelaRecebimento
+            ParcelaRecebimento.objects.create(
+                tenant=user.tenant,
+                movimento_importado=imp,
+                movimento_caixa=movimento,
+                abertura=abertura,
+                forma_pagamento=forma_pagamento,
+                valor=valor_parcela,
+                numero_parcela=numero_parcela,
+                recebido_por=user,
+            )
 
             # Update caixa balance
             if movimento.is_entrada:
@@ -457,20 +505,33 @@ class ImportadorMovimentos:
             else:
                 caixa.saldo_atual -= movimento.valor
 
-            # Mark as confirmed
-            imp.confirmado = True
-            imp.confirmado_em = timezone.now()
-            imp.movimento_destino = movimento
-            imp.save(update_fields=["confirmado", "confirmado_em", "movimento_destino"])
+            # Update MovimentoImportado status
+            if is_quitacao:
+                imp.confirmado = True
+                imp.confirmado_em = timezone.now()
+                imp.movimento_destino = movimento
+                imp.status_recebimento = StatusRecebimento.QUITADO
+                imp.save(
+                    update_fields=[
+                        "confirmado",
+                        "confirmado_em",
+                        "movimento_destino",
+                        "status_recebimento",
+                    ]
+                )
+            else:
+                imp.status_recebimento = StatusRecebimento.PARCIAL
+                imp.save(update_fields=["status_recebimento"])
+
             count += 1
 
-            # Collect for NFS-e dispatch (if client exists)
-            if cliente:
+            # Collect for NFS-e dispatch (only on quitação)
+            if is_quitacao and cliente:
                 movimentos_para_nfse.append(str(movimento.pk))
 
         caixa.save(update_fields=["saldo_atual"])
 
-        # Dispatch NFS-e tasks after transaction commits
+        # Dispatch NFS-e tasks after transaction commits (only for quitação)
         if movimentos_para_nfse and _deve_gerar_nfse(user.tenant):
             from caixa_nfse.nfse.tasks import emitir_nfse_movimento
 
@@ -486,6 +547,26 @@ class ImportadorMovimentos:
 
         deleted, _ = MovimentoImportado.objects.filter(tenant=tenant, confirmado=True).delete()
         return deleted
+
+    @staticmethod
+    def migrar_pendentes_para_nova_abertura(nova_abertura):
+        """
+        Re-link PENDENTE/PARCIAL imports from closed sessions to the new opening.
+        Cross-caixa: pendentes belong to the tenant, appear on any register.
+        """
+        from caixa_nfse.caixa.models import MovimentoImportado, StatusRecebimento
+
+        pendentes = MovimentoImportado.objects.filter(
+            tenant=nova_abertura.tenant,
+            abertura__fechamento__isnull=False,  # abertura was closed
+            status_recebimento__in=[
+                StatusRecebimento.PENDENTE,
+                StatusRecebimento.PARCIAL,
+                StatusRecebimento.VENCIDO,
+            ],
+        )
+        count = pendentes.update(abertura=nova_abertura)
+        return count
 
 
 def _deve_gerar_nfse(tenant):
