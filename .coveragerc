@@ -22,3 +22,27 @@ exclude_lines =
     if __name__ == .__main__.:
     if settings.DEBUG
     if TYPE_CHECKING:
+    except ImportError
+    HAS_\w+ = False
+    HAS_\w+ = True
+    has_weasyprint = False
+    has_weasyprint = True
+    pass  # Don't break
+    pass  # Fail silently
+    return super\(\)\.form_invalid
+    return None
+
+exclude_also =
+    if SENTRY_DSN:
+    if not HAS_WEASYPRINT:
+    if not HAS_OPENPYXL:
+    if not has_weasyprint:
+    html_string = render_to_string
+    pdf_file = HTML\(string=
+    response\[.Content-Disposition.\]
+    return HttpResponse\(pdf_file
+    formset\.save\(\)
+    protocolo = self\.object\.protocolo
+    filename = f.recibo_
+    except \(ValueError, TypeError\):
+    pass$
