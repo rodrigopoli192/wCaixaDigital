@@ -32,6 +32,22 @@ def _ensure_defaults() -> None:
         except ImportError:
             logger.debug("portal_nacional backend unavailable (missing httpx?)")
 
+    if "focus_nfe" not in _BACKEND_MAP:
+        try:
+            from caixa_nfse.nfse.backends.focus_nfe import FocusNFeBackend
+
+            register_backend("focus_nfe", FocusNFeBackend)
+        except ImportError:
+            logger.debug("focus_nfe backend unavailable (missing httpx?)")
+
+    if "tecnospeed" not in _BACKEND_MAP:
+        try:
+            from caixa_nfse.nfse.backends.tecnospeed import TecnoSpeedBackend
+
+            register_backend("tecnospeed", TecnoSpeedBackend)
+        except ImportError:
+            logger.debug("tecnospeed backend unavailable (missing httpx?)")
+
 
 def get_backend(tenant) -> BaseNFSeBackend:
     """

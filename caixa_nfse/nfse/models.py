@@ -466,3 +466,7 @@ class ConfiguracaoNFSe(TenantAwareModel):
 
     def __str__(self):
         return f"Config NFS-e - {self.tenant} ({self.get_backend_display()})"
+
+
+# Import NfseApiLog so Django discovers the model for migrations
+from caixa_nfse.nfse.models_api_log import NfseApiLog  # noqa: E402, F401
