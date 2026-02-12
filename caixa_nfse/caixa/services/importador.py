@@ -390,6 +390,7 @@ class ImportadorMovimentos:
 
         count = 0
         caixa = abertura.caixa
+        movimentos_para_nfse = []
 
         for imp in importados:
             # Auto-register client from apresentante name
@@ -463,7 +464,19 @@ class ImportadorMovimentos:
             imp.save(update_fields=["confirmado", "confirmado_em", "movimento_destino"])
             count += 1
 
+            # Collect for NFS-e dispatch (if client exists)
+            if cliente:
+                movimentos_para_nfse.append(str(movimento.pk))
+
         caixa.save(update_fields=["saldo_atual"])
+
+        # Dispatch NFS-e tasks after transaction commits
+        if movimentos_para_nfse and _deve_gerar_nfse(user.tenant):
+            from caixa_nfse.nfse.tasks import emitir_nfse_movimento
+
+            for mov_id in movimentos_para_nfse:
+                transaction.on_commit(lambda mid=mov_id: emitir_nfse_movimento.delay(mid))
+
         return count
 
     @staticmethod
@@ -473,3 +486,13 @@ class ImportadorMovimentos:
 
         deleted, _ = MovimentoImportado.objects.filter(tenant=tenant, confirmado=True).delete()
         return deleted
+
+
+def _deve_gerar_nfse(tenant):
+    """Verifica se o tenant possui geração automática de NFS-e ativa."""
+    from caixa_nfse.nfse.models import ConfiguracaoNFSe
+
+    config = ConfiguracaoNFSe.objects.filter(tenant=tenant).first()
+    if config is None:
+        return False
+    return config.gerar_nfse_ao_confirmar

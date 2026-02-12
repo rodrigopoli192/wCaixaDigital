@@ -1,12 +1,14 @@
 """
-NFS-e tasks - Celery tasks for async operations.
+NFS-e tasks - Celery tasks for async NFS-e operations.
 """
 
 import logging
 
 from celery import shared_task
 
+from .backends.registry import get_backend
 from .models import EventoFiscal, NotaFiscalServico, StatusNFSe, TipoEventoFiscal
+from .services import criar_nfse_de_movimento
 
 logger = logging.getLogger(__name__)
 
@@ -14,51 +16,111 @@ logger = logging.getLogger(__name__)
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def enviar_nfse(self, nota_id: str) -> dict:
     """
-    Envia NFS-e para prefeitura com retry automático.
+    Emite NFS-e via backend configurado (Strategy Pattern).
+
+    1. Busca NotaFiscalServico
+    2. Obtém backend via get_backend(tenant)
+    3. Chama backend.emitir(nota, tenant)
+    4. Atualiza nota com resultado
     """
     try:
-        nota = NotaFiscalServico.objects.get(pk=nota_id)
+        nota = NotaFiscalServico.objects.select_related("tenant").get(pk=nota_id)
+        tenant = nota.tenant
 
-        # TODO: Implementar integração com WebService ABRASF
-        # 1. Construir XML RPS
-        # 2. Assinar XML com certificado digital
-        # 3. Enviar para WebService
-        # 4. Processar retorno
+        backend = get_backend(tenant)
 
-        # Placeholder - simula autorização
-        logger.info(f"Enviando NFS-e {nota.numero_rps}...")
-
-        # Registra evento
+        # Registra evento de envio
         EventoFiscal.objects.create(
-            tenant=nota.tenant,
+            tenant=tenant,
             nota=nota,
             tipo=TipoEventoFiscal.ENVIO,
-            mensagem="Nota enviada para processamento (mock)",
+            mensagem=f"Enviando via {backend.__class__.__name__}",
             sucesso=True,
         )
 
-        # Simula autorização
-        nota.status = StatusNFSe.AUTORIZADA
-        nota.numero_nfse = nota.numero_rps  # Em produção, viria do retorno
-        nota.codigo_verificacao = "ABC123"  # Em produção, viria do retorno
-        nota.save()
+        resultado = backend.emitir(nota, tenant)
+
+        if resultado.sucesso:
+            nota.status = StatusNFSe.AUTORIZADA
+            nota.numero_nfse = resultado.numero_nfse or nota.numero_rps
+            nota.codigo_verificacao = resultado.codigo_verificacao or ""
+            nota.chave_acesso = resultado.chave_acesso or ""
+            nota.protocolo = resultado.protocolo or ""
+            nota.xml_nfse = resultado.xml_retorno or ""
+            nota.pdf_url = resultado.pdf_url or ""
+            nota.save()
+
+            EventoFiscal.objects.create(
+                tenant=tenant,
+                nota=nota,
+                tipo=TipoEventoFiscal.AUTORIZACAO,
+                mensagem=resultado.mensagem or "Nota autorizada com sucesso",
+                sucesso=True,
+            )
+
+            return {"success": True, "nota_id": str(nota.pk)}
+
+        # Emissão rejeitada
+        nota.status = StatusNFSe.REJEITADA
+        nota.xml_nfse = resultado.xml_retorno or ""
+        nota.save(update_fields=["status", "xml_nfse"])
 
         EventoFiscal.objects.create(
-            tenant=nota.tenant,
+            tenant=tenant,
             nota=nota,
-            tipo=TipoEventoFiscal.AUTORIZACAO,
-            mensagem="Nota autorizada com sucesso (mock)",
-            sucesso=True,
+            tipo=TipoEventoFiscal.REJEICAO,
+            mensagem=resultado.mensagem or "Emissão rejeitada",
+            sucesso=False,
         )
 
-        return {"success": True, "nota_id": str(nota.pk)}
+        return {"success": False, "error": resultado.mensagem or "Emissão rejeitada"}
 
     except NotaFiscalServico.DoesNotExist:
-        logger.error(f"Nota {nota_id} não encontrada")
+        logger.error("Nota %s não encontrada", nota_id)
         return {"success": False, "error": "Nota não encontrada"}
 
     except Exception as e:
-        logger.exception(f"Erro ao enviar NFS-e {nota_id}")
+        logger.exception("Erro ao enviar NFS-e %s", nota_id)
+        self.retry(exc=e)
+
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def emitir_nfse_movimento(self, movimento_id: str) -> dict:
+    """
+    Cria NFS-e a partir de um MovimentoCaixa e emite via backend.
+
+    1. Busca MovimentoCaixa
+    2. Cria NotaFiscalServico via services.criar_nfse_de_movimento
+    3. Delega emissão para enviar_nfse
+    """
+    try:
+        from caixa_nfse.caixa.models import MovimentoCaixa
+
+        movimento = MovimentoCaixa.objects.select_related("tenant", "cliente").get(pk=movimento_id)
+
+        # Se já tem nota vinculada, pula criação
+        if movimento.nota_fiscal_id:
+            logger.info(
+                "Movimento %s já possui nota %s vinculada",
+                movimento_id,
+                movimento.nota_fiscal_id,
+            )
+            return enviar_nfse(str(movimento.nota_fiscal_id))
+
+        nota = criar_nfse_de_movimento(movimento)
+
+        return enviar_nfse(str(nota.pk))
+
+    except MovimentoCaixa.DoesNotExist:
+        logger.error("Movimento %s não encontrado", movimento_id)
+        return {"success": False, "error": "Movimento não encontrado"}
+
+    except ValueError as e:
+        logger.warning("Não foi possível criar NFS-e: %s", e)
+        return {"success": False, "error": str(e)}
+
+    except Exception as e:
+        logger.exception("Erro ao emitir NFS-e para movimento %s", movimento_id)
         self.retry(exc=e)
 
 
@@ -92,8 +154,7 @@ def verificar_certificados_vencendo() -> dict:
                     "validade": str(tenant.certificado_validade),
                 }
             )
-            # TODO: Enviar e-mail de alerta
-            logger.warning(f"Certificado de {tenant.razao_social} vence em {dias} dias")
+            logger.warning("Certificado de %s vence em %d dias", tenant.razao_social, dias)
 
     return {"alertas": alertas}
 

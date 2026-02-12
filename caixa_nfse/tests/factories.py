@@ -71,6 +71,7 @@ class AberturaCaixaFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = "caixa.AberturaCaixa"
 
+    tenant = factory.LazyAttribute(lambda o: o.caixa.tenant)
     caixa = factory.SubFactory(CaixaFactory)
     operador = factory.SubFactory(UserFactory)
     saldo_abertura = Decimal("100.00")
