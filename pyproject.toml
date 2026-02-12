@@ -33,6 +33,7 @@ dependencies = [
     "signxml>=4.0",
     "zeep>=4.2",
     "cryptography>=43.0",
+    "httpx>=0.27",
     
     # Observability
     "sentry-sdk[django,celery]>=2.0",

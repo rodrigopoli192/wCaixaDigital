@@ -24,6 +24,11 @@ def _ensure_defaults() -> None:
 
         register_backend("mock", MockBackend)
 
+    if "portal_nacional" not in _BACKEND_MAP:
+        from caixa_nfse.nfse.backends.portal_nacional import PortalNacionalBackend
+
+        register_backend("portal_nacional", PortalNacionalBackend)
+
 
 def get_backend(tenant) -> BaseNFSeBackend:
     """
