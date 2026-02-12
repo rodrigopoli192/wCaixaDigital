@@ -1,11 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import redirect
+from django.db.models import Count, Q
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
+from django.views import View
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
 from caixa_nfse.backoffice.forms import TenantOnboardingForm
-from caixa_nfse.core.models import Tenant
+from caixa_nfse.core.models import ConexaoExterna, Tenant
 
 User = get_user_model()
 
@@ -29,15 +32,50 @@ class PlatformDashboardView(LoginRequiredMixin, PlatformAdminRequiredMixin, List
     ordering = ["-created_at"]
 
     def get_queryset(self):
-        from django.db.models import Count
+        qs = super().get_queryset().annotate(user_count=Count("usuarios"))
+        params = self.request.GET
 
-        return super().get_queryset().annotate(user_count=Count("usuarios"))
+        if q := params.get("q"):
+            qs = qs.filter(
+                Q(razao_social__icontains=q) | Q(nome_fantasia__icontains=q) | Q(cnpj__icontains=q)
+            )
+        if status := params.get("status"):
+            qs = qs.filter(ativo=(status == "ativo"))
+
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Existing KPIs
         context["total_tenants"] = Tenant.objects.count()
         context["active_tenants"] = Tenant.objects.filter(ativo=True).count()
         context["total_users"] = User.objects.count()
+
+        # New operational KPIs
+        from caixa_nfse.caixa.models import Caixa, MovimentoImportado, StatusCaixa
+        from caixa_nfse.nfse.models import NotaFiscalServico, StatusNFSe
+
+        mes_atual = timezone.now().date().replace(day=1)
+        context["nfse_emitidas_mes"] = NotaFiscalServico.objects.filter(
+            data_emissao__gte=mes_atual, status=StatusNFSe.AUTORIZADA
+        ).count()
+        context["caixas_abertos"] = Caixa.objects.filter(status=StatusCaixa.ABERTO).count()
+        context["movimentos_importados_mes"] = MovimentoImportado.objects.filter(
+            importado_em__gte=mes_atual, confirmado=True
+        ).count()
+
+        # Activity log
+        from caixa_nfse.auditoria.models import RegistroAuditoria
+
+        context["atividade_recente"] = RegistroAuditoria.objects.select_related("usuario").order_by(
+            "-created_at"
+        )[:15]
+
+        # Preserve search params
+        context["q"] = self.request.GET.get("q", "")
+        context["status_filter"] = self.request.GET.get("status", "")
+
         return context
 
 
@@ -325,3 +363,26 @@ class RotinaDeleteView(LoginRequiredMixin, PlatformAdminRequiredMixin, DeleteVie
 
     def get_success_url(self):
         return reverse_lazy("backoffice:sistema_edit", kwargs={"pk": self.object.sistema.pk})
+
+
+class TenantHealthCheckView(LoginRequiredMixin, PlatformAdminRequiredMixin, View):
+    """Testa todas as conexões externas de um tenant (HTMX endpoint)."""
+
+    def post(self, request, tenant_pk):
+        from caixa_nfse.core.services.sql_executor import SQLExecutor
+
+        tenant = get_object_or_404(Tenant, pk=tenant_pk)
+        conexoes = ConexaoExterna.objects.filter(tenant=tenant)
+        results = []
+        for c in conexoes:
+            try:
+                conn = SQLExecutor.get_connection(c)
+                conn.close()
+                results.append({"conexao": c, "ok": True, "msg": "Conexão OK"})
+            except Exception as e:
+                results.append({"conexao": c, "ok": False, "msg": str(e)})
+        return render(
+            request,
+            "backoffice/partials/health_check_results.html",
+            {"results": results, "tenant": tenant},
+        )

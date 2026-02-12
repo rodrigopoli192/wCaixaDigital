@@ -1,0 +1,26 @@
+<!-- Health Check Results (HTMX partial) -->
+<div class="space-y-2 mt-4" id="health-check-results">
+    {% for r in results %}
+    <div class="flex items-center gap-3 p-3 rounded-lg border
+        {% if r.ok %}border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20
+        {% else %}border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20{% endif %}">
+        <span class="material-symbols-outlined text-lg
+            {% if r.ok %}text-emerald-600 dark:text-emerald-400{% else %}text-red-600 dark:text-red-400{% endif %}">
+            {% if r.ok %}check_circle{% else %}error{% endif %}
+        </span>
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-slate-900 dark:text-white">
+                {{ r.conexao.get_tipo_conexao_display }} — {{ r.conexao.host }}:{{ r.conexao.porta }}
+            </p>
+            <p class="text-xs {% if r.ok %}text-emerald-700 dark:text-emerald-400{% else %}text-red-700 dark:text-red-400{% endif %} truncate">
+                {{ r.msg }}
+            </p>
+        </div>
+    </div>
+    {% empty %}
+    <div class="p-4 rounded-lg bg-slate-50 dark:bg-background-dark text-center">
+        <span class="material-symbols-outlined text-2xl text-slate-400 mb-1">cloud_off</span>
+        <p class="text-sm text-slate-500">Nenhuma conexão externa configurada para este tenant.</p>
+    </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Acesso Negado — wCaixaDigital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        }
+    </script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: #1e293b;
+        }
+        .dark body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+        }
+
+        .container {
+            text-align: center;
+            padding: 3rem 2rem;
+            max-width: 480px;
+        }
+
+        .icon-wrap {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse-ring 2s ease-in-out infinite;
+        }
+        .dark .icon-wrap {
+            background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05));
+        }
+
+        .icon-wrap .material-symbols-outlined {
+            font-size: 56px;
+            color: #ef4444;
+            font-variation-settings: 'FILL' 0, 'wght' 300;
+        }
+
+        @keyframes pulse-ring {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.15); }
+            50% { box-shadow: 0 0 0 20px rgba(239,68,68,0); }
+        }
+
+        .error-code {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, #ef4444, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+        .dark .error-title { color: #f1f5f9; }
+
+        .error-desc {
+            font-size: 0.95rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+        .dark .error-desc { color: #94a3b8; }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn .material-symbols-outlined { font-size: 20px; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            box-shadow: 0 4px 14px rgba(249,115,22,0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(249,115,22,0.4);
+        }
+
+        .btn-ghost {
+            background: rgba(100,116,139,0.1);
+            color: #475569;
+        }
+        .dark .btn-ghost {
+            background: rgba(148,163,184,0.1);
+            color: #94a3b8;
+        }
+        .btn-ghost:hover {
+            background: rgba(100,116,139,0.2);
+        }
+
+        .footer {
+            margin-top: 3rem;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon-wrap">
+            <span class="material-symbols-outlined">lock</span>
+        </div>
+
+        <div class="error-code">403</div>
+        <h1 class="error-title">Acesso Negado</h1>
+        <p class="error-desc">
+            Você não tem permissão para acessar esta página.
+            Se acredita que deveria ter acesso, entre em contato
+            com o administrador da plataforma.
+        </p>
+
+        <div class="actions">
+            <a href="/" class="btn btn-primary">
+                <span class="material-symbols-outlined">home</span>
+                Ir para o Início
+            </a>
+            <button onclick="history.back()" class="btn btn-ghost">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Voltar
+            </button>
+        </div>
+
+        <p class="footer">wCaixaDigital — Sistema de Caixa com NFS-e</p>
+    </div>
+</body>
+</html>

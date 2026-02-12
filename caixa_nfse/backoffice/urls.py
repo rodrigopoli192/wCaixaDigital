@@ -41,4 +41,10 @@ urlpatterns = [
         views.RotinaDeleteView.as_view(),
         name="rotina_delete",
     ),
+    # Health Check
+    path(
+        "tenants/<uuid:tenant_pk>/health-check/",
+        views.TenantHealthCheckView.as_view(),
+        name="tenant_health_check",
+    ),
 ]

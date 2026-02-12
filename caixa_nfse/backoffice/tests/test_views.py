@@ -147,3 +147,138 @@ class TestTenantUserManagement:
 
         user.refresh_from_db()
         assert user.first_name == "Updated"
+
+
+@pytest.mark.django_db
+class TestDashboardKPIs:
+    def setup_method(self):
+        from django.test import Client
+
+        self.superuser = UserFactory(is_superuser=True, is_staff=True)
+        self.client = Client()
+        self.client.force_login(self.superuser)
+        self.url = reverse("backoffice:dashboard")
+
+    def test_kpi_context_keys(self):
+        response = self.client.get(self.url)
+        assert response.status_code == 200
+        ctx = response.context
+        for key in [
+            "total_tenants",
+            "active_tenants",
+            "total_users",
+            "nfse_emitidas_mes",
+            "caixas_abertos",
+            "movimentos_importados_mes",
+            "atividade_recente",
+        ]:
+            assert key in ctx, f"Missing key: {key}"
+
+    def test_search_by_name(self):
+        TenantFactory(razao_social="Alpha Corp", cnpj="11111111000100")
+        TenantFactory(razao_social="Beta Corp", cnpj="22222222000100")
+        response = self.client.get(self.url, {"q": "Alpha"})
+        assert response.status_code == 200
+        tenants = list(response.context["tenants"])
+        assert len(tenants) == 1
+        assert tenants[0].razao_social == "Alpha Corp"
+
+    def test_search_by_cnpj(self):
+        TenantFactory(razao_social="Gamma Corp", cnpj="33333333000100")
+        response = self.client.get(self.url, {"q": "33333333"})
+        tenants = list(response.context["tenants"])
+        assert len(tenants) == 1
+
+    def test_filter_by_status_ativo(self):
+        TenantFactory(ativo=True, cnpj="44444444000100")
+        TenantFactory(ativo=False, cnpj="55555555000100")
+        response = self.client.get(self.url, {"status": "ativo"})
+        tenants = list(response.context["tenants"])
+        assert all(t.ativo for t in tenants)
+
+    def test_filter_by_status_inativo(self):
+        TenantFactory(ativo=True, cnpj="66666666000100")
+        TenantFactory(ativo=False, cnpj="77777777000100")
+        response = self.client.get(self.url, {"status": "inativo"})
+        tenants = list(response.context["tenants"])
+        assert all(not t.ativo for t in tenants)
+
+    def test_activity_log_populated(self):
+        from caixa_nfse.tests.factories import RegistroAuditoriaFactory
+
+        RegistroAuditoriaFactory()
+        response = self.client.get(self.url)
+        assert len(response.context["atividade_recente"]) >= 1
+
+
+@pytest.mark.django_db
+class TestTenantHealthCheck:
+    def setup_method(self):
+        from django.test import Client
+
+        self.superuser = UserFactory(is_superuser=True, is_staff=True)
+        self.client = Client()
+        self.client.force_login(self.superuser)
+        self.tenant = TenantFactory()
+
+    def test_health_check_no_connections(self):
+        url = reverse("backoffice:tenant_health_check", kwargs={"tenant_pk": self.tenant.pk})
+        response = self.client.post(url)
+        assert response.status_code == 200
+        assert "Nenhuma conexão" in response.content.decode()
+
+    def test_health_check_with_mock_connection(self):
+        from unittest.mock import MagicMock, patch
+
+        from caixa_nfse.core.models import ConexaoExterna
+
+        conexao = ConexaoExterna.objects.create(
+            tenant=self.tenant,
+            tipo_conexao=ConexaoExterna.TipoConexao.FIREBIRD,
+            host="localhost",
+            porta=3050,
+            database="/test.fdb",
+            usuario="SYSDBA",
+            senha="masterkey",
+        )
+        mock_conn = MagicMock()
+        with patch(
+            "caixa_nfse.core.services.sql_executor.SQLExecutor.get_connection",
+            return_value=mock_conn,
+        ):
+            url = reverse("backoffice:tenant_health_check", kwargs={"tenant_pk": self.tenant.pk})
+            response = self.client.post(url)
+            assert response.status_code == 200
+            assert "Conexão OK" in response.content.decode()
+            mock_conn.close.assert_called_once()
+
+    def test_health_check_connection_failure(self):
+        from unittest.mock import patch
+
+        from caixa_nfse.core.models import ConexaoExterna
+
+        ConexaoExterna.objects.create(
+            tenant=self.tenant,
+            tipo_conexao=ConexaoExterna.TipoConexao.MSSQL,
+            host="invalid-host",
+            porta=1433,
+            database="testdb",
+            usuario="sa",
+            senha="pass",
+        )
+        with patch(
+            "caixa_nfse.core.services.sql_executor.SQLExecutor.get_connection",
+            side_effect=Exception("Connection refused"),
+        ):
+            url = reverse("backoffice:tenant_health_check", kwargs={"tenant_pk": self.tenant.pk})
+            response = self.client.post(url)
+            assert response.status_code == 200
+            content = response.content.decode()
+            assert "Connection refused" in content
+
+    def test_access_denied_for_non_superuser(self, client):
+        user = UserFactory(is_staff=True, is_superuser=False)
+        client.force_login(user)
+        url = reverse("backoffice:tenant_health_check", kwargs={"tenant_pk": self.tenant.pk})
+        response = client.post(url)
+        assert response.status_code == 403
