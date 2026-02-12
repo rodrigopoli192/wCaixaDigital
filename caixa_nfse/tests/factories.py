@@ -226,6 +226,18 @@ class EventoFiscalFactory(factory.django.DjangoModelFactory):
     mensagem = "Evento de teste"
 
 
+class ConfiguracaoNFSeFactory(factory.django.DjangoModelFactory):
+    """Factory for ConfiguracaoNFSe model."""
+
+    class Meta:
+        model = "nfse.ConfiguracaoNFSe"
+
+    tenant = factory.SubFactory(TenantFactory)
+    backend = "mock"
+    ambiente = "HOMOLOGACAO"
+    gerar_nfse_ao_confirmar = False
+
+
 class RegistroAuditoriaFactory(factory.django.DjangoModelFactory):
     """Factory for RegistroAuditoria model."""
 

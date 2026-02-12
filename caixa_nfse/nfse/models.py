@@ -10,7 +10,20 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from caixa_nfse.core.models import BaseModel, TenantAwareModel
+from caixa_nfse.core.models import BaseModel, Tenant, TenantAwareModel
+
+
+class AmbienteNFSe(models.TextChoices):
+    HOMOLOGACAO = "HOMOLOGACAO", _("Homologação")
+    PRODUCAO = "PRODUCAO", _("Produção")
+
+
+class BackendNFSe(models.TextChoices):
+    MOCK = "mock", _("Mock (Testes)")
+    PORTAL_NACIONAL = "portal_nacional", _("Portal Nacional")
+    FOCUS_NFE = "focus_nfe", _("Focus NFe")
+    TECNOSPEED = "tecnospeed", _("TecnoSpeed")
+    PYNFE = "pynfe", _("PyNFe Híbrido")
 
 
 class StatusNFSe(models.TextChoices):
@@ -245,6 +258,46 @@ class NotaFiscalServico(TenantAwareModel):
         blank=True,
     )
 
+    # --- Campos NFS-e Nacional ---
+    chave_acesso = models.CharField(
+        _("chave de acesso"),
+        max_length=50,
+        blank=True,
+        help_text=_("Chave de acesso da NFS-e Nacional (50 dígitos)"),
+    )
+    id_dps = models.CharField(
+        _("ID DPS"),
+        max_length=100,
+        blank=True,
+        help_text=_("Identificador da DPS no Portal Nacional"),
+    )
+    ambiente = models.CharField(
+        _("ambiente"),
+        max_length=15,
+        choices=AmbienteNFSe.choices,
+        default=AmbienteNFSe.HOMOLOGACAO,
+    )
+    backend_utilizado = models.CharField(
+        _("backend utilizado"),
+        max_length=20,
+        choices=BackendNFSe.choices,
+        blank=True,
+    )
+    valor_cbs = models.DecimalField(
+        _("valor CBS"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        help_text=_("Contribuição sobre Bens e Serviços"),
+    )
+    valor_ibs = models.DecimalField(
+        _("valor IBS"),
+        max_digits=14,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        help_text=_("Imposto sobre Bens e Serviços"),
+    )
+
     # Nota substituída (para substituição)
     nota_substituida = models.ForeignKey(
         "self",
@@ -363,3 +416,53 @@ class EventoFiscal(TenantAwareModel):
 
     def __str__(self):
         return f"{self.get_tipo_display()} - {self.nota}"
+
+
+class ConfiguracaoNFSe(TenantAwareModel):
+    """
+    Configuração NFS-e por tenant (1:1).
+    Define backend, ambiente e comportamento de emissão.
+    """
+
+    tenant = models.OneToOneField(
+        Tenant,
+        on_delete=models.CASCADE,
+        related_name="config_nfse",
+        verbose_name=_("empresa"),
+    )
+    backend = models.CharField(
+        _("provedor de emissão"),
+        max_length=20,
+        choices=BackendNFSe.choices,
+        default=BackendNFSe.MOCK,
+    )
+    ambiente = models.CharField(
+        _("ambiente"),
+        max_length=15,
+        choices=AmbienteNFSe.choices,
+        default=AmbienteNFSe.HOMOLOGACAO,
+    )
+    gerar_nfse_ao_confirmar = models.BooleanField(
+        _("gerar NFS-e ao confirmar pagamento"),
+        default=False,
+        help_text=_("Se ativo, gera NFS-e automaticamente ao confirmar movimento"),
+    )
+
+    # Credenciais gateway (Focus NFe / TecnoSpeed)
+    api_token = models.CharField(
+        _("API token"),
+        max_length=255,
+        blank=True,
+    )
+    api_secret = models.CharField(
+        _("API secret"),
+        max_length=255,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = _("configuração NFS-e")
+        verbose_name_plural = _("configurações NFS-e")
+
+    def __str__(self):
+        return f"Config NFS-e - {self.tenant} ({self.get_backend_display()})"
