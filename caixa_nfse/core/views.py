@@ -371,7 +371,11 @@ class TenantAdminRequiredMixin(UserPassesTestMixin):
 
     def test_func(self):
         user = self.request.user
-        return user.is_authenticated and user.tenant and user.pode_aprovar_fechamento
+        if not user.is_authenticated:
+            return False
+        if user.is_superuser:
+            return True
+        return user.tenant and user.pode_aprovar_fechamento
 
 
 class SettingsView(LoginRequiredMixin, TenantAdminRequiredMixin, TemplateView):
@@ -413,6 +417,57 @@ class SettingsParametrosView(LoginRequiredMixin, TenantAdminRequiredMixin, View)
                 "tenant": tenant,
                 "saved": True,
             },
+        )
+
+
+class SettingsNFSeView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
+    """GET/POST for NFS-e configuration (HTMX partial)."""
+
+    def _get_form_and_config(self, request, data=None, files=None):
+        from caixa_nfse.nfse.models import ConfiguracaoNFSe
+        from caixa_nfse.nfse.views import NFSeConfigForm
+
+        tenant = request.user.tenant
+        config, _created = ConfiguracaoNFSe.objects.get_or_create(tenant=tenant)
+        form = (
+            NFSeConfigForm(data, files, instance=config, tenant=tenant)
+            if data
+            else NFSeConfigForm(instance=config, tenant=tenant)
+        )
+        return form, config
+
+    def _cert_info(self, request):
+        tenant = request.user.tenant
+        return {
+            "has_cert": bool(tenant.certificado_digital),
+            "cert_validade": tenant.certificado_validade,
+            "cert_valido": tenant.certificado_valido
+            if hasattr(tenant, "certificado_valido")
+            else False,
+        }
+
+    def get(self, request):
+        form, _config = self._get_form_and_config(request)
+        return render(
+            request,
+            "core/partials/settings_nfse.html",
+            {"form": form, "cert_info": self._cert_info(request)},
+        )
+
+    def post(self, request):
+        form, _config = self._get_form_and_config(request, request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            form, _config = self._get_form_and_config(request)
+            return render(
+                request,
+                "core/partials/settings_nfse.html",
+                {"form": form, "saved": True, "cert_info": self._cert_info(request)},
+            )
+        return render(
+            request,
+            "core/partials/settings_nfse.html",
+            {"form": form, "cert_info": self._cert_info(request)},
         )
 
 

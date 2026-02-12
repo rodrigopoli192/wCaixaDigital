@@ -224,68 +224,72 @@ class NFSeXMLView(LoginRequiredMixin, TenantMixin, DetailView):
         return response
 
 
+_INPUT_CSS = (
+    "w-full bg-slate-50 dark:bg-background-dark border "
+    "border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm "
+    "focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+)
+
+
 class NFSeConfigForm(forms.ModelForm):
+    certificado_digital = forms.FileField(
+        label="Certificado A1 (.pfx)",
+        required=False,
+        widget=forms.ClearableFileInput(
+            attrs={
+                "class": _INPUT_CSS,
+                "accept": ".pfx,.p12",
+            }
+        ),
+    )
+    certificado_senha = forms.CharField(
+        label="Senha do certificado",
+        required=False,
+        widget=forms.PasswordInput(
+            attrs={"class": _INPUT_CSS, "placeholder": "••••••"},
+            render_value=True,
+        ),
+    )
+
     class Meta:
         model = ConfiguracaoNFSe
         fields = ["backend", "ambiente", "gerar_nfse_ao_confirmar", "api_token", "api_secret"]
         widgets = {
-            "backend": forms.Select(
-                attrs={
-                    "class": "w-full bg-slate-50 dark:bg-background-dark border "
-                    "border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm "
-                    "focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
-                }
-            ),
-            "ambiente": forms.Select(
-                attrs={
-                    "class": "w-full bg-slate-50 dark:bg-background-dark border "
-                    "border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm "
-                    "focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
-                }
-            ),
+            "backend": forms.Select(attrs={"class": _INPUT_CSS, "x-model": "backend"}),
+            "ambiente": forms.Select(attrs={"class": _INPUT_CSS}),
             "gerar_nfse_ao_confirmar": forms.CheckboxInput(
                 attrs={"class": "w-5 h-5 text-primary rounded focus:ring-primary cursor-pointer"}
             ),
             "api_token": forms.TextInput(
-                attrs={
-                    "class": "w-full bg-slate-50 dark:bg-background-dark border "
-                    "border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm "
-                    "focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none",
-                    "placeholder": "Token da API",
-                }
+                attrs={"class": _INPUT_CSS, "placeholder": "Token da API"}
             ),
             "api_secret": forms.PasswordInput(
-                attrs={
-                    "class": "w-full bg-slate-50 dark:bg-background-dark border "
-                    "border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm "
-                    "focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none",
-                    "placeholder": "••••••",
-                },
+                attrs={"class": _INPUT_CSS, "placeholder": "••••••"},
                 render_value=True,
             ),
         }
 
+    def __init__(self, *args, tenant=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tenant = tenant
+        if tenant and tenant.certificado_senha:
+            self.fields["certificado_senha"].initial = tenant.certificado_senha
 
-class NFSeConfigView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    """Configurações NFS-e (get_or_create por tenant)."""
-
-    model = ConfiguracaoNFSe
-    form_class = NFSeConfigForm
-    template_name = "nfse/nfse_config.html"
-    success_url = reverse_lazy("nfse:config")
-
-    def test_func(self):
-        return self.request.user.pode_aprovar_fechamento
-
-    def get_object(self, queryset=None):
-        obj, _created = ConfiguracaoNFSe.objects.get_or_create(
-            tenant=self.request.user.tenant,
-        )
-        return obj
-
-    def form_valid(self, form):
-        messages.success(self.request, "Configurações salvas com sucesso!")
-        return super().form_valid(form)
+    def save(self, commit=True):
+        config = super().save(commit=commit)
+        if self.tenant:
+            cert_file = self.cleaned_data.get("certificado_digital")
+            cert_senha = self.cleaned_data.get("certificado_senha")
+            updated = False
+            if cert_file:
+                self.tenant.certificado_digital = cert_file.read()
+                updated = True
+            if cert_senha:
+                self.tenant.certificado_senha = cert_senha
+                updated = True
+            if updated and commit:
+                self.tenant.save(update_fields=["certificado_digital", "certificado_senha"])
+        return config
 
 
 class NFSeTestarConexaoView(LoginRequiredMixin, UserPassesTestMixin, View):

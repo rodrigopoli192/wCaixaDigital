@@ -209,7 +209,7 @@ class TestNFSeConfigView:
     def test_config_get_creates_default(self):
         from caixa_nfse.nfse.models import ConfiguracaoNFSe
 
-        url = reverse("nfse:config")
+        url = reverse("core:settings_nfse")
         response = self.client.get(url)
         assert response.status_code == 200
         assert ConfiguracaoNFSe.objects.filter(tenant=self.tenant).exists()
@@ -217,7 +217,7 @@ class TestNFSeConfigView:
     def test_config_post_save(self):
         from caixa_nfse.nfse.models import ConfiguracaoNFSe
 
-        url = reverse("nfse:config")
+        url = reverse("core:settings_nfse")
         data = {
             "backend": "mock",
             "ambiente": "HOMOLOGACAO",
@@ -226,7 +226,7 @@ class TestNFSeConfigView:
             "api_secret": "test-secret",
         }
         response = self.client.post(url, data)
-        assert response.status_code == 302
+        assert response.status_code == 200  # HTMX partial response
         config = ConfiguracaoNFSe.objects.get(tenant=self.tenant)
         assert config.api_token == "test-token"
         assert config.gerar_nfse_ao_confirmar is True
@@ -236,7 +236,7 @@ class TestNFSeConfigView:
             tenant=self.tenant, pode_emitir_nfse=True, pode_aprovar_fechamento=False
         )
         self.client.force_login(user2)
-        url = reverse("nfse:config")
+        url = reverse("core:settings_nfse")
         response = self.client.get(url)
         assert response.status_code == 403
 

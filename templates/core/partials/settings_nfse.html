@@ -1,0 +1,194 @@
+<div class="p-6 space-y-6" x-data="{ backend: '{{ form.backend.value|default:"mock" }}' }">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">NFS-e</h2>
+            <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Backend, ambiente e credenciais para emissão de notas fiscais.</p>
+        </div>
+    </div>
+
+    <form method="post"
+          hx-post="{% url 'core:settings_nfse' %}"
+          hx-target="#settings-content"
+          hx-swap="innerHTML"
+          hx-encoding="multipart/form-data"
+          class="space-y-6">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl p-4 flex items-start gap-3">
+            <span class="material-symbols-outlined text-red-500 mt-0.5">error</span>
+            <div>
+                {% for error in form.non_field_errors %}
+                <p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if saved %}
+        <div class="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-4 flex items-center gap-3"
+             x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" x-transition>
+            <span class="material-symbols-outlined text-emerald-500">check_circle</span>
+            <p class="text-sm font-medium text-emerald-700 dark:text-emerald-400">Configurações salvas com sucesso!</p>
+        </div>
+        {% endif %}
+
+        <!-- Backend e Ambiente -->
+        <div class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#1a1b1e]">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-orange-500 text-lg">dns</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Backend e Ambiente</h4>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label for="id_backend" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Backend de Emissão</label>
+                        {{ form.backend }}
+                        {% if form.backend.errors %}
+                        <p class="text-xs text-red-500 mt-1">{{ form.backend.errors.0 }}</p>
+                        {% endif %}
+                        <p class="text-xs text-slate-400 mt-1">Provedor para envio das notas fiscais</p>
+                    </div>
+                    <div class="space-y-1">
+                        <label for="id_ambiente" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ambiente</label>
+                        {{ form.ambiente }}
+                        {% if form.ambiente.errors %}
+                        <p class="text-xs text-red-500 mt-1">{{ form.ambiente.errors.0 }}</p>
+                        {% endif %}
+                        <p class="text-xs text-slate-400 mt-1">Homologação para testes, Produção para notas reais</p>
+                    </div>
+                </div>
+
+                <!-- Mock info -->
+                <div x-show="backend === 'mock'" x-transition class="flex items-start gap-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg p-4">
+                    <span class="material-symbols-outlined text-blue-500 text-lg mt-0.5">info</span>
+                    <p class="text-sm text-blue-700 dark:text-blue-300">Backend Mock simula emissões sem chamar APIs externas. Ideal para desenvolvimento e testes.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Automação -->
+        <div class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#1a1b1e]">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-orange-500 text-lg">bolt</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Automação</h4>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-slate-700 dark:text-slate-200">Gerar NFS-e ao confirmar importação</p>
+                        <p class="text-xs text-slate-400 mt-1">Dispara emissão automática quando movimentos são confirmados</p>
+                    </div>
+                    {{ form.gerar_nfse_ao_confirmar }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Certificado Digital (Portal Nacional) -->
+        <div x-show="backend === 'portal_nacional'" x-transition
+             class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#1a1b1e]">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-orange-500 text-lg">shield_lock</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Certificado Digital A1</h4>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                {% if cert_info.has_cert %}
+                <div class="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg p-4">
+                    <span class="material-symbols-outlined text-emerald-500">verified</span>
+                    <div>
+                        <p class="text-sm font-medium text-emerald-700 dark:text-emerald-400">Certificado configurado</p>
+                        {% if cert_info.cert_validade %}
+                        <p class="text-xs text-emerald-600 dark:text-emerald-500 mt-0.5">
+                            Válido até {{ cert_info.cert_validade|date:"d/m/Y" }}
+                            {% if not cert_info.cert_valido %}
+                            <span class="text-red-500 font-semibold ml-1">⚠ EXPIRADO</span>
+                            {% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="flex items-start gap-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-4">
+                    <span class="material-symbols-outlined text-amber-500 mt-0.5">warning</span>
+                    <div>
+                        <p class="text-sm font-medium text-amber-700 dark:text-amber-400">Nenhum certificado configurado</p>
+                        <p class="text-xs text-amber-600 dark:text-amber-500 mt-0.5">Faça upload do arquivo .pfx do certificado A1 para emissão via Portal Nacional</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label for="id_certificado_digital" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Arquivo do Certificado (.pfx)</label>
+                        {{ form.certificado_digital }}
+                        {% if form.certificado_digital.errors %}
+                        <p class="text-xs text-red-500 mt-1">{{ form.certificado_digital.errors.0 }}</p>
+                        {% endif %}
+                        <p class="text-xs text-slate-400 mt-1">Certificado digital e-CNPJ A1 no formato .pfx ou .p12</p>
+                    </div>
+                    <div class="space-y-1">
+                        <label for="id_certificado_senha" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Senha do Certificado</label>
+                        {{ form.certificado_senha }}
+                        {% if form.certificado_senha.errors %}
+                        <p class="text-xs text-red-500 mt-1">{{ form.certificado_senha.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credenciais Gateway (ex: Focus NFe, TecnoSpeed) -->
+        <div x-show="backend !== 'mock' && backend !== 'portal_nacional'" x-transition
+             class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#1a1b1e]">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-orange-500 text-lg">key</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Credenciais</h4>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label for="id_api_token" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Token da API</label>
+                        {{ form.api_token }}
+                        {% if form.api_token.errors %}
+                        <p class="text-xs text-red-500 mt-1">{{ form.api_token.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-1">
+                        <label for="id_api_secret" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Secret da API</label>
+                        {{ form.api_secret }}
+                        {% if form.api_secret.errors %}
+                        <p class="text-xs text-red-500 mt-1">{{ form.api_secret.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between pt-2">
+            <button type="button"
+                    hx-post="{% url 'nfse:testar' %}"
+                    hx-target="#nfse-toast"
+                    hx-swap="innerHTML"
+                    class="border border-orange-500 text-orange-500 hover:bg-orange-500/5 rounded-lg px-4 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm">wifi_tethering</span>
+                Testar Conexão
+            </button>
+            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-orange-500/20">
+                <span class="material-symbols-outlined text-sm">save</span>
+                Salvar Configurações
+            </button>
+        </div>
+    </form>
+
+    <!-- Toast Container -->
+    <div id="nfse-toast"></div>
+</div>

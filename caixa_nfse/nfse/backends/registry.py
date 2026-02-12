@@ -25,9 +25,12 @@ def _ensure_defaults() -> None:
         register_backend("mock", MockBackend)
 
     if "portal_nacional" not in _BACKEND_MAP:
-        from caixa_nfse.nfse.backends.portal_nacional import PortalNacionalBackend
+        try:
+            from caixa_nfse.nfse.backends.portal_nacional import PortalNacionalBackend
 
-        register_backend("portal_nacional", PortalNacionalBackend)
+            register_backend("portal_nacional", PortalNacionalBackend)
+        except ImportError:
+            logger.debug("portal_nacional backend unavailable (missing httpx?)")
 
 
 def get_backend(tenant) -> BaseNFSeBackend:

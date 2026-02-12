@@ -40,6 +40,11 @@ urlpatterns = [
         name="settings_parametros",
     ),
     path(
+        "settings/nfse/",
+        views.SettingsNFSeView.as_view(),
+        name="settings_nfse",
+    ),
+    path(
         "settings/formas-pagamento/",
         views.FormaPagamentoListView.as_view(),
         name="settings_formas_pagamento_list",
