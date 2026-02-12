@@ -1,263 +1,395 @@
-{% extends "base.html" %}
+{% extends "base_dark.html" %}
 
-{% block title %}NFS-e {{ nota.numero_nfse|default:nota.numero_rps }} - Caixa Digital{% endblock %}
+{% block title %}NFS-e {{ nota.numero_nfse|default:nota.numero_rps }} - wCaixaDigital{% endblock %}
+{% block page_title %}NFS-e {{ nota.numero_nfse|default:nota.numero_rps }}{% endblock %}
 
 {% block content %}
-<nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'nfse:list' %}">NFS-e</a></li>
-        <li class="breadcrumb-item active">{{ nota.numero_nfse|default:nota.numero_rps }}</li>
-    </ol>
-</nav>
+<div class="p-6 w-full space-y-6" x-data="{ showCancelModal: false }">
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">
-        <i class="bi bi-receipt me-2"></i>
-        {% if nota.numero_nfse %}NFS-e {{ nota.numero_nfse }}{% else %}RPS {{ nota.numero_rps }}{% endif %}
-        {% if nota.status == 'AUTORIZADA' %}
-        <span class="badge bg-success">Autorizada</span>
-        {% elif nota.status == 'RASCUNHO' %}
-        <span class="badge bg-secondary">Rascunho</span>
-        {% elif nota.status == 'CANCELADA' %}
-        <span class="badge bg-danger">Cancelada</span>
-        {% else %}
-        <span class="badge bg-info">{{ nota.get_status_display }}</span>
-        {% endif %}
-    </h2>
-    <div>
-        {% if nota.status == 'RASCUNHO' %}
-        <a href="{% url 'nfse:update' nota.pk %}" class="btn btn-outline-primary">
-            <i class="bi bi-pencil me-1"></i>Editar
-        </a>
-        <form method="post" action="{% url 'nfse:enviar' nota.pk %}" class="d-inline">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success">
-                <i class="bi bi-send me-1"></i>Enviar para Prefeitura
+    <!-- Header -->
+    <div class="flex items-start justify-between">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'nfse:list' %}" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-400 transition-colors">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </a>
+            <div>
+                <div class="flex items-center gap-3">
+                    <h3 class="text-2xl font-bold tracking-tight">
+                        {% if nota.numero_nfse %}NFS-e {{ nota.numero_nfse }}{% else %}RPS {{ nota.numero_rps }}{% endif %}
+                    </h3>
+                    {% if nota.status == 'AUTORIZADA' %}
+                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-success/10 text-success border border-success/20">Autorizada</span>
+                    {% elif nota.status == 'RASCUNHO' %}
+                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-slate-100 dark:bg-background-dark text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-border-dark">Rascunho</span>
+                    {% elif nota.status == 'ENVIANDO' %}
+                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-primary/10 text-primary border border-primary/20 animate-pulse">Enviando</span>
+                    {% elif nota.status == 'CANCELADA' %}
+                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-danger/10 text-danger border border-danger/20">Cancelada</span>
+                    {% elif nota.status == 'REJEITADA' %}
+                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-warning/10 text-warning border border-warning/20">Rejeitada</span>
+                    {% else %}
+                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">{{ nota.get_status_display }}</span>
+                    {% endif %}
+                </div>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Emitida em {{ nota.data_emissao|date:"d/m/Y" }}</p>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-2">
+            {% if nota.status == 'RASCUNHO' %}
+            <a href="{% url 'nfse:update' nota.pk %}" class="border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-surface-dark rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm">edit</span>
+                Editar
+            </a>
+            <form method="post" action="{% url 'nfse:enviar' nota.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="bg-success hover:bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-success/20">
+                    <span class="material-symbols-outlined text-sm">send</span>
+                    Enviar para Prefeitura
+                </button>
+            </form>
+            {% elif nota.status == 'AUTORIZADA' and nota.pode_cancelar %}
+            <button @click="showCancelModal = true" class="bg-danger hover:bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm">cancel</span>
+                Cancelar Nota
             </button>
-        </form>
-        {% elif nota.status == 'AUTORIZADA' and nota.pode_cancelar %}
-        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelarModal">
-            <i class="bi bi-x-circle me-1"></i>Cancelar Nota
-        </button>
-        {% endif %}
-        {% if nota.xml_nfse or nota.xml_rps %}
-        <a href="{% url 'nfse:xml' nota.pk %}" class="btn btn-outline-secondary">
-            <i class="bi bi-file-code me-1"></i>Download XML
-        </a>
-        {% endif %}
-        {% if nota.pdf_url %}
-        <a href="{{ nota.pdf_url }}" target="_blank" class="btn btn-outline-info">
-            <i class="bi bi-file-pdf me-1"></i>PDF
-        </a>
-        {% endif %}
+            {% endif %}
+            {% if nota.pdf_url %}
+            <a href="{% url 'nfse:danfse' nota.pk %}" class="border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-surface-dark rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+                DANFSe
+            </a>
+            {% endif %}
+            {% if nota.xml_nfse or nota.xml_rps %}
+            <a href="{% url 'nfse:xml' nota.pk %}" class="border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-surface-dark rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm">code</span>
+                XML
+            </a>
+            {% endif %}
+        </div>
     </div>
-</div>
 
-<div class="row g-4">
-    <!-- Dados da Nota -->
-    <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header">
-                <i class="bi bi-file-text me-2"></i>Dados da Nota
-            </div>
-            <div class="card-body">
-                <dl class="row mb-0">
-                    <dt class="col-5">Número RPS</dt>
-                    <dd class="col-7">{{ nota.numero_rps }} / {{ nota.serie_rps }}</dd>
-                    
-                    {% if nota.numero_nfse %}
-                    <dt class="col-5">Número NFS-e</dt>
-                    <dd class="col-7">{{ nota.numero_nfse }}</dd>
-                    {% endif %}
-                    
-                    {% if nota.codigo_verificacao %}
-                    <dt class="col-5">Cód. Verificação</dt>
-                    <dd class="col-7"><code>{{ nota.codigo_verificacao }}</code></dd>
-                    {% endif %}
-                    
-                    <dt class="col-5">Data Emissão</dt>
-                    <dd class="col-7">{{ nota.data_emissao|date:"d/m/Y" }}</dd>
-                    
-                    <dt class="col-5">Competência</dt>
-                    <dd class="col-7">{{ nota.competencia|date:"m/Y" }}</dd>
-                    
-                    <dt class="col-5">Local Prestação</dt>
-                    <dd class="col-7">{{ nota.local_prestacao_ibge }}</dd>
-                </dl>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Tomador -->
-    <div class="col-lg-6">
-        <div class="card h-100">
-            <div class="card-header">
-                <i class="bi bi-person me-2"></i>Tomador do Serviço
-            </div>
-            <div class="card-body">
-                <dl class="row mb-0">
-                    <dt class="col-5">Nome/Razão</dt>
-                    <dd class="col-7">
-                        <a href="{% url 'clientes:detail' nota.cliente.pk %}">{{ nota.cliente.razao_social }}</a>
-                    </dd>
-                    
-                    <dt class="col-5">CPF/CNPJ</dt>
-                    <dd class="col-7">{{ nota.cliente.documento_formatado }}</dd>
-                    
-                    {% if nota.cliente.email %}
-                    <dt class="col-5">E-mail</dt>
-                    <dd class="col-7">{{ nota.cliente.email }}</dd>
-                    {% endif %}
-                    
-                    {% if nota.cliente.endereco_completo %}
-                    <dt class="col-5">Endereço</dt>
-                    <dd class="col-7">{{ nota.cliente.endereco_completo }}</dd>
-                    {% endif %}
-                </dl>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Serviço -->
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <i class="bi bi-briefcase me-2"></i>Serviço Prestado
-            </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <strong>Código LC 116:</strong> {{ nota.servico.codigo_lc116 }}
-                    </div>
-                    <div class="col-md-9">
-                        <strong>Descrição:</strong> {{ nota.servico.descricao }}
-                    </div>
-                </div>
-                <div class="border rounded p-3 bg-light">
-                    <strong>Discriminação:</strong><br>
-                    {{ nota.discriminacao|linebreaks }}
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Valores -->
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <i class="bi bi-currency-dollar me-2"></i>Valores
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-2">
-                        <p class="text-muted mb-1 small">Valor Serviços</p>
-                        <h5>R$ {{ nota.valor_servicos|floatformat:2 }}</h5>
-                    </div>
-                    <div class="col-md-2">
-                        <p class="text-muted mb-1 small">(-) Deduções</p>
-                        <h5 class="text-danger">R$ {{ nota.valor_deducoes|floatformat:2 }}</h5>
-                    </div>
-                    <div class="col-md-2">
-                        <p class="text-muted mb-1 small">Base Cálculo</p>
-                        <h5>R$ {{ nota.base_calculo|floatformat:2 }}</h5>
-                    </div>
-                    <div class="col-md-2">
-                        <p class="text-muted mb-1 small">ISS ({{ nota.aliquota_iss|floatformat:2 }}%)</p>
-                        <h5>R$ {{ nota.valor_iss|floatformat:2 }}</h5>
-                    </div>
-                    <div class="col-md-2">
-                        <p class="text-muted mb-1 small">ISS Retido</p>
-                        <h5>{% if nota.iss_retido %}Sim{% else %}Não{% endif %}</h5>
-                    </div>
-                    <div class="col-md-2">
-                        <p class="text-muted mb-1 small">Valor Líquido</p>
-                        <h4 class="text-success fw-bold">R$ {{ nota.valor_liquido|floatformat:2 }}</h4>
-                    </div>
-                </div>
-                
-                {% if nota.valor_pis or nota.valor_cofins or nota.valor_inss %}
-                <hr>
-                <div class="row text-center">
-                    <div class="col"><small class="text-muted">PIS: R$ {{ nota.valor_pis|floatformat:2 }}</small></div>
-                    <div class="col"><small class="text-muted">COFINS: R$ {{ nota.valor_cofins|floatformat:2 }}</small></div>
-                    <div class="col"><small class="text-muted">INSS: R$ {{ nota.valor_inss|floatformat:2 }}</small></div>
-                    <div class="col"><small class="text-muted">IR: R$ {{ nota.valor_ir|floatformat:2 }}</small></div>
-                    <div class="col"><small class="text-muted">CSLL: R$ {{ nota.valor_csll|floatformat:2 }}</small></div>
-                </div>
+    <!-- Error Alert (para notas rejeitadas) -->
+    {% if nota.status == 'REJEITADA' %}
+    <div class="bg-danger/5 border border-danger/20 rounded-xl p-4 flex items-start gap-3">
+        <span class="material-symbols-outlined text-danger mt-0.5">error</span>
+        <div>
+            <p class="text-sm font-bold text-danger">Nota Rejeitada</p>
+            {% for evento in eventos %}
+                {% if evento.tipo == 'REJEICAO' and not evento.sucesso %}
+                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ evento.mensagem }}</p>
                 {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Dados da Nota -->
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-lg">description</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Dados da Nota</h4>
+                </div>
+            </div>
+            <div class="p-6">
+                <dl class="space-y-3">
+                    <div class="flex justify-between">
+                        <dt class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Número RPS</dt>
+                        <dd class="text-sm font-mono text-slate-700 dark:text-slate-200">{{ nota.numero_rps }} / {{ nota.serie_rps }}</dd>
+                    </div>
+                    {% if nota.numero_nfse %}
+                    <div class="flex justify-between">
+                        <dt class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Número NFS-e</dt>
+                        <dd class="text-sm font-mono font-bold text-slate-700 dark:text-slate-200">{{ nota.numero_nfse }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if nota.codigo_verificacao %}
+                    <div class="flex justify-between">
+                        <dt class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Cód. Verificação</dt>
+                        <dd class="text-sm font-mono text-primary">{{ nota.codigo_verificacao }}</dd>
+                    </div>
+                    {% endif %}
+                    <div class="flex justify-between">
+                        <dt class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data Emissão</dt>
+                        <dd class="text-sm text-slate-700 dark:text-slate-200">{{ nota.data_emissao|date:"d/m/Y" }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Competência</dt>
+                        <dd class="text-sm text-slate-700 dark:text-slate-200">{{ nota.competencia|date:"m/Y" }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Local Prestação</dt>
+                        <dd class="text-sm text-slate-700 dark:text-slate-200">{{ nota.local_prestacao_ibge }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Tomador do Serviço -->
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-lg">person</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Tomador do Serviço</h4>
+                </div>
+            </div>
+            <div class="p-6">
+                <dl class="space-y-3">
+                    <div class="flex justify-between">
+                        <dt class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nome/Razão</dt>
+                        <dd class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ nota.cliente.razao_social }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CPF/CNPJ</dt>
+                        <dd class="text-sm font-mono text-slate-700 dark:text-slate-200">{{ nota.cliente.documento_formatado }}</dd>
+                    </div>
+                    {% if nota.cliente.email %}
+                    <div class="flex justify-between">
+                        <dt class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">E-mail</dt>
+                        <dd class="text-sm text-slate-700 dark:text-slate-200">{{ nota.cliente.email }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if nota.cliente.endereco_completo %}
+                    <div class="flex justify-between items-start">
+                        <dt class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Endereço</dt>
+                        <dd class="text-sm text-slate-700 dark:text-slate-200 text-right max-w-[60%]">{{ nota.cliente.endereco_completo }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Eventos -->
-{% if eventos %}
-<div class="card mt-4">
-    <div class="card-header">
-        <i class="bi bi-clock-history me-2"></i>Histórico de Eventos
-    </div>
-    <div class="card-body p-0">
-        <table class="table table-sm mb-0">
-            <thead>
-                <tr>
-                    <th>Data/Hora</th>
-                    <th>Evento</th>
-                    <th>Protocolo</th>
-                    <th>Mensagem</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for evento in eventos %}
-                <tr>
-                    <td>{{ evento.data_hora|date:"d/m/Y H:i:s" }}</td>
-                    <td>{{ evento.get_tipo_display }}</td>
-                    <td>{{ evento.protocolo|default:"-" }}</td>
-                    <td>{{ evento.mensagem|truncatechars:50 }}</td>
-                    <td>
-                        {% if evento.sucesso %}
-                        <span class="badge bg-success">OK</span>
-                        {% else %}
-                        <span class="badge bg-danger">Erro</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% endif %}
-
-<!-- Modal Cancelamento -->
-{% if nota.pode_cancelar %}
-<div class="modal fade" id="cancelarModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Cancelar NFS-e</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    <!-- Identificação Nacional (chave_acesso, id_dps, backend) -->
+    {% if nota.chave_acesso or nota.id_dps or nota.backend_utilizado %}
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-lg">verified</span>
+                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Identificação Nacional</h4>
             </div>
+        </div>
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            {% if nota.chave_acesso %}
+            <div>
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Chave de Acesso</p>
+                <p class="text-sm font-mono text-slate-700 dark:text-slate-200 break-all">{{ nota.chave_acesso }}</p>
+            </div>
+            {% endif %}
+            {% if nota.id_dps %}
+            <div>
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">ID DPS</p>
+                <p class="text-sm font-mono text-slate-700 dark:text-slate-200">{{ nota.id_dps }}</p>
+            </div>
+            {% endif %}
+            {% if nota.backend_utilizado %}
+            <div>
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Backend</p>
+                <span class="px-2 py-1 rounded text-xs font-bold uppercase bg-primary/10 text-primary border border-primary/20">{{ nota.backend_utilizado }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Serviço Prestado -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-lg">work</span>
+                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Serviço Prestado</h4>
+            </div>
+        </div>
+        <div class="p-6 space-y-4">
+            <div class="flex items-center gap-6">
+                <div>
+                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Código LC 116</p>
+                    <p class="text-sm font-mono font-bold text-slate-700 dark:text-slate-200 mt-1">{{ nota.servico.codigo_lc116 }}</p>
+                </div>
+                <div class="flex-1">
+                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Descrição</p>
+                    <p class="text-sm text-slate-700 dark:text-slate-200 mt-1">{{ nota.servico.descricao }}</p>
+                </div>
+            </div>
+            <div class="bg-slate-50 dark:bg-background-dark rounded-lg p-4 border border-slate-200 dark:border-border-dark">
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Discriminação</p>
+                <div class="text-sm text-slate-700 dark:text-slate-200 leading-relaxed">{{ nota.discriminacao|linebreaks }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Valores -->
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-lg">payments</span>
+                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Valores</h4>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-4 text-center">
+                <div>
+                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Valor Serviços</p>
+                    <p class="text-lg font-bold text-slate-700 dark:text-slate-200 mt-1">R$ {{ nota.valor_servicos|floatformat:2 }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">(-) Deduções</p>
+                    <p class="text-lg font-bold text-danger mt-1">R$ {{ nota.valor_deducoes|floatformat:2 }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Base Cálculo</p>
+                    <p class="text-lg font-bold text-slate-700 dark:text-slate-200 mt-1">R$ {{ nota.base_calculo|floatformat:2 }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ISS ({{ nota.aliquota_iss|floatformat:2 }}%)</p>
+                    <p class="text-lg font-bold text-slate-700 dark:text-slate-200 mt-1">R$ {{ nota.valor_iss|floatformat:2 }}</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ISS Retido</p>
+                    <p class="text-lg font-bold mt-1 {% if nota.iss_retido %}text-warning{% else %}text-slate-500{% endif %}">{% if nota.iss_retido %}Sim{% else %}Não{% endif %}</p>
+                </div>
+                <div class="bg-success/5 rounded-lg p-3 border border-success/20">
+                    <p class="text-xs font-bold text-success uppercase tracking-wider">Valor Líquido</p>
+                    <p class="text-xl font-bold text-success mt-1">R$ {{ nota.valor_liquido|floatformat:2 }}</p>
+                </div>
+            </div>
+
+            {% if nota.valor_pis or nota.valor_cofins or nota.valor_inss %}
+            <div class="mt-4 pt-4 border-t border-slate-200 dark:border-border-dark">
+                <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Retenções Federais</p>
+                <div class="grid grid-cols-5 gap-4 text-center">
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase">PIS</p>
+                        <p class="text-sm font-mono text-slate-600 dark:text-slate-400">R$ {{ nota.valor_pis|floatformat:2 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase">COFINS</p>
+                        <p class="text-sm font-mono text-slate-600 dark:text-slate-400">R$ {{ nota.valor_cofins|floatformat:2 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase">INSS</p>
+                        <p class="text-sm font-mono text-slate-600 dark:text-slate-400">R$ {{ nota.valor_inss|floatformat:2 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase">IR</p>
+                        <p class="text-sm font-mono text-slate-600 dark:text-slate-400">R$ {{ nota.valor_ir|floatformat:2 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase">CSLL</p>
+                        <p class="text-sm font-mono text-slate-600 dark:text-slate-400">R$ {{ nota.valor_csll|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- CBS/IBS (Reforma Tributária) -->
+            {% if nota.valor_cbs or nota.valor_ibs %}
+            <div class="mt-4 pt-4 border-t border-slate-200 dark:border-border-dark">
+                <p class="text-xs font-bold text-primary uppercase tracking-wider mb-3 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">new_releases</span>
+                    Reforma Tributária (CBS/IBS)
+                </p>
+                <div class="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase">CBS</p>
+                        <p class="text-sm font-mono text-slate-600 dark:text-slate-400">R$ {{ nota.valor_cbs|floatformat:2 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-slate-400 uppercase">IBS</p>
+                        <p class="text-sm font-mono text-slate-600 dark:text-slate-400">R$ {{ nota.valor_ibs|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Eventos / Timeline -->
+    {% if eventos %}
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-lg">history</span>
+                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Histórico de Eventos</h4>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">{{ eventos|length }}</span>
+            </div>
+        </div>
+        <div class="divide-y divide-slate-100 dark:divide-border-dark">
+            {% for evento in eventos %}
+            <div class="px-6 py-4 flex items-start gap-4 hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
+                <!-- Icon -->
+                <div class="mt-0.5">
+                    {% if evento.sucesso %}
+                    <div class="size-8 rounded-full bg-success/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-success text-lg">check_circle</span>
+                    </div>
+                    {% else %}
+                    <div class="size-8 rounded-full bg-danger/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-danger text-lg">error</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ evento.get_tipo_display }}</span>
+                        {% if evento.protocolo %}
+                        <span class="text-[10px] font-mono text-slate-400 bg-slate-100 dark:bg-background-dark px-2 py-0.5 rounded">{{ evento.protocolo }}</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{{ evento.mensagem }}</p>
+                </div>
+                <!-- Time -->
+                <span class="text-xs text-slate-400 whitespace-nowrap">{{ evento.data_hora|date:"d/m/Y H:i:s" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Cancel Modal (Alpine.js) -->
+    {% if nota.pode_cancelar %}
+    <div x-show="showCancelModal" x-transition.opacity
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+         style="display: none;">
+        <div @click.outside="showCancelModal = false"
+             class="bg-white dark:bg-surface-dark rounded-xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-border-dark overflow-hidden">
+            <!-- Header -->
+            <div class="px-6 py-4 bg-danger/10 border-b border-danger/20 flex items-center gap-3">
+                <span class="material-symbols-outlined text-danger">warning</span>
+                <h3 class="font-bold text-danger">Cancelar NFS-e</h3>
+            </div>
+
             <form method="post" action="{% url 'nfse:cancelar' nota.pk %}">
                 {% csrf_token %}
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        Esta ação não pode ser desfeita!
+                <div class="p-6 space-y-4">
+                    <div class="bg-warning/5 border border-warning/20 rounded-lg p-3 flex items-start gap-2">
+                        <span class="material-symbols-outlined text-warning text-lg mt-0.5">info</span>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Esta ação não pode ser desfeita!</p>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Motivo do Cancelamento</label>
-                        <textarea name="motivo" class="form-control" rows="3" required
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider" for="motivo_cancel">Motivo do Cancelamento</label>
+                        <textarea name="motivo" id="motivo_cancel" rows="3" required
+                                  class="mt-2 w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-danger focus:border-danger transition-all outline-none"
                                   placeholder="Descreva o motivo do cancelamento..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
-                    <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
+                <div class="px-6 py-4 border-t border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50 flex justify-end gap-3">
+                    <button type="button" @click="showCancelModal = false"
+                            class="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-surface-dark transition-colors text-sm font-medium">
+                        Voltar
+                    </button>
+                    <button type="submit"
+                            class="bg-danger hover:bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-semibold transition-all">
+                        Confirmar Cancelamento
+                    </button>
                 </div>
             </form>
         </div>
     </div>
+    {% endif %}
 </div>
-{% endif %}
 {% endblock %}

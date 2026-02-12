@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block title %}NFS-e - wCaixaDigital{% endblock %}
+{% block page_title %}Notas Fiscais de Serviço{% endblock %}
 
 {% block content %}
 <div class="p-6 w-full space-y-6">
@@ -11,39 +12,65 @@
             <h3 class="text-2xl font-bold tracking-tight">Notas Fiscais de Serviço</h3>
             <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Gestão de emissão e consulta de notas</p>
         </div>
-        <a href="{% url 'nfse:create' %}" class="bg-success hover:bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-success/20">
-            <span class="material-symbols-outlined text-sm">add</span>
-            Nova NFS-e
-        </a>
+        <div class="flex items-center gap-3">
+            {% if is_gerente %}
+            <a href="{% url 'nfse:config' %}" class="border border-slate-200 dark:border-border-dark hover:bg-slate-50 dark:hover:bg-surface-dark text-slate-600 dark:text-slate-300 rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm">settings</span>
+                Configurações
+            </a>
+            {% endif %}
+            <a href="{% url 'nfse:create' %}" class="bg-success hover:bg-emerald-600 text-white rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-success/20">
+                <span class="material-symbols-outlined text-sm">add</span>
+                Nova NFS-e
+            </a>
+        </div>
     </div>
 
     <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Autorizadas -->
-        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <!-- Total -->
+        <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
             <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <span class="material-symbols-outlined text-6xl text-success">check_circle</span>
+                <span class="material-symbols-outlined text-5xl text-slate-400">receipt_long</span>
             </div>
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Autorizadas</p>
+            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total</p>
+            <h4 class="text-2xl font-bold mt-1 text-slate-700 dark:text-slate-200">{{ stats.total|default:"0" }}</h4>
+        </div>
+
+        <!-- Autorizadas -->
+        <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
+            <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-5xl text-success">check_circle</span>
+            </div>
+            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Autorizadas</p>
             <h4 class="text-2xl font-bold mt-1 text-success">{{ stats.autorizadas|default:"0" }}</h4>
         </div>
         
         <!-- Rascunhos -->
-        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
+        <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
             <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <span class="material-symbols-outlined text-6xl text-warning">edit_document</span>
+                <span class="material-symbols-outlined text-5xl text-slate-400">edit_document</span>
             </div>
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Rascunhos</p>
-            <h4 class="text-2xl font-bold mt-1 text-warning">{{ stats.rascunhos|default:"0" }}</h4>
+            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Rascunhos</p>
+            <h4 class="text-2xl font-bold mt-1 text-slate-500 dark:text-slate-300">{{ stats.rascunhos|default:"0" }}</h4>
         </div>
 
-        <!-- Canceladas -->
-        <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
+        <!-- Rejeitadas -->
+        <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
             <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <span class="material-symbols-outlined text-6xl text-danger">cancel</span>
+                <span class="material-symbols-outlined text-5xl text-warning">error</span>
             </div>
-            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Canceladas</p>
-            <h4 class="text-2xl font-bold mt-1 text-danger">{{ stats.canceladas|default:"0" }}</h4>
+            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Rejeitadas</p>
+            <h4 class="text-2xl font-bold mt-1 text-warning">{{ stats.rejeitadas|default:"0" }}</h4>
+        </div>
+
+        <!-- Enviando -->
+        <div class="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
+            <div class="absolute right-0 top-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <span class="material-symbols-outlined text-5xl text-primary animate-pulse">sync</span>
+            </div>
+            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Enviando</p>
+            <h4 class="text-2xl font-bold mt-1 text-primary">{{ stats.enviando|default:"0" }}</h4>
         </div>
     </div>
 
@@ -80,7 +107,9 @@
                     <select name="status" class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
                         <option value="">Todos</option>
                         <option value="RASCUNHO" {% if request.GET.status == 'RASCUNHO' %}selected{% endif %}>Rascunho</option>
+                        <option value="ENVIANDO" {% if request.GET.status == 'ENVIANDO' %}selected{% endif %}>Enviando</option>
                         <option value="AUTORIZADA" {% if request.GET.status == 'AUTORIZADA' %}selected{% endif %}>Autorizada</option>
+                        <option value="REJEITADA" {% if request.GET.status == 'REJEITADA' %}selected{% endif %}>Rejeitada</option>
                         <option value="CANCELADA" {% if request.GET.status == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
                     </select>
                 </div>
@@ -118,6 +147,7 @@
                         <th class="px-6 py-4">NFS-e</th>
                         <th class="px-6 py-4">Data</th>
                         <th class="px-6 py-4">Cliente</th>
+                        <th class="px-6 py-4">Backend</th>
                         <th class="px-6 py-4">Status</th>
                         <th class="px-6 py-4 text-right">Valor Serv.</th>
                         <th class="px-6 py-4 text-center">Ações</th>
@@ -139,12 +169,19 @@
                             <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ nota.cliente.razao_social|truncatechars:30 }}</span>
                         </td>
                         <td class="px-6 py-4">
+                            {% if nota.backend_utilizado %}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-100 dark:bg-background-dark text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-border-dark">{{ nota.backend_utilizado }}</span>
+                            {% else %}
+                            <span class="text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
                             {% if nota.status == 'AUTORIZADA' %}
                             <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Autorizada</span>
                             {% elif nota.status == 'RASCUNHO' %}
-                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-100 text-slate-500 border border-slate-200">Rascunho</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-slate-100 dark:bg-background-dark text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-border-dark">Rascunho</span>
                             {% elif nota.status == 'ENVIANDO' %}
-                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">Enviando</span>
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-primary/10 text-primary border border-primary/20 animate-pulse">Enviando</span>
                             {% elif nota.status == 'CANCELADA' %}
                             <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-danger/10 text-danger border border-danger/20">Cancelada</span>
                             {% elif nota.status == 'REJEITADA' %}
@@ -157,17 +194,22 @@
                             <span class="font-bold text-slate-700 dark:text-slate-200">R$ {{ nota.valor_servicos|floatformat:2 }}</span>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="flex items-center justify-center gap-2">
-                                <a href="{% url 'nfse:detail' nota.pk %}" class="p-1 rounded text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors" title="Visualizar">
+                            <div class="flex items-center justify-center gap-1">
+                                <a href="{% url 'nfse:detail' nota.pk %}" class="p-1.5 rounded text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors" title="Visualizar">
                                     <span class="material-symbols-outlined text-lg">visibility</span>
                                 </a>
                                 {% if nota.status == 'RASCUNHO' %}
-                                <a href="{% url 'nfse:update' nota.pk %}" class="p-1 rounded text-slate-400 hover:text-warning hover:bg-warning/10 transition-colors" title="Editar">
+                                <a href="{% url 'nfse:update' nota.pk %}" class="p-1.5 rounded text-slate-400 hover:text-warning hover:bg-warning/10 transition-colors" title="Editar">
                                     <span class="material-symbols-outlined text-lg">edit</span>
                                 </a>
                                 {% endif %}
+                                {% if nota.pdf_url %}
+                                <a href="{% url 'nfse:danfse' nota.pk %}" class="p-1.5 rounded text-slate-400 hover:text-success hover:bg-success/10 transition-colors" title="DANFSe">
+                                    <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+                                </a>
+                                {% endif %}
                                 {% if nota.xml_nfse or nota.xml_rps %}
-                                <a href="{% url 'nfse:xml' nota.pk %}" class="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-colors" title="XML">
+                                <a href="{% url 'nfse:xml' nota.pk %}" class="p-1.5 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-background-dark transition-colors" title="XML">
                                     <span class="material-symbols-outlined text-lg">code</span>
                                 </a>
                                 {% endif %}
@@ -176,7 +218,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-sm text-slate-500">
+                        <td colspan="8" class="px-6 py-8 text-center text-sm text-slate-500">
                             <div class="flex flex-col items-center gap-2">
                                 <span class="material-symbols-outlined text-4xl text-slate-300">receipt_long</span>
                                 <p>Nenhuma nota fiscal encontrada.</p>
@@ -197,7 +239,7 @@
             
             <div class="flex gap-1">
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.numero %}&numero={{ request.GET.numero }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.numero %}&numero={{ request.GET.numero }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
                     <span class="material-symbols-outlined text-sm">chevron_left</span>
                 </a>
                 {% endif %}
@@ -205,7 +247,7 @@
                 <span class="px-3 py-1 bg-primary/10 text-primary rounded text-xs font-bold">{{ page_obj.number }}</span>
                 
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.numero %}&numero={{ request.GET.numero }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.numero %}&numero={{ request.GET.numero }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
                     <span class="material-symbols-outlined text-sm">chevron_right</span>
                 </a>
                 {% endif %}

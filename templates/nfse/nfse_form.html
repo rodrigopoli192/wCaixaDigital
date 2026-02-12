@@ -1,150 +1,209 @@
-{% extends "base.html" %}
+{% extends "base_dark.html" %}
 
-{% block title %}{% if object %}Editar{% else %}Nova{% endif %} NFS-e - Caixa Digital{% endblock %}
+{% block title %}{% if object %}Editar{% else %}Nova{% endif %} NFS-e - wCaixaDigital{% endblock %}
+{% block page_title %}{% if object %}Editar NFS-e{% else %}Nova NFS-e{% endif %}{% endblock %}
 
 {% block content %}
-<nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'nfse:list' %}">NFS-e</a></li>
-        <li class="breadcrumb-item active">{% if object %}Editar{% else %}Nova Nota{% endif %}</li>
-    </ol>
-</nav>
+<div class="p-6 w-full max-w-5xl mx-auto space-y-6">
 
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="card shadow-sm">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0">
-                    <i class="bi bi-receipt me-2"></i>
-                    {% if object %}Editar NFS-e{% else %}Nova NFS-e{% endif %}
-                </h5>
+    <!-- Header -->
+    <div class="flex items-center gap-4">
+        <a href="{% url 'nfse:list' %}" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-400 transition-colors">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </a>
+        <div class="flex-1">
+            <div class="flex items-center gap-3">
+                <h3 class="text-2xl font-bold tracking-tight">{% if object %}Editar NFS-e{% else %}Nova NFS-e{% endif %}</h3>
+                {% if ambiente %}
+                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase
+                    {% if ambiente == 'PRODUCAO' %}bg-danger/10 text-danger border border-danger/20{% else %}bg-warning/10 text-warning border border-warning/20{% endif %}">
+                    {{ ambiente }}
+                </span>
+                {% endif %}
             </div>
-            <div class="card-body">
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    
-                    <!-- Tomador -->
-                    <fieldset class="mb-4">
-                        <legend class="h6 text-muted border-bottom pb-2">
-                            <i class="bi bi-person me-2"></i>Tomador do Serviço
-                        </legend>
-                        <div class="row">
-                            <div class="col-md-8 mb-3">
-                                <label for="id_cliente" class="form-label">Cliente</label>
-                                {{ form.cliente }}
-                                <div class="form-text">
-                                    <a href="{% url 'clientes:create' %}">+ Cadastrar novo cliente</a>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="id_competencia" class="form-label">Competência</label>
-                                {{ form.competencia }}
-                            </div>
-                        </div>
-                    </fieldset>
-                    
-                    <!-- Serviço -->
-                    <fieldset class="mb-4">
-                        <legend class="h6 text-muted border-bottom pb-2">
-                            <i class="bi bi-briefcase me-2"></i>Serviço
-                        </legend>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="id_servico" class="form-label">Código de Serviço</label>
-                                {{ form.servico }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="id_local_prestacao_ibge" class="form-label">Local de Prestação (IBGE)</label>
-                                {{ form.local_prestacao_ibge }}
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="id_discriminacao" class="form-label">Discriminação do Serviço</label>
-                            {{ form.discriminacao }}
-                            <div class="form-text">Descreva detalhadamente os serviços prestados</div>
-                        </div>
-                    </fieldset>
-                    
-                    <!-- Valores -->
-                    <fieldset class="mb-4">
-                        <legend class="h6 text-muted border-bottom pb-2">
-                            <i class="bi bi-currency-dollar me-2"></i>Valores
-                        </legend>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="id_valor_servicos" class="form-label">Valor dos Serviços</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">R$</span>
-                                    {{ form.valor_servicos }}
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="id_valor_deducoes" class="form-label">Deduções</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">R$</span>
-                                    {{ form.valor_deducoes }}
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="id_aliquota_iss" class="form-label">Alíquota ISS (%)</label>
-                                {{ form.aliquota_iss }}
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="form-check">
-                                {{ form.iss_retido }}
-                                <label class="form-check-label" for="id_iss_retido">
-                                    ISS Retido na Fonte
-                                </label>
-                            </div>
-                        </div>
-                    </fieldset>
-                    
-                    <!-- Retenções -->
-                    <fieldset class="mb-4">
-                        <legend class="h6 text-muted border-bottom pb-2">
-                            <i class="bi bi-percent me-2"></i>Retenções Federais
-                        </legend>
-                        <div class="row">
-                            <div class="col-md-2 mb-3">
-                                <label for="id_valor_pis" class="form-label">PIS</label>
-                                {{ form.valor_pis }}
-                            </div>
-                            <div class="col-md-2 mb-3">
-                                <label for="id_valor_cofins" class="form-label">COFINS</label>
-                                {{ form.valor_cofins }}
-                            </div>
-                            <div class="col-md-2 mb-3">
-                                <label for="id_valor_inss" class="form-label">INSS</label>
-                                {{ form.valor_inss }}
-                            </div>
-                            <div class="col-md-2 mb-3">
-                                <label for="id_valor_ir" class="form-label">IR</label>
-                                {{ form.valor_ir }}
-                            </div>
-                            <div class="col-md-2 mb-3">
-                                <label for="id_valor_csll" class="form-label">CSLL</label>
-                                {{ form.valor_csll }}
-                            </div>
-                        </div>
-                    </fieldset>
-                    
-                    <div class="d-flex justify-content-between">
-                        <a href="{% url 'nfse:list' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i>Cancelar
-                        </a>
-                        <div>
-                            <button type="submit" name="acao" value="salvar" class="btn btn-primary">
-                                <i class="bi bi-save me-1"></i>Salvar Rascunho
-                            </button>
-                            <button type="submit" name="acao" value="enviar" class="btn btn-success ms-2">
-                                <i class="bi bi-send me-1"></i>Salvar e Enviar
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Preencha os dados para gerar o RPS</p>
         </div>
     </div>
+
+    <!-- Form -->
+    <form method="post" novalidate class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Non-field errors -->
+        {% if form.non_field_errors %}
+        <div class="bg-danger/5 border border-danger/20 rounded-xl p-4 flex items-start gap-3">
+            <span class="material-symbols-outlined text-danger mt-0.5">error</span>
+            <div>
+                {% for error in form.non_field_errors %}
+                <p class="text-sm text-danger">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Tomador do Serviço -->
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-lg">person</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Tomador do Serviço</h4>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2 space-y-1">
+                        <label for="id_cliente" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Cliente</label>
+                        {{ form.cliente }}
+                        {% if form.cliente.errors %}
+                        <p class="text-xs text-danger mt-1">{{ form.cliente.errors.0 }}</p>
+                        {% endif %}
+                        <p class="text-xs text-slate-400 mt-1">
+                            <a href="{% url 'clientes:create' %}" class="text-primary hover:underline">+ Cadastrar novo cliente</a>
+                        </p>
+                    </div>
+                    <div class="space-y-1">
+                        <label for="id_competencia" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Competência</label>
+                        {{ form.competencia }}
+                        {% if form.competencia.errors %}
+                        <p class="text-xs text-danger mt-1">{{ form.competencia.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Serviço -->
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-lg">work</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Serviço</h4>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label for="id_servico" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Código de Serviço</label>
+                        {{ form.servico }}
+                        {% if form.servico.errors %}
+                        <p class="text-xs text-danger mt-1">{{ form.servico.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-1">
+                        <label for="id_local_prestacao_ibge" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Local de Prestação (IBGE)</label>
+                        {{ form.local_prestacao_ibge }}
+                        {% if form.local_prestacao_ibge.errors %}
+                        <p class="text-xs text-danger mt-1">{{ form.local_prestacao_ibge.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label for="id_discriminacao" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Discriminação do Serviço</label>
+                    {{ form.discriminacao }}
+                    {% if form.discriminacao.errors %}
+                    <p class="text-xs text-danger mt-1">{{ form.discriminacao.errors.0 }}</p>
+                    {% endif %}
+                    <p class="text-xs text-slate-400 mt-1">Descreva detalhadamente os serviços prestados</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Valores -->
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-lg">payments</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Valores</h4>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="space-y-1">
+                        <label for="id_valor_servicos" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Valor dos Serviços</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-bold">R$</span>
+                            {{ form.valor_servicos }}
+                        </div>
+                        {% if form.valor_servicos.errors %}
+                        <p class="text-xs text-danger mt-1">{{ form.valor_servicos.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-1">
+                        <label for="id_valor_deducoes" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Deduções</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-bold">R$</span>
+                            {{ form.valor_deducoes }}
+                        </div>
+                        {% if form.valor_deducoes.errors %}
+                        <p class="text-xs text-danger mt-1">{{ form.valor_deducoes.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="space-y-1">
+                        <label for="id_aliquota_iss" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Alíquota ISS (%)</label>
+                        {{ form.aliquota_iss }}
+                        {% if form.aliquota_iss.errors %}
+                        <p class="text-xs text-danger mt-1">{{ form.aliquota_iss.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    {{ form.iss_retido }}
+                    <label for="id_iss_retido" class="text-sm text-slate-600 dark:text-slate-300 cursor-pointer select-none">ISS Retido na Fonte</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Retenções Federais -->
+        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-lg">percent</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Retenções Federais</h4>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div class="space-y-1">
+                        <label for="id_valor_pis" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">PIS</label>
+                        {{ form.valor_pis }}
+                    </div>
+                    <div class="space-y-1">
+                        <label for="id_valor_cofins" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">COFINS</label>
+                        {{ form.valor_cofins }}
+                    </div>
+                    <div class="space-y-1">
+                        <label for="id_valor_inss" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">INSS</label>
+                        {{ form.valor_inss }}
+                    </div>
+                    <div class="space-y-1">
+                        <label for="id_valor_ir" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">IR</label>
+                        {{ form.valor_ir }}
+                    </div>
+                    <div class="space-y-1">
+                        <label for="id_valor_csll" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CSLL</label>
+                        {{ form.valor_csll }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between pt-2">
+            <a href="{% url 'nfse:list' %}" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium flex items-center gap-1 transition-colors">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                Cancelar
+            </a>
+            <div class="flex gap-3">
+                <button type="submit" name="acao" value="salvar" class="border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-surface-dark rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all">
+                    <span class="material-symbols-outlined text-sm">save</span>
+                    Salvar Rascunho
+                </button>
+                <button type="submit" name="acao" value="enviar" class="bg-success hover:bg-emerald-600 text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-success/20">
+                    <span class="material-symbols-outlined text-sm">send</span>
+                    Salvar e Enviar
+                </button>
+            </div>
+        </div>
+    </form>
 </div>
 {% endblock %}

@@ -1,16 +1,23 @@
 """
-NFS-e views - Placeholder implementation.
+NFS-e views.
 """
 
+import logging
+
+from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db import models
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
-from .models import NotaFiscalServico, StatusNFSe
+from .models import ConfiguracaoNFSe, NotaFiscalServico, StatusNFSe
+
+logger = logging.getLogger(__name__)
 
 
 class TenantMixin:
@@ -21,20 +28,72 @@ class TenantMixin:
         return qs.none()
 
 
-class NFSeListView(LoginRequiredMixin, TenantMixin, ListView):
+class NFSeListView(LoginRequiredMixin, TenantMixin, UserPassesTestMixin, ListView):
     model = NotaFiscalServico
     template_name = "nfse/nfse_list.html"
     context_object_name = "notas"
     paginate_by = 25
 
+    def test_func(self):
+        return self.request.user.pode_emitir_nfse
+
     def get_queryset(self):
-        return super().get_queryset().select_related("cliente", "servico")
+        qs = super().get_queryset().select_related("cliente", "servico")
+        user = self.request.user
+
+        # Operador vê só suas notas; gerente vê todas do tenant
+        if not user.pode_aprovar_fechamento:
+            qs = qs.filter(created_by=user)
+
+        params = self.request.GET
+
+        if numero := params.get("numero"):
+            qs = qs.filter(
+                models.Q(numero_rps__icontains=numero) | models.Q(numero_nfse__icontains=numero)
+            )
+        if cliente := params.get("cliente"):
+            qs = qs.filter(
+                models.Q(cliente__razao_social__icontains=cliente)
+                | models.Q(cliente__cpf_cnpj__icontains=cliente)
+            )
+        if status := params.get("status"):
+            qs = qs.filter(status=status)
+        if data_inicio := params.get("data_inicio"):
+            qs = qs.filter(data_emissao__gte=data_inicio)
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        user = self.request.user
+        is_gerente = user.pode_aprovar_fechamento
+        base_qs = super().get_queryset()
+        if not is_gerente:
+            base_qs = base_qs.filter(created_by=user)
+        ctx["stats"] = {
+            "total": base_qs.count(),
+            "autorizadas": base_qs.filter(status=StatusNFSe.AUTORIZADA).count(),
+            "rascunhos": base_qs.filter(status=StatusNFSe.RASCUNHO).count(),
+            "canceladas": base_qs.filter(status=StatusNFSe.CANCELADA).count(),
+            "rejeitadas": base_qs.filter(status=StatusNFSe.REJEITADA).count(),
+            "enviando": base_qs.filter(status=StatusNFSe.ENVIANDO).count(),
+        }
+        ctx["is_gerente"] = is_gerente
+        return ctx
 
 
-class NFSeDetailView(LoginRequiredMixin, TenantMixin, DetailView):
+class NFSeDetailView(LoginRequiredMixin, TenantMixin, UserPassesTestMixin, DetailView):
     model = NotaFiscalServico
     template_name = "nfse/nfse_detail.html"
     context_object_name = "nota"
+
+    def test_func(self):
+        return self.request.user.pode_emitir_nfse
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["eventos"] = self.object.eventos.order_by("-data_hora")
+        return ctx
 
 
 class NFSeCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -163,3 +222,129 @@ class NFSeXMLView(LoginRequiredMixin, TenantMixin, DetailView):
         response = HttpResponse(xml, content_type="application/xml")
         response["Content-Disposition"] = f'attachment; filename="nfse_{nota.numero_rps}.xml"'
         return response
+
+
+class NFSeConfigForm(forms.ModelForm):
+    class Meta:
+        model = ConfiguracaoNFSe
+        fields = ["backend", "ambiente", "gerar_nfse_ao_confirmar", "api_token", "api_secret"]
+        widgets = {
+            "backend": forms.Select(
+                attrs={
+                    "class": "w-full bg-slate-50 dark:bg-background-dark border "
+                    "border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm "
+                    "focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                }
+            ),
+            "ambiente": forms.Select(
+                attrs={
+                    "class": "w-full bg-slate-50 dark:bg-background-dark border "
+                    "border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm "
+                    "focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+                }
+            ),
+            "gerar_nfse_ao_confirmar": forms.CheckboxInput(
+                attrs={"class": "w-5 h-5 text-primary rounded focus:ring-primary cursor-pointer"}
+            ),
+            "api_token": forms.TextInput(
+                attrs={
+                    "class": "w-full bg-slate-50 dark:bg-background-dark border "
+                    "border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm "
+                    "focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none",
+                    "placeholder": "Token da API",
+                }
+            ),
+            "api_secret": forms.PasswordInput(
+                attrs={
+                    "class": "w-full bg-slate-50 dark:bg-background-dark border "
+                    "border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm "
+                    "focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none",
+                    "placeholder": "••••••",
+                },
+                render_value=True,
+            ),
+        }
+
+
+class NFSeConfigView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """Configurações NFS-e (get_or_create por tenant)."""
+
+    model = ConfiguracaoNFSe
+    form_class = NFSeConfigForm
+    template_name = "nfse/nfse_config.html"
+    success_url = reverse_lazy("nfse:config")
+
+    def test_func(self):
+        return self.request.user.pode_aprovar_fechamento
+
+    def get_object(self, queryset=None):
+        obj, _created = ConfiguracaoNFSe.objects.get_or_create(
+            tenant=self.request.user.tenant,
+        )
+        return obj
+
+    def form_valid(self, form):
+        messages.success(self.request, "Configurações salvas com sucesso!")
+        return super().form_valid(form)
+
+
+class NFSeTestarConexaoView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """Testa conexão com backend NFS-e (HTMX endpoint)."""
+
+    def test_func(self):
+        return self.request.user.pode_aprovar_fechamento
+
+    def post(self, request):
+        from .backends import get_backend
+
+        try:
+            config = ConfiguracaoNFSe.objects.get(tenant=request.user.tenant)
+            backend = get_backend(request.user.tenant)
+            # Call connectivity check if available
+            if hasattr(backend, "testar_conexao"):
+                result = backend.testar_conexao(request.user.tenant)
+                if result.get("sucesso"):
+                    ctx = {
+                        "toast_type": "success",
+                        "toast_title": "Conexão OK",
+                        "toast_message": f"Backend {config.get_backend_display()} respondeu com sucesso.",
+                    }
+                else:
+                    ctx = {
+                        "toast_type": "error",
+                        "toast_title": "Falha na Conexão",
+                        "toast_message": result.get("mensagem", "Erro desconhecido"),
+                    }
+            else:
+                ctx = {
+                    "toast_type": "success",
+                    "toast_title": "Backend Carregado",
+                    "toast_message": f"Backend {config.get_backend_display()} configurado.",
+                }
+        except ConfiguracaoNFSe.DoesNotExist:
+            ctx = {
+                "toast_type": "error",
+                "toast_title": "Sem Configuração",
+                "toast_message": "Configure o backend primeiro.",
+            }
+        except Exception as e:
+            logger.exception("Erro ao testar conexão NFS-e")
+            ctx = {
+                "toast_type": "error",
+                "toast_title": "Erro",
+                "toast_message": str(e),
+            }
+
+        html = render_to_string("nfse/_nfse_toast.html", ctx, request=request)
+        return HttpResponse(html)
+
+
+class NFSeDANFSeDownloadView(LoginRequiredMixin, TenantMixin, View):
+    """Redirect para download do DANFSe (PDF)."""
+
+    def get(self, request, pk):
+        nota = get_object_or_404(NotaFiscalServico, pk=pk, tenant=request.user.tenant)
+        if nota.pdf_url:
+            return redirect(nota.pdf_url)
+        messages.error(request, "DANFSe não disponível para esta nota.")
+        return redirect("nfse:detail", pk=pk)
