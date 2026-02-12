@@ -185,3 +185,67 @@ def consultar_lote_nfse(nota_ids: list[str]) -> dict:
             )
 
     return {"resultados": resultados}
+
+
+@shared_task
+def poll_nfse_status() -> dict:
+    """
+    Consulta status de notas em ENVIANDO há mais de 2 minutos.
+
+    Atualiza status para AUTORIZADA ou REJEITADA quando o gateway
+    confirma o processamento. Agenda via Celery Beat a cada 5 min.
+    """
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    cutoff = timezone.now() - timedelta(minutes=2)
+    notas = NotaFiscalServico.objects.filter(
+        status=StatusNFSe.ENVIANDO,
+        updated_at__lt=cutoff,
+    ).select_related("tenant")
+
+    atualizadas = 0
+
+    for nota in notas[:50]:  # Limit per run
+        try:
+            backend = get_backend(nota.tenant)
+            resultado = backend.consultar(nota, nota.tenant)
+
+            if not resultado.sucesso:
+                continue
+
+            status_raw = (resultado.status or "").lower()
+            if status_raw in ("autorizada", "autorizado", "aut"):
+                nota.status = StatusNFSe.AUTORIZADA
+                nota.xml_nfse = resultado.xml_retorno or nota.xml_nfse
+                nota.save(update_fields=["status", "xml_nfse", "updated_at"])
+
+                EventoFiscal.objects.create(
+                    tenant=nota.tenant,
+                    nota=nota,
+                    tipo=TipoEventoFiscal.AUTORIZACAO,
+                    mensagem=f"Polling: {resultado.mensagem or 'Autorizada'}",
+                    sucesso=True,
+                )
+                atualizadas += 1
+
+            elif status_raw in ("rejeitada", "rejeitado", "erro"):
+                nota.status = StatusNFSe.REJEITADA
+                nota.xml_nfse = resultado.xml_retorno or nota.xml_nfse
+                nota.save(update_fields=["status", "xml_nfse", "updated_at"])
+
+                EventoFiscal.objects.create(
+                    tenant=nota.tenant,
+                    nota=nota,
+                    tipo=TipoEventoFiscal.REJEICAO,
+                    mensagem=f"Polling: {resultado.mensagem or 'Rejeitada'}",
+                    sucesso=False,
+                )
+                atualizadas += 1
+
+        except Exception:
+            logger.exception("Erro polling nota %s", nota.pk)
+
+    logger.info("poll_nfse_status: %d notas atualizadas", atualizadas)
+    return {"atualizadas": atualizadas}

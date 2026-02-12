@@ -1,0 +1,238 @@
+{% extends "base_dark.html" %}
+{% load static %}
+
+{% block title %}Dashboard NFS-e{% endblock %}
+
+{% block content %}
+<div class="p-6 w-full space-y-6" x-data="nfseDashboard()">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'nfse:list' %}" class="size-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors">
+                <span class="material-symbols-outlined text-primary">arrow_back</span>
+            </a>
+            <div>
+                <h3 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Dashboard NFS-e</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Análise de emissões e receita</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <select onchange="window.location.href='?meses='+this.value"
+                    class="bg-slate-50 dark:bg-[#212224] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 py-2 text-sm">
+                <option value="3" {% if meses == 3 %}selected{% endif %}>3 meses</option>
+                <option value="6" {% if meses == 6 %}selected{% endif %}>6 meses</option>
+                <option value="12" {% if meses == 12 %}selected{% endif %}>12 meses</option>
+                <option value="24" {% if meses == 24 %}selected{% endif %}>24 meses</option>
+            </select>
+            <a href="{% url 'nfse:export_csv' %}"
+               class="border border-orange-500 text-orange-500 hover:bg-orange-500/5 rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-sm">download</span>
+                Exportar CSV
+            </a>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] p-5">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-orange-500">receipt_long</span>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Total Notas</p>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white">{{ kpis.total_notas }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] p-5">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-emerald-500">check_circle</span>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Autorizadas</p>
+                    <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ kpis.autorizadas }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] p-5">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-lg bg-sky-500/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-sky-500">payments</span>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Receita</p>
+                    <p class="text-2xl font-bold text-slate-900 dark:text-white">R$ {{ kpis.valor_servicos|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] p-5">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-amber-500">account_balance</span>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">ISS Total</p>
+                    <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">R$ {{ kpis.iss_total|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Monthly Revenue Chart -->
+        <div class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#1a1b1e]">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-orange-500 text-lg">bar_chart</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Receita Mensal</h4>
+                </div>
+            </div>
+            <div class="p-6">
+                <canvas id="monthlyChart" height="250"></canvas>
+            </div>
+        </div>
+
+        <!-- Status Breakdown -->
+        <div class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#1a1b1e]">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-orange-500 text-lg">donut_large</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Status das Notas</h4>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="space-y-3">
+                    {% for item in status_breakdown %}
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            {% if item.status == 'AUTORIZADA' %}
+                            <span class="size-3 rounded-full bg-emerald-500"></span>
+                            <span class="text-sm text-slate-700 dark:text-slate-300">Autorizadas</span>
+                            {% elif item.status == 'RASCUNHO' %}
+                            <span class="size-3 rounded-full bg-slate-400"></span>
+                            <span class="text-sm text-slate-700 dark:text-slate-300">Rascunhos</span>
+                            {% elif item.status == 'ENVIANDO' %}
+                            <span class="size-3 rounded-full bg-sky-500"></span>
+                            <span class="text-sm text-slate-700 dark:text-slate-300">Enviando</span>
+                            {% elif item.status == 'REJEITADA' %}
+                            <span class="size-3 rounded-full bg-red-500"></span>
+                            <span class="text-sm text-slate-700 dark:text-slate-300">Rejeitadas</span>
+                            {% elif item.status == 'CANCELADA' %}
+                            <span class="size-3 rounded-full bg-amber-500"></span>
+                            <span class="text-sm text-slate-700 dark:text-slate-300">Canceladas</span>
+                            {% else %}
+                            <span class="size-3 rounded-full bg-slate-300"></span>
+                            <span class="text-sm text-slate-700 dark:text-slate-300">{{ item.status }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="text-sm font-semibold text-slate-900 dark:text-white">{{ item.count }}</span>
+                            <span class="text-xs text-slate-400">R$ {{ item.total|floatformat:2|default:"0,00" }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-sm text-slate-400 text-center py-4">Nenhuma nota no período</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Clients -->
+    <div class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#1a1b1e]">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-orange-500 text-lg">groups</span>
+                <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Top 10 Clientes por Receita</h4>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-[#2d3544]">
+                        <th class="text-left px-6 py-3">#</th>
+                        <th class="text-left px-6 py-3">Cliente</th>
+                        <th class="text-right px-6 py-3">Notas</th>
+                        <th class="text-right px-6 py-3">Receita</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in top_clients %}
+                    <tr class="border-b border-slate-100 dark:border-[#2d3544] hover:bg-slate-50 dark:hover:bg-[#1a1b1e] transition-colors">
+                        <td class="px-6 py-3 text-sm text-slate-500">{{ forloop.counter }}</td>
+                        <td class="px-6 py-3 text-sm font-medium text-slate-900 dark:text-white">{{ client.cliente__razao_social }}</td>
+                        <td class="px-6 py-3 text-sm text-right text-slate-600 dark:text-slate-300">{{ client.count }}</td>
+                        <td class="px-6 py-3 text-sm text-right font-semibold text-slate-900 dark:text-white">R$ {{ client.total|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-8 text-center text-sm text-slate-400">Nenhum cliente no período</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const monthlyData = {{ monthly_data|safe }};
+    const ctx = document.getElementById('monthlyChart');
+    if (!ctx || !monthlyData.length) return;
+
+    const labels = monthlyData.map(d => {
+        const date = new Date(d.mes);
+        return date.toLocaleDateString('pt-BR', {month: 'short', year: '2-digit'});
+    });
+    const receita = monthlyData.map(d => parseFloat(d.total) || 0);
+    const iss = monthlyData.map(d => parseFloat(d.iss) || 0);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Receita',
+                data: receita,
+                backgroundColor: 'rgba(249, 115, 22, 0.6)',
+                borderColor: 'rgb(249, 115, 22)',
+                borderWidth: 1,
+                borderRadius: 4,
+            }, {
+                label: 'ISS',
+                data: iss,
+                backgroundColor: 'rgba(245, 158, 11, 0.6)',
+                borderColor: 'rgb(245, 158, 11)',
+                borderWidth: 1,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: v => 'R$ ' + v.toLocaleString('pt-BR'),
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ctx.dataset.label + ': R$ ' + ctx.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits: 2}),
+                    }
+                }
+            }
+        }
+    });
+});
+function nfseDashboard() { return {}; }
+</script>
+{% endblock %}

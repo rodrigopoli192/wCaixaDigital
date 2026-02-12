@@ -459,6 +459,13 @@ class ConfiguracaoNFSe(TenantAwareModel):
         max_length=255,
         blank=True,
     )
+    webhook_token = models.CharField(
+        _("token do webhook"),
+        max_length=64,
+        blank=True,
+        db_index=True,
+        help_text=_("Token para autenticação de callbacks dos gateways"),
+    )
 
     class Meta:
         verbose_name = _("configuração NFS-e")

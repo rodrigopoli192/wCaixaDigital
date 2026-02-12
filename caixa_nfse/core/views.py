@@ -446,28 +446,36 @@ class SettingsNFSeView(LoginRequiredMixin, TenantAdminRequiredMixin, View):
             else False,
         }
 
+    def _context(self, request, form, config, **extra):
+        ctx = {"form": form, "cert_info": self._cert_info(request)}
+        if config.webhook_token:
+            base = request.build_absolute_uri("/nfse/webhook/")
+            ctx["webhook_url"] = f"{base}?token={config.webhook_token}"
+        ctx.update(extra)
+        return ctx
+
     def get(self, request):
-        form, _config = self._get_form_and_config(request)
+        form, config = self._get_form_and_config(request)
         return render(
             request,
             "core/partials/settings_nfse.html",
-            {"form": form, "cert_info": self._cert_info(request)},
+            self._context(request, form, config),
         )
 
     def post(self, request):
-        form, _config = self._get_form_and_config(request, request.POST, request.FILES)
+        form, config = self._get_form_and_config(request, request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            form, _config = self._get_form_and_config(request)
+            form, config = self._get_form_and_config(request)
             return render(
                 request,
                 "core/partials/settings_nfse.html",
-                {"form": form, "saved": True, "cert_info": self._cert_info(request)},
+                self._context(request, form, config, saved=True),
             )
         return render(
             request,
             "core/partials/settings_nfse.html",
-            {"form": form, "cert_info": self._cert_info(request)},
+            self._context(request, form, config),
         )
 
 

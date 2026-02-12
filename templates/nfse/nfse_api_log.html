@@ -1,0 +1,126 @@
+{% extends "base_dark.html" %}
+
+{% block title %}Log de APIs NFS-e{% endblock %}
+
+{% block content %}
+<div class="p-6 w-full space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'nfse:dashboard' %}" class="size-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 hover:bg-primary/20 transition-colors">
+                <span class="material-symbols-outlined text-primary">arrow_back</span>
+            </a>
+            <div>
+                <h3 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Log de APIs NFS-e</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Registro de chamadas aos gateways de emissão</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] p-4">
+        <form method="get" class="flex flex-wrap items-end gap-4">
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Método</label>
+                <select name="method" class="bg-slate-50 dark:bg-[#1a1b1e] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 py-2 text-sm">
+                    <option value="">Todos</option>
+                    <option value="GET" {% if request.GET.method == "GET" %}selected{% endif %}>GET</option>
+                    <option value="POST" {% if request.GET.method == "POST" %}selected{% endif %}>POST</option>
+                    <option value="PUT" {% if request.GET.method == "PUT" %}selected{% endif %}>PUT</option>
+                    <option value="DELETE" {% if request.GET.method == "DELETE" %}selected{% endif %}>DELETE</option>
+                </select>
+            </div>
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status HTTP</label>
+                <input type="text" name="status" value="{{ request.GET.status }}" placeholder="200, 400..."
+                       class="bg-slate-50 dark:bg-[#1a1b1e] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 py-2 text-sm w-28">
+            </div>
+            <div class="space-y-1 flex-1 min-w-[200px]">
+                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">URL</label>
+                <input type="text" name="url" value="{{ request.GET.url }}" placeholder="Buscar por URL..."
+                       class="w-full bg-slate-50 dark:bg-[#1a1b1e] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 py-2 text-sm">
+            </div>
+            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-4 py-2 text-sm font-semibold flex items-center gap-1 transition-all">
+                <span class="material-symbols-outlined text-sm">filter_list</span>
+                Filtrar
+            </button>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#1a1b1e]">
+                        <th class="text-left px-4 py-3">Data</th>
+                        <th class="text-left px-4 py-3">Método</th>
+                        <th class="text-left px-4 py-3">URL</th>
+                        <th class="text-center px-4 py-3">Status</th>
+                        <th class="text-right px-4 py-3">Tempo</th>
+                        <th class="text-left px-4 py-3">Request ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr class="border-b border-slate-100 dark:border-[#2d3544] hover:bg-slate-50 dark:hover:bg-[#1a1b1e] transition-colors"
+                        x-data="{ expanded: false }">
+                        <td class="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                            {{ log.created_at|date:"d/m H:i:s" }}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold
+                                {% if log.method == 'GET' %}bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400
+                                {% elif log.method == 'POST' %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400
+                                {% elif log.method == 'DELETE' %}bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400
+                                {% else %}bg-slate-100 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400
+                                {% endif %}">
+                                {{ log.method }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-200 font-mono max-w-xs truncate">
+                            {{ log.url }}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold
+                                {% if log.status_code >= 200 and log.status_code < 300 %}bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400
+                                {% elif log.status_code >= 400 %}bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400
+                                {% else %}bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400
+                                {% endif %}">
+                                {{ log.status_code|default:"-" }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-right text-slate-500 dark:text-slate-400">
+                            {{ log.duration_ms|floatformat:0|default:"-" }}ms
+                        </td>
+                        <td class="px-4 py-3 text-xs text-slate-400 font-mono">
+                            {{ log.request_id|truncatechars:12 }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">
+                            <span class="material-symbols-outlined text-3xl block mb-2">search_off</span>
+                            Nenhum log encontrado
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center gap-2 pt-2">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1 border border-slate-200 dark:border-[#2d3544] rounded-lg text-sm hover:bg-slate-50 dark:hover:bg-[#1a1b1e] transition-colors">&laquo;</a>
+        {% endif %}
+        <span class="px-3 py-1 text-sm text-slate-500">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1 border border-slate-200 dark:border-[#2d3544] rounded-lg text-sm hover:bg-slate-50 dark:hover:bg-[#1a1b1e] transition-colors">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -253,7 +253,14 @@ class NFSeConfigForm(forms.ModelForm):
 
     class Meta:
         model = ConfiguracaoNFSe
-        fields = ["backend", "ambiente", "gerar_nfse_ao_confirmar", "api_token", "api_secret"]
+        fields = [
+            "backend",
+            "ambiente",
+            "gerar_nfse_ao_confirmar",
+            "api_token",
+            "api_secret",
+            "webhook_token",
+        ]
         widgets = {
             "backend": forms.Select(attrs={"class": _INPUT_CSS, "x-model": "backend"}),
             "ambiente": forms.Select(attrs={"class": _INPUT_CSS}),
@@ -267,6 +274,13 @@ class NFSeConfigForm(forms.ModelForm):
                 attrs={"class": _INPUT_CSS, "placeholder": "••••••"},
                 render_value=True,
             ),
+            "webhook_token": forms.TextInput(
+                attrs={
+                    "class": _INPUT_CSS,
+                    "placeholder": "Gerado automaticamente",
+                    "readonly": "readonly",
+                }
+            ),
         }
 
     def __init__(self, *args, tenant=None, **kwargs):
@@ -276,7 +290,17 @@ class NFSeConfigForm(forms.ModelForm):
             self.fields["certificado_senha"].initial = tenant.certificado_senha
 
     def save(self, commit=True):
-        config = super().save(commit=commit)
+        import secrets
+
+        config = super().save(commit=False)
+
+        # Auto-generate webhook_token for gateway backends
+        if not config.webhook_token and config.backend not in ("mock", "portal_nacional"):
+            config.webhook_token = secrets.token_hex(32)
+
+        if commit:
+            config.save()
+
         if self.tenant:
             cert_file = self.cleaned_data.get("certificado_digital")
             cert_senha = self.cleaned_data.get("certificado_senha")
@@ -344,11 +368,28 @@ class NFSeTestarConexaoView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 
 class NFSeDANFSeDownloadView(LoginRequiredMixin, TenantMixin, View):
-    """Redirect para download do DANFSe (PDF)."""
+    """Download DANFSe (PDF) — redirect ou proxy via backend."""
 
     def get(self, request, pk):
         nota = get_object_or_404(NotaFiscalServico, pk=pk, tenant=request.user.tenant)
+
+        # 1. Redirect se URL pública disponível
         if nota.pdf_url:
             return redirect(nota.pdf_url)
+
+        # 2. Tenta baixar via backend
+        from .backends.registry import get_backend
+
+        try:
+            backend = get_backend(nota.tenant)
+            pdf_bytes = backend.baixar_danfse(nota, nota.tenant)
+            if pdf_bytes:
+                filename = f"danfse_{nota.numero_nfse or nota.numero_rps}.pdf"
+                response = HttpResponse(pdf_bytes, content_type="application/pdf")
+                response["Content-Disposition"] = f'inline; filename="{filename}"'
+                return response
+        except Exception:
+            logger.exception("Erro ao baixar DANFSe nota %s", pk)
+
         messages.error(request, "DANFSe não disponível para esta nota.")
         return redirect("nfse:detail", pk=pk)

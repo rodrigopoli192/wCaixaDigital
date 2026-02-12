@@ -160,6 +160,8 @@
                         {% if form.api_token.errors %}
                         <p class="text-xs text-red-500 mt-1">{{ form.api_token.errors.0 }}</p>
                         {% endif %}
+                        <p class="text-xs text-slate-400 mt-1" x-show="backend === 'focus_nfe'">Token de autenticação da Focus NFe (usado como Basic Auth)</p>
+                        <p class="text-xs text-slate-400 mt-1" x-show="backend === 'tecnospeed'">Token Software House (token_sh) da TecnoSpeed</p>
                     </div>
                     <div class="space-y-1">
                         <label for="id_api_secret" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Secret da API</label>
@@ -169,6 +171,53 @@
                         {% endif %}
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Webhook (Gateway) -->
+        <div x-show="backend !== 'mock' && backend !== 'portal_nacional'" x-transition
+             class="bg-white dark:bg-[#212224] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#1a1b1e]">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-orange-500 text-lg">webhook</span>
+                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Webhook</h4>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="flex items-start gap-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg p-4">
+                    <span class="material-symbols-outlined text-blue-500 text-lg mt-0.5">info</span>
+                    <div>
+                        <p class="text-sm text-blue-700 dark:text-blue-300">Configure esta URL no painel do gateway para receber notificações de status das notas fiscais.</p>
+                        <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">O token é gerado automaticamente ao salvar. Use-o como parâmetro na URL do webhook.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label for="id_webhook_token" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Token do Webhook</label>
+                    {{ form.webhook_token }}
+                    {% if form.webhook_token.errors %}
+                    <p class="text-xs text-red-500 mt-1">{{ form.webhook_token.errors.0 }}</p>
+                    {% endif %}
+                    <p class="text-xs text-slate-400 mt-1">Token de autenticação dos callbacks (gerado automaticamente)</p>
+                </div>
+
+                {% if webhook_url %}
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">URL do Webhook</label>
+                    <div class="flex items-center gap-2" x-data="{ copied: false }">
+                        <input type="text" value="{{ webhook_url }}" readonly
+                               class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2 text-sm font-mono text-slate-600 dark:text-slate-300 outline-none">
+                        <button type="button"
+                                @click="navigator.clipboard.writeText('{{ webhook_url }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                class="flex-shrink-0 border border-slate-300 dark:border-border-dark hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg p-2 transition-all"
+                                :class="copied ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20' : ''">
+                            <span class="material-symbols-outlined text-sm" x-text="copied ? 'check' : 'content_copy'"
+                                  :class="copied ? 'text-emerald-500' : 'text-slate-500'"></span>
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Copie e configure no painel do seu gateway</p>
+                </div>
+                {% endif %}
             </div>
         </div>
 

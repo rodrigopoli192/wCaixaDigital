@@ -237,6 +237,7 @@ class ConfiguracaoNFSeFactory(factory.django.DjangoModelFactory):
     backend = "mock"
     ambiente = "HOMOLOGACAO"
     gerar_nfse_ao_confirmar = False
+    webhook_token = ""
 
 
 class RegistroAuditoriaFactory(factory.django.DjangoModelFactory):
