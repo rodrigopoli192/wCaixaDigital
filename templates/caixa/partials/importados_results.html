@@ -18,22 +18,21 @@
 
     <div class="flex justify-end">
         <a href="javascript:void(0)"
-           @click="
-               /* Close modal (same x-data scope as movimento_list.html root) */
-               open = false;
-               /* After modal closes, expand accordion + scroll */
-               setTimeout(() => {
-                   const container = document.getElementById('importados-container');
-                   if (container) {
-                       const accordion = container.closest('[x-data]');
-                       if (accordion && accordion._x_dataStack) {
-                           accordion._x_dataStack[0].expanded = true;
-                       }
-                       htmx.trigger(container, 'revealed');
-                       setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+           @click="(() => {
+               const root = document.getElementById('movimentos-root');
+               if (root && window.Alpine) { Alpine.$data(root).open = false; }
+               const el = document.getElementById('importados-container');
+               if (el) {
+                   const url = el.getAttribute('hx-get');
+                   if (url) {
+                       htmx.ajax('GET', url, { target: '#importados-container', swap: 'innerHTML' });
                    }
-               }, 350);
-           "
+                   el.addEventListener('htmx:afterSettle', function scrollOnce() {
+                       el.removeEventListener('htmx:afterSettle', scrollOnce);
+                       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                   });
+               }
+           })()"
            class="text-primary hover:text-orange-600 font-bold text-sm flex items-center gap-1 transition-colors cursor-pointer">
             <span class="material-symbols-outlined text-lg">visibility</span>
             Ver Importados

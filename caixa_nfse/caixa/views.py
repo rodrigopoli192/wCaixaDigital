@@ -779,12 +779,95 @@ class ImportarMovimentosView(LoginRequiredMixin, UserPassesTestMixin, DetailView
                 )
                 return HttpResponse(html)
 
+            # Group rows by rotina for tabbed display
+            from collections import OrderedDict
+
+            # Assign global indices for unique hidden field names across tabs
+            for idx, row in enumerate(preview_rows):
+                row["meta_global_index"] = idx
+
+            preview_groups = OrderedDict()
+            for row in preview_rows:
+                rotina_nome = row.get("meta_rotina_nome", "Outros")
+                if rotina_nome not in preview_groups:
+                    preview_groups[rotina_nome] = []
+                preview_groups[rotina_nome].append(row)
+
+            # Convert to list of dicts for template iteration
+            preview_tabs = [
+                {"name": name, "rows": rows, "index": idx}
+                for idx, (name, rows) in enumerate(preview_groups.items())
+            ]
+
+            # Check NFS-e config
+            nfse_config_ativa = False
+            nfse_backend = None
+            try:
+                from caixa_nfse.nfse.models import ConfiguracaoNFSe
+
+                cfg = ConfiguracaoNFSe.objects.filter(tenant=request.user.tenant).first()
+                if cfg and cfg.ativa:
+                    nfse_config_ativa = True
+                    nfse_backend = cfg.backend
+            except Exception:
+                pass
+
+            # Compute active financial columns (non-zero across all rows)
+            ALL_VALUE_FIELDS = ["valor", "emolumento", "taxa_judiciaria"] + [
+                f
+                for f in MovimentoImportado.TAXA_FIELDS
+                if f not in ("emolumento", "taxa_judiciaria")
+            ]
+            LABEL_MAP = {
+                "valor": "Valor Total",
+                "emolumento": "Emolumento",
+                "taxa_judiciaria": "T. Judiciária",
+                "iss": "ISS",
+                "fundesp": "FUNDESP",
+                "funesp": "FUNESP",
+                "estado": "Estado",
+                "fesemps": "FESEMPS",
+                "funemp": "FUNEMP",
+                "funcomp": "FUNCOMP",
+                "fepadsaj": "FEPADSAJ",
+                "funproge": "FUNPROGE",
+                "fundepeg": "FUNDEPEG",
+                "fundaf": "FUNDAF",
+                "femal": "FEMAL",
+                "fecad": "FECAD",
+                "valor_receita_adicional_1": "Rec. Adic. 1",
+                "valor_receita_adicional_2": "Rec. Adic. 2",
+            }
+            active_value_cols = []
+            for field in ALL_VALUE_FIELDS:
+                for row in preview_rows:
+                    raw = row.get(field, "0.00")
+                    try:
+                        if Decimal(str(raw).replace(",", ".")) != Decimal("0.00"):
+                            active_value_cols.append(
+                                {
+                                    "key": field,
+                                    "label": LABEL_MAP.get(field, field.upper()),
+                                }
+                            )
+                            break
+                    except Exception:
+                        pass
+            # Compute min-width for the grid table based on active columns
+            # Base: ~750px for fixed columns + 100px per value column
+            grid_min_width = 750 + len(active_value_cols) * 100
+
             html = render_to_string(
                 "caixa/partials/importados_preview.html",
                 {
                     "preview_rows": preview_rows,
+                    "preview_tabs": preview_tabs,
                     "logs": all_logs,
                     "abertura": abertura,
+                    "nfse_config_ativa": nfse_config_ativa,
+                    "nfse_backend": nfse_backend,
+                    "active_value_cols": active_value_cols,
+                    "grid_min_width": grid_min_width,
                 },
                 request=request,
             )
@@ -894,6 +977,7 @@ class ListaImportadosView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             .select_related("rotina", "conexao")
             .prefetch_related("parcelas", "parcelas__forma_pagamento", "parcelas__recebido_por")
             .annotate(itens_count=Count("itens"))
+            .order_by("-importado_em")
         )
 
     def get_context_data(self, **kwargs):

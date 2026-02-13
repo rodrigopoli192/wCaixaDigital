@@ -62,12 +62,7 @@
                 {% endif %}
                 {% endwith %}
                 {% else %}
-                <!-- Status Badge (MovimentoImportado) - valor bruto do sistema externo -->
-                {% if mov.status_item %}
-                <span class="text-[10px] px-2 py-0.5 rounded-full shrink-0 bg-slate-500/20 text-slate-600 dark:text-slate-400 font-bold">
-                    {{ mov.status_item }}
-                </span>
-                {% endif %}
+                <!-- Status Badge (MovimentoImportado) - removido: valor bruto do sistema externo sem contexto -->
 
                 <!-- Status Recebimento Badge -->
                 {% if mov.status_recebimento == 'PARCIAL' %}

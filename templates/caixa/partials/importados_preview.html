@@ -1,56 +1,39 @@
-<!-- Preview table for import results with checkboxes and detailed view -->
-<div class="p-5 space-y-4" x-data="{
-    selectedCount: 0,
-    showDetailModal: false,
-    detailData: {},
-    toggleAll(checked) {
-        const boxes = this.$refs.previewBody.querySelectorAll('input[name=selected_rows]:not(:disabled)');
-        boxes.forEach(b => { b.checked = checked; });
-        this.selectedCount = checked ? boxes.length : 0;
-    },
-    updateCount() {
-        const boxes = this.$refs.previewBody.querySelectorAll('input[name=selected_rows]:not(:disabled)');
-        this.selectedCount = [...boxes].filter(b => b.checked).length;
-    },
-    openDetails(data) {
-        this.detailData = data;
-        this.showDetailModal = true;
+<!-- Preview table for import results with tabs per rotina -->
+<style>
+    .grid-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+    .grid-scroll::-webkit-scrollbar-track { background: transparent; }
+    .grid-scroll::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.35); border-radius: 4px; }
+    .grid-scroll::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,0.6); }
+    .grid-scroll::-webkit-scrollbar-corner { background: transparent; }
+    @media (prefers-color-scheme: dark) {
+        .grid-scroll::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.4); }
+        .grid-scroll::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.7); }
     }
-}">
+    .grid-scroll { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,0.35) transparent; }
+</style>
+
+<div id="preview-root" class="p-5 space-y-4">
 
     <!-- Detail Modal (Overlay) -->
-    <div x-show="showDetailModal" 
-         x-transition.opacity 
+    <div id="detail-modal" 
          class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
          style="display: none;">
-        <div @click.outside="showDetailModal = false" 
-             class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden border border-slate-200 dark:border-[#2d3544]">
-            
-            <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-[#2d3544] flex items-center justify-between bg-slate-50 dark:bg-[#25262b]">
+        <div class="bg-white dark:bg-surface-dark rounded-xl shadow-2xl w-full border border-slate-200 dark:border-border-dark flex flex-col"
+             style="max-width:40rem; max-height:80vh; overflow:hidden;">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center justify-between bg-slate-50 dark:bg-background-dark">
                 <h3 class="font-bold text-lg text-slate-800 dark:text-white">Detalhes do Registro</h3>
-                <button @click="showDetailModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                <button onclick="document.getElementById('detail-modal').style.display='none'" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-
-            <!-- Modal Content (Scrollable) -->
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-0">
+            <div class="flex-1 p-0 grid-scroll" style="overflow-y:auto;">
                 <table class="w-full text-sm">
-                    <tbody class="divide-y divide-slate-100 dark:divide-[#2d3544]">
-                        <template x-for="(value, key) in detailData" :key="key">
-                            <tr class="hover:bg-slate-50 dark:hover:bg-[#2d3544]/50 transition-colors">
-                                <td class="px-6 py-3 font-mono text-slate-500 dark:text-slate-400 w-1/3 text-xs uppercase tracking-wide" x-text="key"></td>
-                                <td class="px-6 py-3 font-medium text-slate-800 dark:text-slate-200 break-all" x-text="value"></td>
-                            </tr>
-                        </template>
+                    <tbody id="detail-modal-body" class="divide-y divide-slate-100 dark:divide-border-dark">
                     </tbody>
                 </table>
             </div>
-
-            <!-- Modal Footer -->
-            <div class="px-6 py-4 border-t border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#25262b] flex justify-end">
-                <button @click="showDetailModal = false" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-lg font-medium transition-colors text-sm">
+            <div class="px-6 py-4 border-t border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark flex justify-end">
+                <button onclick="document.getElementById('detail-modal').style.display='none'" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-lg font-medium transition-colors text-sm">
                     Fechar
                 </button>
             </div>
@@ -59,23 +42,43 @@
 
     <!-- Header -->
     <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary text-xl">preview</span>
-            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200">
-                Pré-visualização
-            </h3>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold">
-                {{ preview_rows|length }} registro(s)
-            </span>
+        <div class="flex items-center gap-3">
+            <div class="p-2 rounded-lg bg-primary/10">
+                <span class="material-symbols-outlined text-primary text-xl">preview</span>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 dark:text-white">Pré-visualização</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ preview_rows|length }} registro(s) encontrado(s)
+                </p>
+            </div>
         </div>
-        <label class="flex items-center gap-2 text-xs text-slate-500 cursor-pointer select-none">
-            <input type="checkbox" @change="toggleAll($event.target.checked)"
-                   class="w-3.5 h-3.5 text-primary rounded focus:ring-primary">
+        <label class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+            <input type="checkbox" id="select-all-checkbox"
+                   class="w-3 h-3 text-primary rounded focus:ring-primary cursor-pointer">
             Selecionar todos
         </label>
     </div>
 
-    <!-- Preview Table -->
+    {% if preview_tabs|length > 1 %}
+    <!-- Tabs Navigation -->
+    <div class="flex gap-1 border-b border-slate-200 dark:border-border-dark" style="overflow-x:auto;">
+        {% for tab in preview_tabs %}
+        <button type="button"
+                data-tab-btn="{{ tab.index }}"
+                onclick="switchTab({{ tab.index }})"
+                class="px-4 py-2.5 text-xs border-b-2 transition-all flex items-center gap-2 -mb-px whitespace-nowrap shrink-0 {% if tab.index == 0 %}border-primary text-primary bg-primary/5 font-bold{% else %}border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300{% endif %}">
+            <span>{{ tab.name }}</span>
+            <span class="text-xs px-1.5 py-0.5 rounded-full font-bold {% if tab.index == 0 %}bg-primary/10 text-primary{% else %}bg-slate-100 dark:bg-slate-700 text-slate-400{% endif %}"
+                  data-tab-badge="{{ tab.index }}">
+                {{ tab.rows|length }}
+            </span>
+        </button>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Preview Table (wrapped in form) -->
     <form method="post"
           hx-post="{% url 'caixa:importar_movimentos' abertura.pk %}"
           hx-target="#import-results"
@@ -84,134 +87,147 @@
         {% csrf_token %}
         <input type="hidden" name="action" value="importar">
 
-        <div class="border border-slate-200 dark:border-border-dark rounded-xl overflow-hidden bg-white dark:bg-[#1e1e1e]">
-            <div class="max-h-[450px] overflow-auto custom-scrollbar">
-                <table class="w-full text-xs whitespace-nowrap">
-                    <thead class="bg-slate-50 dark:bg-[#25262b] sticky top-0 z-10 shadow-sm">
-                        <tr class="text-left text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold">
-                            <th class="px-3 py-3 w-8 bg-slate-50 dark:bg-[#25262b] sticky left-0 z-20 border-r border-slate-200 dark:border-[#2d3544]"></th>
-                            <th class="px-3 py-3 w-10 text-center">Ações</th>
-                            <th class="px-3 py-3">Origem</th>
-                            <th class="px-3 py-3">Protocolo</th>
-                            <th class="px-3 py-3">Descrição</th>
-                            <th class="px-3 py-3">Apresentante</th>
-                            <th class="px-3 py-3">Data Ato</th>
-                            <th class="px-3 py-3 text-right bg-emerald-50/50 dark:bg-emerald-900/10">Valor Total</th>
-                            <th class="px-3 py-3 text-right text-blue-600/70 dark:text-blue-400/70">Emolumento</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Tx Jud.</th>
-                            <th class="px-3 py-3 text-right text-slate-400">ISS</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Fundesp</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Funesp</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Estado</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Fesemps</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Funemp</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Funcomp</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Fepadsaj</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Funproge</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Fundepeg</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Fundaf</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Femal</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Fecad</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Rec. Adic. 1</th>
-                            <th class="px-3 py-3 text-right text-slate-400">Rec. Adic. 2</th>
-                            <th class="px-3 py-3 text-center">QTD</th>
-                            <th class="px-3 py-3 text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody x-ref="previewBody" class="divide-y divide-slate-100 dark:divide-[#2d3544]">
-                        {% for row in preview_rows %}
-                        <tr class="{% if row.meta_duplicado %}opacity-50 grayscale{% else %}hover:bg-slate-50 dark:hover:bg-[#2d3544]/40{% endif %} transition-colors has-[:checked]:bg-primary/5 group">
-                            <td class="px-3 py-2 bg-white dark:bg-[#1e1e1e] group-hover:bg-slate-50 dark:group-hover:bg-[#2d3544]/40 sticky left-0 z-10 border-r border-slate-100 dark:border-[#2d3544]">
-                                {% if row.meta_duplicado %}
-                                <input type="checkbox" disabled
-                                       class="w-3.5 h-3.5 text-slate-400 rounded cursor-not-allowed bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600">
-                                {% else %}
-                                <input type="checkbox" name="selected_rows" value="{{ forloop.counter0 }}"
-                                       @change="updateCount()"
-                                       class="w-3.5 h-3.5 text-primary rounded focus:ring-primary border-slate-300 dark:border-slate-600">
-                                {% endif %}
-                                <!-- Hidden fields -->
-                                <input type="hidden" name="conexao_id_{{ forloop.counter0 }}" value="{{ row.meta_conexao_id }}">
-                                <input type="hidden" name="rotina_id_{{ forloop.counter0 }}" value="{{ row.meta_rotina_id }}">
-                                <input type="hidden" name="raw_headers_{{ forloop.counter0 }}" value="{{ row.meta_raw_headers }}">
-                                <input type="hidden" name="raw_rows_{{ forloop.counter0 }}" value="{{ row.meta_raw_rows }}">
-                            </td>
-                            <td class="px-3 py-2 text-center">
-                                <button type="button" 
-                                        @click="openDetails(JSON.parse('{{ row.meta_full_data|escapejs }}'))"
-                                        class="p-1 rounded text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                                        title="Ver todos os campos">
-                                    <span class="material-symbols-outlined text-lg">visibility</span>
-                                </button>
-                            </td>
-                            <td class="px-3 py-2 text-slate-500 dark:text-slate-400 max-w-[140px] truncate text-[10px]" title="{{ row.meta_origem }}">{{ row.meta_origem }}</td>
-                            <td class="px-3 py-2 font-mono text-slate-700 dark:text-slate-300 font-bold">{{ row.protocolo|default:"-" }}</td>
-                            <td class="px-3 py-2 text-slate-600 dark:text-slate-400 max-w-[150px] truncate" title="{{ row.descricao|default:'' }}">{{ row.descricao|default:"-" }}</td>
-                            <td class="px-3 py-2 text-slate-600 dark:text-slate-400 max-w-[120px] truncate" title="{{ row.cliente_nome|default:'' }}">{{ row.cliente_nome|default:"-" }}</td>
-                            <td class="px-3 py-2 text-slate-600 dark:text-slate-400 text-center">{{ row.data_ato|default:"-" }}</td>
-                            
-                            <!-- Valores -->
-                            <td class="px-3 py-2 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50/30 dark:bg-emerald-900/5">{{ row.valor|default:"0.00" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-blue-600 dark:text-blue-400">{{ row.emolumento|default:"0.00" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.taxa_judiciaria|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.iss|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.fundesp|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.funesp|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.estado|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.fesemps|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.funemp|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.funcomp|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.fepadsaj|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.funproge|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.fundepeg|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.fundaf|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.femal|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.fecad|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.valor_receita_adicional_1|default:"-" }}</td>
-                            <td class="px-3 py-2 text-right font-mono text-slate-500 dark:text-slate-500">{{ row.valor_receita_adicional_2|default:"-" }}</td>
+        {% for tab in preview_tabs %}
+        <div data-tab-pane="{{ tab.index }}"
+             {% if tab.index != 0 %}style="display: none;"{% endif %}>
 
-                            <td class="px-3 py-2 text-center text-slate-600 dark:text-slate-400">{{ row.quantidade|default:"1" }}</td>
-                            <td class="px-3 py-2 text-center">
-                                {% if row.meta_duplicado %}
-                                <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold whitespace-nowrap border border-amber-200 dark:border-amber-500/20">Já existe</span>
-                                {% else %}
-                                <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-200 dark:border-emerald-500/20">Novo</span>
+            <!-- Grid wrapper -->
+            <div class="rounded-xl border border-slate-200 dark:border-border-dark shadow-sm"
+                 style="overflow:hidden;">
+                <div class="grid-scroll"
+                     style="max-height:450px; overflow:auto;">
+                    <table class="w-full text-xs text-slate-900 dark:text-slate-200"
+                           style="min-width:{{ grid_min_width }}px;">
+                        <thead>
+                            <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                <th class="px-2 py-2 w-8 border-r border-slate-200 dark:border-slate-700" style="position:sticky; left:0; z-index:20; background:inherit;"></th>
+                                <th class="px-2 py-2 w-10 text-center">Ações</th>
+                                <th class="px-2 py-2">Protocolo</th>
+                                <th class="px-2 py-2">Descrição</th>
+                                <th class="px-2 py-2">Apresentante</th>
+                                <th class="px-2 py-2">Data Ato</th>
+                                {% for col in active_value_cols %}
+                                <th class="px-2 py-2 text-right whitespace-nowrap">{{ col.label }}</th>
+                                {% endfor %}
+                                <th class="px-2 py-2 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-surface-dark">
+                            {% for row in tab.rows %}
+                            <tr class="border-b border-slate-100 dark:border-slate-700/50 {% if row.meta_duplicado %}opacity-50 grayscale{% else %}hover:bg-primary/5 dark:hover:bg-primary/10{% endif %} transition-colors group">
+                                <td class="px-2 py-1.5 bg-white dark:bg-surface-dark border-r border-slate-100 dark:border-slate-700/50 group-hover:bg-primary/5 dark:group-hover:bg-primary/10 transition-colors" style="position:sticky; left:0; z-index:5;">
+                                    {% if row.meta_duplicado %}
+                                    <input type="checkbox" disabled
+                                           class="w-3 h-3 text-slate-400 rounded cursor-not-allowed bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600">
+                                    {% else %}
+                                    <input type="checkbox" name="selected_rows" value="{{ row.meta_global_index }}"
+                                           class="w-3 h-3 text-primary rounded focus:ring-primary border-slate-300 dark:border-slate-600 cursor-pointer row-checkbox">
+                                    {% endif %}
+                                    <input type="hidden" name="conexao_id_{{ row.meta_global_index }}" value="{{ row.meta_conexao_id }}">
+                                    <input type="hidden" name="rotina_id_{{ row.meta_global_index }}" value="{{ row.meta_rotina_id }}">
+                                    <input type="hidden" name="raw_headers_{{ row.meta_global_index }}" value="{{ row.meta_raw_headers }}">
+                                    <input type="hidden" name="raw_rows_{{ row.meta_global_index }}" value="{{ row.meta_raw_rows }}">
+                                </td>
+                                <td class="px-2 py-1.5 text-center">
+                                    <button type="button" 
+                                            onclick="openDetailModal({{ row.meta_full_data }})"
+                                            class="p-0.5 rounded-md text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                                            title="Ver todos os campos">
+                                        <span class="material-symbols-outlined text-base">visibility</span>
+                                    </button>
+                                </td>
+                                <td class="px-2 py-1.5 font-mono text-slate-800 dark:text-slate-100 font-bold">{{ row.protocolo|default:"-" }}</td>
+                                <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300" style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ row.descricao|default:'' }}">{{ row.descricao|default:"-" }}</td>
+                                <td class="px-2 py-1.5 text-slate-600 dark:text-slate-300 font-medium" style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ row.cliente_nome|default:'' }}">{{ row.cliente_nome|default:"-" }}</td>
+                                <td class="px-2 py-1.5 text-slate-500 dark:text-slate-400 text-center whitespace-nowrap">{{ row.data_ato|default:"-" }}</td>
+                                
+                                <!-- Dynamic Value Columns -->
+                                {% for col in active_value_cols %}
+                                {% with key=col.key %}
+                                {% if key == "valor" %}
+                                <td class="px-2 py-1.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">{{ row.valor|default:"0.00" }}</td>
+                                {% elif key == "emolumento" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-blue-600 dark:text-blue-400">{{ row.emolumento|default:"0.00" }}</td>
+                                {% elif key == "taxa_judiciaria" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-violet-600 dark:text-violet-400">{{ row.taxa_judiciaria|default:"0.00" }}</td>
+                                {% elif key == "iss" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.iss|default:"0.00" }}</td>
+                                {% elif key == "fundesp" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.fundesp|default:"0.00" }}</td>
+                                {% elif key == "funesp" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.funesp|default:"0.00" }}</td>
+                                {% elif key == "estado" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.estado|default:"0.00" }}</td>
+                                {% elif key == "fesemps" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.fesemps|default:"0.00" }}</td>
+                                {% elif key == "funemp" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.funemp|default:"0.00" }}</td>
+                                {% elif key == "funcomp" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.funcomp|default:"0.00" }}</td>
+                                {% elif key == "fepadsaj" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.fepadsaj|default:"0.00" }}</td>
+                                {% elif key == "funproge" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.funproge|default:"0.00" }}</td>
+                                {% elif key == "fundepeg" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.fundepeg|default:"0.00" }}</td>
+                                {% elif key == "fundaf" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.fundaf|default:"0.00" }}</td>
+                                {% elif key == "femal" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.femal|default:"0.00" }}</td>
+                                {% elif key == "fecad" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.fecad|default:"0.00" }}</td>
+                                {% elif key == "valor_receita_adicional_1" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.valor_receita_adicional_1|default:"0.00" }}</td>
+                                {% elif key == "valor_receita_adicional_2" %}
+                                <td class="px-2 py-1.5 text-right font-mono text-slate-600 dark:text-slate-400">{{ row.valor_receita_adicional_2|default:"0.00" }}</td>
                                 {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                {% endwith %}
+                                {% endfor %}
+
+                                <td class="px-2 py-1.5 text-center">
+                                    {% if row.meta_duplicado %}
+                                    <span class="text-xs px-2 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold whitespace-nowrap">Já existe</span>
+                                    {% else %}
+                                    <span class="text-xs px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold">Novo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
+        {% endfor %}
 
         <!-- Import Selected Button -->
-        <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-[#2d3544] mt-4">
+        <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-border-dark mt-4">
             <div class="flex items-center gap-4">
                 <p class="text-xs text-slate-500 dark:text-slate-400">
-                    <span x-text="selectedCount" class="font-bold text-primary">0</span> de {{ preview_rows|length }} selecionado(s)
+                    <span id="selected-count" class="font-bold text-primary text-sm">0</span>
+                    <span class="text-slate-400">de</span>
+                    <span class="font-semibold text-slate-600 dark:text-slate-300">{{ preview_rows|length }}</span> selecionado(s)
                 </p>
                 {% if nfse_config_ativa %}
-                <label class="flex items-center gap-2 text-xs cursor-pointer select-none bg-primary/5 border border-primary/20 rounded-lg px-3 py-1.5">
+                <label class="flex items-center gap-2 text-xs cursor-pointer select-none bg-primary/5 border border-primary/20 rounded-lg px-3 py-2 hover:bg-primary/10 transition-colors">
                     <input type="checkbox" name="gerar_nfse" value="true"
-                           class="w-3.5 h-3.5 text-primary rounded focus:ring-primary">
+                           class="w-3.5 h-3.5 text-primary rounded focus:ring-primary cursor-pointer">
                     <span class="text-slate-600 dark:text-slate-300 font-medium">Gerar NFS-e</span>
-                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-slate-100 dark:bg-background-dark text-slate-400 border border-slate-200 dark:border-border-dark">{{ nfse_backend|default:"mock" }}</span>
+                    <span class="px-1.5 py-0.5 rounded text-xs font-bold uppercase bg-slate-100 dark:bg-background-dark text-slate-400 border border-slate-200 dark:border-border-dark">{{ nfse_backend|default:"mock" }}</span>
                 </label>
                 {% endif %}
             </div>
             <div class="flex gap-2">
                 <button type="button" 
-                        @click="document.getElementById('modal-container').innerHTML = ''"
-                        class="px-4 py-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 font-medium transition-colors text-sm">
+                        onclick="document.getElementById('modal-container').innerHTML = ''"
+                        class="px-4 py-2.5 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 font-medium transition-colors text-sm hover:bg-slate-100 dark:hover:bg-slate-800">
                     Cancelar
                 </button>
-                <button type="submit"
-                        :disabled="selectedCount === 0"
-                        class="bg-primary hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg shadow-primary/30 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none text-sm">
+                <button type="submit" id="btn-importar" disabled
+                        class="bg-primary hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg font-bold shadow-lg shadow-primary/25 transition-all flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none text-sm">
                     <span class="material-symbols-outlined text-lg">cloud_download</span>
                     <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full hidden" id="import-selected-spinner"></span>
-                    Importar Selecionados (<span x-text="selectedCount">0</span>)
+                    Importar (<span id="btn-count">0</span>)
                 </button>
             </div>
         </div>
@@ -219,12 +235,13 @@
 
     {% if logs %}
     <!-- Execution Logs -->
-    <details class="group border border-slate-200 dark:border-[#2d3544] rounded-lg">
-        <summary class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-[#25262b] transition-colors p-3 rounded-lg select-none">
+    <details class="group border border-slate-200 dark:border-border-dark rounded-lg">
+        <summary class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors p-3 rounded-lg select-none">
             <span class="material-symbols-outlined text-lg group-open:rotate-90 transition-transform text-slate-400">chevron_right</span>
             Log de Execução ({{ logs|length }})
         </summary>
-        <div class="bg-slate-50 dark:bg-[#1e1e1e] border-t border-slate-200 dark:border-[#2d3544] p-3 max-h-[150px] overflow-y-auto custom-scrollbar space-y-0.5">
+        <div class="bg-slate-50 dark:bg-background-dark border-t border-slate-200 dark:border-border-dark p-3 space-y-0.5 grid-scroll"
+             style="max-height:150px; overflow-y:auto;">
             {% for log in logs %}
             <p class="text-xs font-mono leading-relaxed {% if log.type == 'success' %}text-emerald-600 dark:text-emerald-400{% elif log.type == 'error' %}text-red-600 dark:text-red-400{% elif log.type == 'warning' %}text-amber-600 dark:text-amber-400{% else %}text-slate-500 dark:text-slate-400{% endif %}">
                 <span class="opacity-60">[{{ log.time }}]</span>
@@ -236,3 +253,101 @@
     </details>
     {% endif %}
 </div>
+
+<script>
+// ---- Preview Grid Controller (vanilla JS, no Alpine dependency) ----
+(function() {
+    const root = document.getElementById('preview-root');
+    if (!root) return;
+
+    // Counter update
+    function updateSelectedCount() {
+        const boxes = root.querySelectorAll('.row-checkbox');
+        const count = [...boxes].filter(b => b.checked).length;
+        const countEl = document.getElementById('selected-count');
+        const btnCountEl = document.getElementById('btn-count');
+        const btn = document.getElementById('btn-importar');
+        if (countEl) countEl.textContent = count;
+        if (btnCountEl) btnCountEl.textContent = count;
+        if (btn) btn.disabled = (count === 0);
+    }
+
+    // Event delegation for row checkboxes
+    root.addEventListener('change', function(e) {
+        if (e.target.classList.contains('row-checkbox')) {
+            updateSelectedCount();
+        }
+    });
+
+    // Select all
+    const selectAllCb = document.getElementById('select-all-checkbox');
+    if (selectAllCb) {
+        selectAllCb.addEventListener('change', function() {
+            const checked = this.checked;
+            root.querySelectorAll('.row-checkbox').forEach(b => { b.checked = checked; });
+            updateSelectedCount();
+        });
+    }
+
+    // Initial count
+    updateSelectedCount();
+})();
+
+// Tab switching
+function switchTab(idx) {
+    document.querySelectorAll('[data-tab-pane]').forEach(pane => {
+        pane.style.display = pane.dataset.tabPane == idx ? '' : 'none';
+    });
+    document.querySelectorAll('[data-tab-btn]').forEach(btn => {
+        const isActive = btn.dataset.tabBtn == idx;
+        btn.className = btn.className
+            .replace(/border-primary|text-primary|bg-primary\/5|font-bold/g, '')
+            .replace(/border-transparent|text-slate-500/g, '')
+            .trim();
+        if (isActive) {
+            btn.classList.add('border-primary', 'text-primary', 'font-bold');
+            btn.style.backgroundColor = 'rgba(var(--color-primary-rgb, 249, 115, 22), 0.05)';
+        } else {
+            btn.classList.add('border-transparent', 'text-slate-500');
+            btn.style.backgroundColor = '';
+        }
+        // Badge
+        const badge = btn.querySelector('[data-tab-badge]');
+        if (badge) {
+            badge.className = badge.className
+                .replace(/bg-primary\/10|text-primary/g, '')
+                .replace(/bg-slate-100|dark:bg-slate-700|text-slate-400/g, '')
+                .trim();
+            if (isActive) {
+                badge.classList.add('text-primary');
+                badge.style.backgroundColor = 'rgba(var(--color-primary-rgb, 249, 115, 22), 0.1)';
+            } else {
+                badge.classList.add('text-slate-400');
+                badge.style.backgroundColor = '';
+            }
+        }
+    });
+}
+
+// Detail modal
+function openDetailModal(data) {
+    const modal = document.getElementById('detail-modal');
+    const body = document.getElementById('detail-modal-body');
+    if (!modal || !body) return;
+    body.innerHTML = '';
+    for (const [key, value] of Object.entries(data)) {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors';
+        tr.innerHTML = `
+            <td class="px-6 py-3 font-mono text-slate-500 dark:text-slate-400 w-1/3 text-xs uppercase tracking-wide">${key}</td>
+            <td class="px-6 py-3 font-medium text-slate-800 dark:text-slate-200 break-all">${value}</td>
+        `;
+        body.appendChild(tr);
+    }
+    modal.style.display = '';
+    // Close on backdrop click
+    modal.onclick = function(e) {
+        if (e.target === modal) modal.style.display = 'none';
+    };
+}
+</script>
