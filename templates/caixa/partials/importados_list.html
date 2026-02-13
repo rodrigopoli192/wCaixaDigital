@@ -1,123 +1,428 @@
-<!-- Imported Movements List (Staging) - Card Layout with Per-Row Accordion -->
-<!-- Supports partial payments: per-item valor input + status badges + session grouping -->
+<!-- Imported Movements List - Rendered as separate cards with Confirmation Modal -->
+<!-- HTMX partial loaded into #importados-container -->
 <div class="space-y-4" x-data="{ 
     selected: [], 
     selectAll: false,
-    parcelas: {},
+    showModal: false,
+    modalItems: [],
+    formaPagamento: '',
+    tipo: 'ENTRADA',
+    valorReceber: 0,
+    totalSaldo: 0,
+    totalValor: 0,
+    totalRecebido: 0,
+    formError: '',
+
+    get isMultiple() { return this.modalItems.length > 1; },
+    get saldoRestante() { return Math.max(0, this.totalSaldo - this.valorReceber); },
+    get isParcial() { return this.valorReceber > 0 && this.valorReceber < this.totalSaldo; },
+    get canSubmit() {
+        return this.formaPagamento !== '' 
+            && this.valorReceber > 0 
+            && this.valorReceber <= this.totalSaldo;
+    },
+
     toggleAll() { 
         this.selectAll = !this.selectAll;
         if (this.selectAll) {
-            this.selected = {{ importados|length }} > 0 ? [{% for i in importados %}'{{ i.pk }}'{% if not forloop.last %},{% endif %}{% endfor %}] : [];
+            let ids = [];
+            {% for i in importados %}ids.push('{{ i.pk }}');{% endfor %}
+            {% for p in parciais %}ids.push('{{ p.pk }}');{% endfor %}
+            this.selected = ids;
         } else {
             this.selected = [];
         }
-    }
+    },
+
+    openModal() {
+        if (this.selected.length === 0) return;
+        const items = [];
+        let totalSaldo = 0, totalValor = 0, totalRecebido = 0;
+
+        this.selected.forEach(id => {
+            const card = document.querySelector('[data-imp-id=&quot;' + id + '&quot;]');
+            if (!card) return;
+            const saldo = parseFloat(card.dataset.saldo) || 0;
+            const valorTotal = parseFloat(card.dataset.valorTotal) || 0;
+            const recebido = parseFloat(card.dataset.recebido) || 0;
+            const protocolo = card.dataset.protocolo || '—';
+            const descricao = card.dataset.descricao || '';
+            items.push({ id, protocolo, descricao, valorTotal, recebido, saldo });
+            totalSaldo += saldo;
+            totalValor += valorTotal;
+            totalRecebido += recebido;
+        });
+
+        this.modalItems = items;
+        this.totalSaldo = totalSaldo;
+        this.totalValor = totalValor;
+        this.totalRecebido = totalRecebido;
+        this.valorReceber = totalSaldo;
+        this.formaPagamento = '';
+        this.formError = '';
+        this.showModal = true;
+    },
+
+    submitConfirmacao() {
+        if (!this.formaPagamento) {
+            this.formError = 'Selecione uma forma de pagamento.';
+            return;
+        }
+        if (this.valorReceber <= 0) {
+            this.formError = 'Informe um valor maior que zero.';
+            return;
+        }
+        if (this.valorReceber > this.totalSaldo) {
+            this.formError = 'Valor excede o saldo pendente.';
+            return;
+        }
+        this.formError = '';
+
+        const form = this.$refs.hiddenForm;
+        // Clear old dynamic inputs
+        form.querySelectorAll('.dynamic-input').forEach(el => el.remove());
+
+        // Add IDs
+        this.selected.forEach(id => {
+            const inp = document.createElement('input');
+            inp.type = 'hidden'; inp.name = 'importado_ids'; inp.value = id;
+            inp.className = 'dynamic-input';
+            form.appendChild(inp);
+        });
+
+        // Add forma + tipo
+        let fpInp = document.createElement('input');
+        fpInp.type = 'hidden'; fpInp.name = 'forma_pagamento_id'; fpInp.value = this.formaPagamento;
+        fpInp.className = 'dynamic-input';
+        form.appendChild(fpInp);
+
+        let tipoInp = document.createElement('input');
+        tipoInp.type = 'hidden'; tipoInp.name = 'tipo'; tipoInp.value = this.tipo;
+        tipoInp.className = 'dynamic-input';
+        form.appendChild(tipoInp);
+
+        // Partial payment: only for single item with valor < saldo
+        if (!this.isMultiple && this.valorReceber < this.totalSaldo) {
+            const parcInp = document.createElement('input');
+            parcInp.type = 'hidden';
+            parcInp.name = 'valor_parcela_' + this.modalItems[0].id;
+            parcInp.value = this.valorReceber.toFixed(2).replace('.', ',');
+            parcInp.className = 'dynamic-input';
+            form.appendChild(parcInp);
+        }
+
+        this.showModal = false;
+        form.requestSubmit();
+    },
+
+    fmt(v) { return 'R$ ' + parseFloat(v).toFixed(2).replace('.', ','); }
 }">
 
+    <!-- Hidden HTMX Form (submits to backend) -->
+    <form x-ref="hiddenForm" method="post"
+          hx-post="{% url 'caixa:confirmar_importados' abertura.pk %}"
+          hx-swap="none" style="display:none;">
+        {% csrf_token %}
+    </form>
+
+    <!-- Hidden HTMX Form for Delete -->
+    <form x-ref="deleteForm" method="post"
+          hx-post="{% url 'caixa:excluir_importados' abertura.pk %}"
+          hx-swap="none" style="display:none;">
+        {% csrf_token %}
+    </form>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- CARD 1: Aguardando Saldo Restante (Parcialmente Pagos)        -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    {% if parciais %}
+    <div class="bg-white dark:bg-[#2B2C30] rounded-2xl border border-amber-500/30 dark:border-amber-500/20 shadow-sm dark:shadow-none overflow-hidden"
+         x-data="{ expanded: true }">
+        <button @click="expanded = !expanded"
+                class="w-full flex items-center justify-between px-6 py-4 hover:bg-amber-50/50 dark:hover:bg-amber-500/5 transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-amber-500">hourglass_top</span>
+                <span class="text-sm font-bold text-amber-700 dark:text-amber-400">Aguardando Saldo Restante</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">{{ parciais|length }}</span>
+            </div>
+            <span class="material-symbols-outlined text-amber-400 transition-transform" :class="expanded ? 'rotate-180' : ''">expand_more</span>
+        </button>
+        <div x-show="expanded" x-collapse class="px-4 pb-4 space-y-2">
+            {% for imp in parciais %}
+            {% include "caixa/partials/_movimento_card.html" with mov=imp show_checkbox=True show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- CARD 2: Movimentos Importados (Pendentes de Confirmação)      -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
     {% if importados %}
-    <!-- Action Bar -->
-    <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-[#2B2C30] rounded-xl border border-slate-200 dark:border-[#2d3544]">
+    <div class="bg-white dark:bg-[#2B2C30] rounded-2xl border border-blue-500/30 dark:border-blue-500/20 shadow-sm dark:shadow-none overflow-hidden"
+         x-data="{ expanded: true }">
+        <button @click="expanded = !expanded"
+                class="w-full flex items-center justify-between px-6 py-4 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-blue-500">cloud_queue</span>
+                <span class="text-sm font-bold text-blue-700 dark:text-blue-400">Movimentos Importados (Aguardando Confirmação)</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold">{{ importados|length }}</span>
+            </div>
+            <span class="material-symbols-outlined text-blue-400 transition-transform" :class="expanded ? 'rotate-180' : ''">expand_more</span>
+        </button>
+        <div x-show="expanded" x-collapse class="px-4 pb-4 space-y-3">
+
+            <!-- Pendentes de Sessões Anteriores -->
+            {% if pendentes_anteriores %}
+            <div class="space-y-2">
+                <div class="flex items-center gap-2 px-1">
+                    <span class="material-symbols-outlined text-blue-400 text-base">history</span>
+                    <span class="text-xs font-bold text-blue-600 dark:text-blue-400">Sessões Anteriores</span>
+                    <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold">{{ pendentes_anteriores|length }}</span>
+                </div>
+                {% for imp in pendentes_anteriores %}
+                {% include "caixa/partials/_movimento_card.html" with mov=imp show_checkbox=True show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Importados Desta Sessão -->
+            {% if importados_sessao_atual %}
+            <div class="space-y-2">
+                {% if pendentes_anteriores %}
+                <div class="flex items-center gap-2 px-1">
+                    <span class="material-symbols-outlined text-primary text-base">download</span>
+                    <span class="text-xs font-bold text-primary">Desta Sessão</span>
+                    <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-bold">{{ importados_sessao_atual|length }}</span>
+                </div>
+                {% endif %}
+                {% for imp in importados_sessao_atual %}
+                {% include "caixa/partials/_movimento_card.html" with mov=imp show_checkbox=True show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Fallback -->
+            {% if not pendentes_anteriores and not importados_sessao_atual %}
+            <div class="space-y-2">
+                {% for imp in importados %}
+                {% include "caixa/partials/_movimento_card.html" with mov=imp show_checkbox=True show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- ACTION BAR (floating bottom bar)                              -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div x-show="selected.length > 0" x-transition
+         class="sticky bottom-4 z-40 flex items-center justify-between p-4 bg-slate-900/95 dark:bg-[#1a1b1f]/95 backdrop-blur rounded-2xl border border-slate-700 dark:border-[#2d3544] shadow-2xl">
         <div class="flex items-center gap-3">
             <input type="checkbox" @click="toggleAll()" :checked="selectAll"
                    class="w-4 h-4 text-primary rounded focus:ring-primary">
-            <span class="text-sm font-bold text-slate-500 dark:text-slate-400">
-                <span x-text="selected.length" class="text-primary">0</span> de {{ importados|length }} selecionado(s)
+            <span class="text-sm font-bold text-white">
+                <span x-text="selected.length" class="text-primary"></span> selecionado(s)
             </span>
         </div>
         <div class="flex items-center gap-2">
-            <!-- Confirm Button -->
-            <form method="post" 
-                  hx-post="{% url 'caixa:confirmar_importados' abertura.pk %}"
-                  hx-swap="none"
-                  x-show="selected.length > 0" x-transition
-                  @submit="for(let id of selected){ let el=document.querySelector(`[data-parcela-id='${id}']`); if(el&&el.value){ let inp=document.createElement('input'); inp.type='hidden'; inp.name=`valor_parcela_${id}`; inp.value=el.value; $el.appendChild(inp); } }">
-                {% csrf_token %}
-                <template x-for="id in selected" :key="id">
-                    <input type="hidden" name="importado_ids" :value="id">
-                </template>
-                
-                <div class="flex items-center gap-2">
-                    <select name="forma_pagamento_id" required
-                            class="h-9 bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 text-sm text-slate-700 dark:text-slate-200 focus:border-primary outline-none">
-                        <option value="">Forma Pagto.</option>
-                        {% for fp in formas_pagamento %}
-                        <option value="{{ fp.pk }}">{{ fp.nome }}</option>
-                        {% endfor %}
-                    </select>
-                    <select name="tipo" 
-                            class="h-9 bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 text-sm text-slate-700 dark:text-slate-200 focus:border-primary outline-none">
-                        <option value="ENTRADA">Entrada</option>
-                        <option value="SAIDA">Saída</option>
-                    </select>
-                    <button type="submit" class="h-9 bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-lg text-sm font-bold flex items-center gap-1 transition-all">
-                        <span class="material-symbols-outlined text-sm">check_circle</span>
-                        Confirmar
-                    </button>
+            <button @click="openModal()" type="button"
+                    class="h-9 bg-emerald-600 hover:bg-emerald-700 text-white px-5 rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-emerald-600/20">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                Confirmar
+            </button>
+            <button @click="if(confirm('Excluir os itens selecionados?')){ 
+                        const form = $refs.deleteForm;
+                        form.querySelectorAll('.dynamic-input').forEach(el => el.remove());
+                        selected.forEach(id => { 
+                            const inp = document.createElement('input'); 
+                            inp.type='hidden'; inp.name='importado_ids'; inp.value=id; 
+                            inp.className='dynamic-input'; 
+                            form.appendChild(inp); 
+                        }); 
+                        form.requestSubmit(); 
+                    }" type="button"
+                    class="h-9 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-3 rounded-lg text-sm font-bold flex items-center gap-1 transition-all border border-red-600/30">
+                <span class="material-symbols-outlined text-sm">delete</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Empty State (nothing at all) -->
+    {% if not importados and not parciais %}
+    <div class="bg-white dark:bg-[#2B2C30] rounded-2xl border border-slate-200 dark:border-[#2d3544] shadow-sm dark:shadow-none overflow-hidden">
+        <div class="flex flex-col items-center justify-center py-12 text-slate-500">
+            <span class="material-symbols-outlined text-4xl opacity-30 mb-2">cloud_off</span>
+            <p class="text-sm">Nenhum movimento importado pendente.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Confirmação de Recebimento                             -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <div x-show="showModal" x-transition.opacity
+         class="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+         @keydown.escape.window="showModal = false">
+        <div class="bg-white dark:bg-[#2B2C30] rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 dark:border-[#2d3544] overflow-hidden"
+             @click.outside="showModal = false" x-transition.scale.95>
+
+            <!-- Header -->
+            <div class="px-6 py-4 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center gap-3">
+                <span class="material-symbols-outlined text-emerald-500 text-xl">receipt_long</span>
+                <div>
+                    <h3 class="font-bold text-base text-emerald-700 dark:text-emerald-300">Confirmar Recebimento</h3>
+                    <p class="text-xs text-emerald-600/70 dark:text-emerald-400/60">
+                        <span x-text="modalItems.length"></span> item(ns) selecionado(s)
+                    </p>
                 </div>
-            </form>
+            </div>
 
-            <!-- Delete Button -->
-            <form method="post"
-                  hx-post="{% url 'caixa:excluir_importados' abertura.pk %}"
-                  hx-swap="none"
-                  hx-confirm="Excluir os itens selecionados?"
-                  x-show="selected.length > 0" x-transition>
-                {% csrf_token %}
-                <template x-for="id in selected" :key="id">
-                    <input type="hidden" name="importado_ids" :value="id">
-                </template>
-                <button type="submit" class="h-9 bg-red-600/20 hover:bg-red-600/30 text-red-400 px-3 rounded-lg text-sm font-bold flex items-center gap-1 transition-all border border-red-600/30">
-                    <span class="material-symbols-outlined text-sm">delete</span>
-                    Excluir
+            <!-- Body -->
+            <div class="px-6 py-5 space-y-5 max-h-[65vh] overflow-y-auto">
+
+                <!-- Itens Selecionados -->
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Itens Selecionados</label>
+                    <div class="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
+                        <template x-for="item in modalItems" :key="item.id">
+                            <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 dark:bg-[#23242A] border border-slate-200 dark:border-[#2d3544]">
+                                <div class="flex-1 min-w-0">
+                                    <span class="text-xs font-bold text-slate-700 dark:text-white" x-text="item.protocolo"></span>
+                                    <p class="text-[10px] text-slate-400 truncate" x-text="item.descricao" x-show="item.descricao"></p>
+                                </div>
+                                <span class="text-xs font-bold text-primary ml-3 shrink-0" x-text="fmt(item.saldo)"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Forma de Pagamento + Tipo -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Forma de Pagamento *</label>
+                        <select x-model="formaPagamento" 
+                                :class="formError && !formaPagamento ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200 dark:border-[#2d3544]'"
+                                class="w-full h-10 bg-white dark:bg-[#23242A] border rounded-lg px-3 text-sm text-slate-700 dark:text-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                            <option value="">Selecione...</option>
+                            {% for fp in formas_pagamento %}
+                            <option value="{{ fp.pk }}">{{ fp.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block">Tipo</label>
+                        <select x-model="tipo"
+                                class="w-full h-10 bg-white dark:bg-[#23242A] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 text-sm text-slate-700 dark:text-slate-200 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+                            <option value="ENTRADA">Entrada</option>
+                            <option value="SAIDA">Saída</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Resumo Financeiro -->
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Resumo Financeiro</label>
+                    <div class="rounded-xl bg-slate-50 dark:bg-[#23242A] border border-slate-200 dark:border-[#2d3544] p-4 space-y-3">
+                        
+                        <!-- Valor Total -->
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Valor Total</span>
+                            <span class="text-sm font-bold text-slate-700 dark:text-white" x-text="fmt(totalValor)"></span>
+                        </div>
+
+                        <!-- Já Recebido (only if > 0) -->
+                        <div class="flex items-center justify-between" x-show="totalRecebido > 0">
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Já Recebido</span>
+                            <span class="text-sm font-bold text-emerald-600" x-text="fmt(totalRecebido)"></span>
+                        </div>
+
+                        <div class="border-t border-slate-200 dark:border-[#2d3544]" x-show="totalRecebido > 0"></div>
+
+                        <!-- Saldo Pendente -->
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-slate-500 dark:text-slate-400">Saldo Pendente</span>
+                            <span class="text-sm font-bold text-amber-600 dark:text-amber-400" x-text="fmt(totalSaldo)"></span>
+                        </div>
+
+                        <div class="border-t border-dashed border-slate-300 dark:border-[#3d3e44]"></div>
+
+                        <!-- Valor a Receber -->
+                        <div class="flex items-center justify-between gap-4">
+                            <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Valor a Receber</span>
+                            <template x-if="isMultiple">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-bold text-primary" x-text="fmt(valorReceber)"></span>
+                                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-[#2d3544] text-slate-500 dark:text-slate-400" title="Pagamento parcial indisponível para múltiplos itens">fixo</span>
+                                </div>
+                            </template>
+                            <template x-if="!isMultiple">
+                                <div class="relative">
+                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">R$</span>
+                                    <input type="text" 
+                                           :value="valorReceber.toFixed(2).replace('.', ',')"
+                                           @input="
+                                               let v = $event.target.value.replace(/[^\d,]/g, '').replace(',', '.');
+                                               let num = parseFloat(v);
+                                               if (!isNaN(num)) valorReceber = num;
+                                           "
+                                           :class="valorReceber > totalSaldo ? 'border-red-500 ring-1 ring-red-500 text-red-500' : 'border-slate-200 dark:border-[#2d3544] text-primary'"
+                                           class="w-36 h-9 bg-white dark:bg-[#1a1b1f] border rounded-lg pl-9 pr-3 text-sm font-bold text-right outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all">
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Validation error -->
+                        <p x-show="valorReceber > totalSaldo" class="text-[11px] text-red-500 font-medium flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs">error</span>
+                            Valor excede o saldo pendente
+                        </p>
+
+                        <!-- Saldo Restante -->
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-[#2d3544]">
+                            <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Saldo Restante</span>
+                            <span class="text-sm font-bold" 
+                                  :class="saldoRestante > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600'"
+                                  x-text="fmt(saldoRestante)"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Partial Payment Warning -->
+                <div x-show="isParcial && !isMultiple" x-transition
+                     class="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                    <span class="material-symbols-outlined text-amber-500 text-lg mt-0.5">info</span>
+                    <div>
+                        <p class="text-xs font-bold text-amber-700 dark:text-amber-300">Recebimento Parcial</p>
+                        <p class="text-[11px] text-amber-600/80 dark:text-amber-400/70 mt-0.5">
+                            O saldo restante de <span class="font-bold" x-text="fmt(saldoRestante)"></span> ficará pendente e aparecerá na próxima abertura.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Form Error -->
+                <p x-show="formError" x-text="formError" x-transition
+                   class="text-xs text-red-500 font-medium flex items-center gap-1 p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 border-t border-slate-200 dark:border-[#2d3544] bg-slate-50 dark:bg-[#23242A] flex items-center justify-end gap-2">
+                <button @click="showModal = false" type="button"
+                        class="h-10 px-5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-[#2d3544] transition-colors">
+                    Cancelar
                 </button>
-            </form>
+                <button @click="submitConfirmacao()" type="button"
+                        :disabled="!canSubmit"
+                        :class="canSubmit 
+                            ? 'bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20' 
+                            : 'bg-slate-300 dark:bg-slate-600 cursor-not-allowed'"
+                        class="h-10 px-6 rounded-lg text-sm font-bold text-white transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">check_circle</span>
+                    Confirmar Recebimento
+                </button>
+            </div>
         </div>
     </div>
-
-    <!-- Pendentes de Sessões Anteriores -->
-    {% if pendentes_anteriores %}
-    <div class="space-y-2">
-        <div class="flex items-center gap-2 px-1">
-            <span class="material-symbols-outlined text-amber-500 text-lg">history</span>
-            <h3 class="text-sm font-bold text-amber-600 dark:text-amber-400">Pendentes de Sessões Anteriores</h3>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">{{ pendentes_anteriores|length }}</span>
-        </div>
-        {% for imp in pendentes_anteriores %}
-        {% include "caixa/partials/_movimento_card.html" with mov=imp show_checkbox=True show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- Importados Desta Sessão -->
-    {% if importados_sessao_atual %}
-    <div class="space-y-2">
-        {% if pendentes_anteriores %}
-        <div class="flex items-center gap-2 px-1">
-            <span class="material-symbols-outlined text-primary text-lg">download</span>
-            <h3 class="text-sm font-bold text-primary">Importados Desta Sessão</h3>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-primary/20 text-primary font-bold">{{ importados_sessao_atual|length }}</span>
-        </div>
-        {% endif %}
-        {% for imp in importados_sessao_atual %}
-        {% include "caixa/partials/_movimento_card.html" with mov=imp show_checkbox=True show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- Fallback: all imports in single list (no session distinction) -->
-    {% if not pendentes_anteriores and not importados_sessao_atual %}
-    <div class="space-y-2">
-        {% for imp in importados %}
-        {% include "caixa/partials/_movimento_card.html" with mov=imp show_checkbox=True show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    {% else %}
-    <!-- Empty State -->
-    <div class="flex flex-col items-center justify-center py-12 text-slate-500">
-        <span class="material-symbols-outlined text-4xl opacity-30 mb-2">cloud_off</span>
-        <p class="text-sm">Nenhum movimento importado pendente.</p>
-    </div>
-    {% endif %}
 </div>

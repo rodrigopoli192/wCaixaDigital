@@ -353,6 +353,14 @@ class ImportadorMovimentos:
         if child_items:
             ItemAtoImportado.objects.bulk_create(child_items)
 
+        # 4. Backfill valor: when SQL has no 'valor' column, use sum of TAXA_FIELDS
+        for obj in created:
+            if obj.valor == Decimal("0.00"):
+                total_taxas = obj.valor_total_taxas
+                if total_taxas > Decimal("0.00"):
+                    obj.valor = total_taxas
+                    obj.save(update_fields=["valor"])
+
         return len(created), skipped
 
     @staticmethod
@@ -403,6 +411,13 @@ class ImportadorMovimentos:
         movimentos_para_nfse = []
 
         for imp in importados:
+            # Ensure imp.valor is populated (backfill from taxa fields)
+            if imp.valor == Decimal("0.00"):
+                total_taxas = imp.valor_total_taxas
+                if total_taxas > Decimal("0.00"):
+                    imp.valor = total_taxas
+                    imp.save(update_fields=["valor"])
+
             # Determine payment value
             str_id = str(imp.pk)
             if str_id in parcelas_map:
@@ -414,13 +429,16 @@ class ImportadorMovimentos:
 
             # Validate
             saldo = imp.saldo_pendente
+            if saldo <= Decimal("0.00"):
+                continue  # Already fully paid
             if valor_parcela <= Decimal("0.00"):
                 continue
             if valor_parcela > saldo:
                 valor_parcela = saldo
 
             # Determine if this is full payment
-            is_quitacao = valor_parcela >= saldo
+            remaining = saldo - valor_parcela
+            is_quitacao = remaining <= Decimal("0.00")
             numero_parcela = imp.parcelas.count() + 1
 
             # Auto-register client from apresentante name (only on first parcela)
@@ -499,11 +517,12 @@ class ImportadorMovimentos:
                 recebido_por=user,
             )
 
-            # Update caixa balance
+            # Update caixa balance (use valor_total_taxas as the real amount)
+            valor_real = movimento.valor_total_taxas or movimento.valor
             if movimento.is_entrada:
-                caixa.saldo_atual += movimento.valor
+                caixa.saldo_atual += valor_real
             else:
-                caixa.saldo_atual -= movimento.valor
+                caixa.saldo_atual -= valor_real
 
             # Update MovimentoImportado status
             if is_quitacao:

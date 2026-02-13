@@ -544,6 +544,12 @@ class MovimentoCaixa(TenantAwareModel):
         """Verifica se é movimento de saída."""
         return self.tipo in [TipoMovimento.SAIDA, TipoMovimento.SANGRIA, TipoMovimento.ESTORNO]
 
+    @property
+    def importado_origem(self):
+        """Retorna o MovimentoImportado vinculado via ParcelaRecebimento."""
+        parcela = self.parcela_recebimento.select_related("movimento_importado").first()
+        return parcela.movimento_importado if parcela else None
+
 
 class FechamentoCaixa(TenantAwareModel):
     """
@@ -892,7 +898,10 @@ class MovimentoImportado(TenantAwareModel):
         """True se prazo de quitação passou e não está quitado."""
         if not self.prazo_quitacao:
             return False
-        return date.today() > self.prazo_quitacao and self.status_recebimento != StatusRecebimento.QUITADO
+        return (
+            date.today() > self.prazo_quitacao
+            and self.status_recebimento != StatusRecebimento.QUITADO
+        )
 
 
 class ParcelaRecebimento(TenantAwareModel):

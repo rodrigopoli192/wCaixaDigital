@@ -152,127 +152,155 @@
         </div>
     </div>
 
-    <!-- 3. Filters Section -->
+    <!-- 3. Movimentações do Dia (card único) -->
     <style>
         .filter-select { -webkit-appearance: none !important; -moz-appearance: none !important; appearance: none !important; }
     </style>
-    <div class="bg-white dark:bg-[#2B2C30] p-4 rounded-xl border border-slate-200 dark:border-[#2d3544] shadow-sm dark:shadow-none">
-        <form method="get" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-4 items-end">
-             <!-- Tipo de Lançamento (3 cols) -->
-            <div class="col-span-1 md:col-span-2 xl:col-span-3 space-y-1.5">
-                <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Tipo de Lançamento</label>
-                <div class="relative">
-                    <select name="tipo" class="filter-select w-full h-11 bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-4 pr-10 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm transition-all hover:border-slate-400 dark:hover:border-slate-600">
-                        <option value="">Todos os Movimentos</option>
-                        <option value="ENTRADA" {% if request.GET.tipo == 'ENTRADA' %}selected{% endif %}>Entradas</option>
-                        <option value="SAIDA" {% if request.GET.tipo == 'SAIDA' %}selected{% endif %}>Saídas</option>
-                        <option value="SANGRIA" {% if request.GET.tipo == 'SANGRIA' %}selected{% endif %}>Sangrias</option>
-                        <option value="SUPRIMENTO" {% if request.GET.tipo == 'SUPRIMENTO' %}selected{% endif %}>Suprimentos</option>
-                    </select>
-                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-sm">keyboard_arrow_down</span>
-                </div>
-            </div>
+    <div class="bg-white dark:bg-[#2B2C30] rounded-2xl border border-slate-200 dark:border-[#2d3544] shadow-sm dark:shadow-none overflow-hidden">
 
-            <!-- Data Início (3 cols) -->
-            <div class="col-span-1 xl:col-span-3 space-y-1.5">
-                <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data Início</label>
-                     <input type="date" name="data_inicio" value="{{ request.GET.data_inicio }}"
-                       class="w-full h-11 bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-4 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm transition-all hover:border-slate-400 dark:hover:border-slate-600">
-            </div>
-
-            <!-- Data Fim (3 cols) -->
-            <div class="col-span-1 xl:col-span-3 space-y-1.5">
-                <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data Fim</label>
-                     <input type="date" name="data_fim" value="{{ request.GET.data_fim }}"
-                       class="w-full h-11 bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-4 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-sm transition-all hover:border-slate-400 dark:hover:border-slate-600">
-            </div>
-
-            <!-- Buttons (3 cols) -->
-            <div class="col-span-1 md:col-span-2 xl:col-span-3 flex gap-2">
-                <button type="submit" class="h-11 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg px-6 flex-1 flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-orange-500/20 active:scale-95">
-                    <span class="material-symbols-outlined text-xl">search</span>
-                    Filtrar
-                </button>
-                <a href="{% url 'caixa:lista_movimentos' abertura.pk %}" class="h-11 w-12 bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] hover:bg-slate-100 dark:hover:bg-[#2d3544] rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white flex items-center justify-center transition-colors hover:border-slate-400 dark:hover:border-slate-500 active:scale-95" title="Limpar Filtros">
-                    <span class="material-symbols-outlined">filter_alt_off</span>
-                </a>
-            </div>
-        </form>
-    </div>
-
-    <!-- 4. Movements Cards Section -->
-    <div class="space-y-2">
-        {% for mov in object_list %}
-        {% include "caixa/partials/_movimento_card.html" with mov=mov show_tipo=True show_checkbox=False show_origem=False show_caixa=False model_type="movimento" %}
-        {% empty %}
-        <div class="bg-white dark:bg-[#2B2C30] rounded-2xl border border-slate-200 dark:border-[#2d3544] shadow-sm dark:shadow-none p-16">
-            <div class="flex flex-col items-center justify-center text-slate-500">
-                <span class="material-symbols-outlined text-4xl opacity-30 mb-2">receipt_long</span>
-                <p class="text-sm">Nenhuma movimentação registrada.</p>
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-[#2d3544] flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-orange-500">receipt_long</span>
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white">Movimentações do Dia</h3>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-500 font-bold">
+                    {% if is_paginated %}{{ page_obj.paginator.count }}{% else %}{{ object_list|length }}{% endif %}
+                </span>
             </div>
         </div>
-        {% endfor %}
-    </div>
 
-    <!-- Pagination -->
-    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mt-4">
-        <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">
-            {% if is_paginated %}
-                Exibindo {{ page_obj.start_index }} de {{ page_obj.end_index }} movimentações
-            {% else %}
-                Total de {{ object_list.count }} movimentações
-            {% endif %}
-        </span>
+        <!-- Filtros -->
+        <div class="px-5 py-3 border-b border-slate-100 dark:border-[#2d3544] bg-slate-50/50 dark:bg-[#23242a]">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-3 items-end">
+                 <!-- Tipo de Lançamento (3 cols) -->
+                <div class="col-span-1 md:col-span-2 xl:col-span-3 space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Tipo de Lançamento</label>
+                    <div class="relative">
+                        <select name="tipo" class="filter-select w-full h-10 bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 pr-8 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-xs transition-all hover:border-slate-400 dark:hover:border-slate-600">
+                            <option value="">Todos os Movimentos</option>
+                            <option value="ENTRADA" {% if request.GET.tipo == 'ENTRADA' %}selected{% endif %}>Entradas</option>
+                            <option value="SAIDA" {% if request.GET.tipo == 'SAIDA' %}selected{% endif %}>Saídas</option>
+                            <option value="SANGRIA" {% if request.GET.tipo == 'SANGRIA' %}selected{% endif %}>Sangrias</option>
+                            <option value="SUPRIMENTO" {% if request.GET.tipo == 'SUPRIMENTO' %}selected{% endif %}>Suprimentos</option>
+                        </select>
+                        <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-sm">keyboard_arrow_down</span>
+                    </div>
+                </div>
 
+                <!-- Data Início (3 cols) -->
+                <div class="col-span-1 xl:col-span-3 space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data Início</label>
+                         <input type="date" name="data_inicio" value="{{ request.GET.data_inicio }}"
+                           class="w-full h-10 bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-xs transition-all hover:border-slate-400 dark:hover:border-slate-600">
+                </div>
+
+                <!-- Data Fim (3 cols) -->
+                <div class="col-span-1 xl:col-span-3 space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-1">Data Fim</label>
+                         <input type="date" name="data_fim" value="{{ request.GET.data_fim }}"
+                           class="w-full h-10 bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg px-3 text-slate-700 dark:text-slate-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none font-medium text-xs transition-all hover:border-slate-400 dark:hover:border-slate-600">
+                </div>
+
+                <!-- Buttons (3 cols) -->
+                <div class="col-span-1 md:col-span-2 xl:col-span-3 flex gap-2">
+                    <button type="submit" class="h-10 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg px-5 flex-1 flex items-center justify-center gap-2 transition-all hover:shadow-lg hover:shadow-orange-500/20 active:scale-95 text-xs">
+                        <span class="material-symbols-outlined text-lg">search</span>
+                        Filtrar
+                    </button>
+                    <a href="{% url 'caixa:lista_movimentos' abertura.pk %}" class="h-10 w-10 bg-white dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] hover:bg-slate-100 dark:hover:bg-[#2d3544] rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white flex items-center justify-center transition-colors hover:border-slate-400 dark:hover:border-slate-500 active:scale-95" title="Limpar Filtros">
+                        <span class="material-symbols-outlined text-lg">filter_alt_off</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Cards de movimentos -->
+        <div class="p-4 space-y-2">
+            {% for mov in object_list %}
+            {% include "caixa/partials/_movimento_card.html" with mov=mov show_tipo=True show_checkbox=False show_origem=False show_caixa=False model_type="movimento" %}
+            {% empty %}
+            <div class="py-12">
+                <div class="flex flex-col items-center justify-center text-slate-500">
+                    <span class="material-symbols-outlined text-4xl opacity-30 mb-2">receipt_long</span>
+                    <p class="text-sm">Nenhuma movimentação registrada.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Totalizador -->
+        {% if object_list %}
+        <div class="border-t border-slate-200 dark:border-[#2d3544] bg-slate-50/80 dark:bg-[#23242a] px-5 py-3">
+            <div class="flex items-center justify-end gap-3">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-auto flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">functions</span>
+                    Totais
+                </span>
+                <div class="w-[90px] text-right">
+                    <span class="text-[9px] uppercase text-slate-400 dark:text-slate-500 block leading-none">Emolumento</span>
+                    <span class="text-xs font-mono font-bold text-slate-700 dark:text-slate-200">R$ {{ total_emolumento|floatformat:2 }}</span>
+                </div>
+                <div class="w-[80px] text-right">
+                    <span class="text-[9px] uppercase text-slate-400 dark:text-slate-500 block leading-none">Taxas</span>
+                    <span class="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">R$ {{ total_taxas|floatformat:2 }}</span>
+                </div>
+                <div class="w-[90px] text-right">
+                    <span class="text-[9px] uppercase text-slate-400 dark:text-slate-500 block leading-none">Total</span>
+                    <span class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">R$ {{ total_geral|floatformat:2 }}</span>
+                </div>
+                {% if total_valor_pago != total_geral %}
+                <div class="w-[90px] text-right">
+                    <span class="text-[9px] uppercase text-amber-500 dark:text-amber-400 block leading-none">Valor Pago</span>
+                    <span class="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">R$ {{ total_valor_pago|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Paginação -->
         {% if is_paginated %}
-        <div class="flex items-center gap-2">
-            {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-4 py-1.5 rounded border border-slate-200 dark:border-[#2d3544] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 text-xs font-bold uppercase transition-colors">
-                Anterior
-            </a>
-            {% else %}
-            <span class="px-4 py-1.5 rounded border border-slate-200 dark:border-[#2d3544] text-slate-400 dark:text-slate-700 text-xs font-bold uppercase cursor-not-allowed">
-                Anterior
+        <div class="border-t border-slate-100 dark:border-[#2d3544] px-5 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+            <span class="text-xs text-slate-500">
+                Exibindo {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }} movimentações
             </span>
-            {% endif %}
+            <div class="flex items-center gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-3 py-1 rounded border border-slate-200 dark:border-[#2d3544] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 text-xs font-bold uppercase transition-colors">
+                    Anterior
+                </a>
+                {% else %}
+                <span class="px-3 py-1 rounded border border-slate-200 dark:border-[#2d3544] text-slate-400 dark:text-slate-700 text-xs font-bold uppercase cursor-not-allowed">
+                    Anterior
+                </span>
+                {% endif %}
 
-            <span class="size-8 rounded bg-orange-500 text-white flex items-center justify-center text-sm font-bold shadow-lg shadow-orange-500/20">
-                {{ page_obj.number }}
-            </span>
+                <span class="size-7 rounded bg-orange-500 text-white flex items-center justify-center text-xs font-bold shadow-lg shadow-orange-500/20">
+                    {{ page_obj.number }}
+                </span>
 
-             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-4 py-1.5 rounded border border-slate-200 dark:border-[#2d3544] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 text-xs font-bold uppercase transition-colors">
-                Próximo
-            </a>
-            {% else %}
-             <span class="px-4 py-1.5 rounded border border-slate-200 dark:border-[#2d3544] text-slate-400 dark:text-slate-700 text-xs font-bold uppercase cursor-not-allowed">
-                Próximo
-            </span>
-            {% endif %}
+                 {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="px-3 py-1 rounded border border-slate-200 dark:border-[#2d3544] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-400 dark:hover:border-slate-500 text-xs font-bold uppercase transition-colors">
+                    Próximo
+                </a>
+                {% else %}
+                 <span class="px-3 py-1 rounded border border-slate-200 dark:border-[#2d3544] text-slate-400 dark:text-slate-700 text-xs font-bold uppercase cursor-not-allowed">
+                    Próximo
+                </span>
+                {% endif %}
+            </div>
         </div>
         {% endif %}
     </div>
 
-    <!-- 5. Imported Movements Pending Section -->
+    <!-- 5. Imported Movements & Partial Payments Sections -->
     {% if abertura.caixa.status == 'ABERTO' %}
-    <div class="bg-white dark:bg-[#2B2C30] rounded-2xl border border-slate-200 dark:border-[#2d3544] shadow-sm dark:shadow-none overflow-hidden"
-         x-data="{ expanded: true }">
-        <button @click="expanded = !expanded"
-                class="w-full flex items-center justify-between px-6 py-4 hover:bg-slate-50 dark:hover:bg-[#2d3544]/50 transition-colors">
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-blue-400">cloud_queue</span>
-                <span class="text-sm font-bold text-slate-900 dark:text-white">Movimentos Importados (Pendentes)</span>
-            </div>
-            <span class="material-symbols-outlined text-slate-400 transition-transform" :class="expanded ? 'rotate-180' : ''">expand_more</span>
-        </button>
-        <div x-show="expanded" x-collapse
-             id="importados-container"
-             hx-get="{% url 'caixa:lista_importados' abertura.pk %}"
-             hx-trigger="revealed"
-             hx-swap="innerHTML">
-            <div class="flex justify-center p-6">
-                <span class="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></span>
-            </div>
+    <div id="importados-container" class="space-y-4"
+         hx-get="{% url 'caixa:lista_importados' abertura.pk %}"
+         hx-trigger="revealed"
+         hx-swap="innerHTML">
+        <div class="flex justify-center p-6">
+            <span class="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></span>
         </div>
     </div>
     {% endif %}

@@ -2,8 +2,9 @@
 <!-- Variables: mov, show_checkbox (bool), show_tipo (bool), show_origem (bool), show_caixa (bool) -->
 
 <div class="bg-white dark:bg-[#2B2C30] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden transition-colors shadow-sm dark:shadow-none"
+     {% if show_origem %}data-imp-id="{{ mov.pk }}" data-saldo="{{ mov.saldo_pendente }}" data-valor-total="{{ mov.valor }}" data-recebido="{{ mov.valor_recebido }}" data-protocolo="{{ mov.protocolo|floatformat:0|default:'—' }}" data-descricao="{{ mov.descricao|default:'' }}"{% endif %}
      {% if show_checkbox %}:class="selected.includes('{{ mov.pk }}') ? 'border-primary/50 bg-primary/5' : ''"{% endif %}
-     x-data="{ details: false }">
+     x-data="{ details: false, showPayments: false }">
 
     <!-- Main Row -->
     <div class="flex items-center gap-3 px-4 py-3">
@@ -17,7 +18,7 @@
         <div class="flex-1 min-w-0 space-y-1">
             <!-- Row 1: Protocolo | Descrição | Status/Tipo | Emolumento | Taxas | Total | Badge -->
             <div class="flex items-center gap-4 overflow-hidden">
-                <span class="text-sm font-mono text-slate-700 dark:text-slate-200 shrink-0 w-[80px] truncate" title="{{ mov.protocolo }}">{{ mov.protocolo|default:"—" }}</span>
+                <span class="text-sm font-mono text-slate-700 dark:text-slate-200 shrink-0 whitespace-nowrap" title="Protocolo: {{ mov.protocolo|floatformat:0 }}">Protocolo: {{ mov.protocolo|floatformat:0|default:"—" }}</span>
                 <span class="text-sm text-slate-600 dark:text-slate-300 truncate flex-1 min-w-0 max-w-[250px]" title="{{ mov.descricao }}">{{ mov.descricao|default:"—" }}</span>
 
                 {% if show_tipo %}
@@ -33,14 +34,23 @@
                 {% elif mov.tipo == 'ESTORNO' %}
                 <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-600 dark:text-slate-400 font-bold shrink-0">Estorno</span>
                 {% endif %}
-                {% else %}
-                <!-- Status Badge (MovimentoImportado) -->
-                <span class="text-[10px] px-2 py-0.5 rounded-full shrink-0
-                {% if mov.status_item == 'Aberto' or not mov.status_item %}bg-emerald-500/20 text-emerald-600 dark:text-emerald-400
-                    {% elif mov.status_item == 'Cancelado' %}bg-red-500/20 text-red-600 dark:text-red-400
-                    {% else %}bg-blue-500/20 text-blue-600 dark:text-blue-400{% endif %} font-bold">
-                    {{ mov.status_item|default:"Aberto" }}
+
+                <!-- Partial Payment Badge (when MovimentoCaixa is linked to a ParcelaRecebimento) -->
+                {% if mov.parcela_recebimento.exists %}
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold shrink-0 flex items-center gap-0.5 cursor-pointer"
+                      @click.stop="showPayments = !showPayments"
+                      title="Este movimento é um pagamento parcial — clique para ver todos os pagamentos">
+                    <span class="material-symbols-outlined text-[10px]">hourglass_top</span>
+                    Pgto. Parcial
                 </span>
+                {% endif %}
+                {% else %}
+                <!-- Status Badge (MovimentoImportado) - valor bruto do sistema externo -->
+                {% if mov.status_item %}
+                <span class="text-[10px] px-2 py-0.5 rounded-full shrink-0 bg-slate-500/20 text-slate-600 dark:text-slate-400 font-bold">
+                    {{ mov.status_item }}
+                </span>
+                {% endif %}
 
                 <!-- Status Recebimento Badge -->
                 {% if mov.status_recebimento == 'PARCIAL' %}
@@ -79,20 +89,25 @@
                         <span class="text-xs font-mono font-bold {% if total %}text-emerald-600 dark:text-emerald-400{% else %}text-slate-400 dark:text-slate-500{% endif %}">R$ {{ total|floatformat:2 }}</span>
                         {% endwith %}
                     </div>
+                    {% if show_tipo and mov.valor and mov.valor != mov.valor_total_taxas %}
+                    <div class="w-[90px]">
+                        <span class="text-[9px] uppercase text-amber-500 dark:text-amber-400 block leading-none">Valor Pago</span>
+                        <span class="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">R$ {{ mov.valor|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    {% if show_tipo %}
+                    {% with imp=mov.importado_origem %}
+                    {% if imp and imp.saldo_pendente > 0 %}
+                    <div class="w-[90px]">
+                        <span class="text-[9px] uppercase text-red-500 dark:text-red-400 block leading-none">Pendente</span>
+                        <span class="text-xs font-mono font-bold text-red-500 dark:text-red-400">R$ {{ imp.saldo_pendente|floatformat:2 }}</span>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    {% endif %}
                 </div>
 
-                <!-- Partial payment: per-item valor input (only for importados, not quitados) -->
-                {% if show_origem and mov.status_recebimento != 'QUITADO' %}
-                <div class="shrink-0 w-[120px]" x-show="selected.includes('{{ mov.pk }}')" x-transition>
-                    <label class="text-[9px] uppercase text-slate-400 dark:text-slate-500 block leading-none mb-0.5">Valor Parcela</label>
-                    <input type="text" 
-                           data-parcela-id="{{ mov.pk }}"
-                           name="valor_parcela_{{ mov.pk }}"
-                           placeholder="{{ mov.saldo_pendente|floatformat:2 }}"
-                           class="w-full h-7 bg-white dark:bg-[#1E1F23] border border-slate-200 dark:border-[#2d3544] rounded px-2 text-xs font-mono text-right text-slate-700 dark:text-slate-200 focus:border-primary outline-none placeholder:text-slate-400"
-                           title="Deixe vazio para pagar o saldo total">
-                </div>
-                {% endif %}
+                <!-- Partial payment value now handled by confirmation modal -->
 
                 {% if show_origem %}
                 <!-- Origem badge (importados) -->
@@ -187,6 +202,53 @@
         </button>
     </div>
 
+    <!-- Payment History Accordion (for partial payments) -->
+    {% if show_tipo and mov.parcela_recebimento.exists %}
+    {% with parcela=mov.parcela_recebimento.first %}
+    {% with imp=parcela.movimento_importado %}
+    <div x-show="showPayments" x-collapse class="border-t border-amber-500/20">
+        <div class="px-5 py-3 bg-amber-50/50 dark:bg-amber-500/5">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined text-amber-500 text-sm">receipt_long</span>
+                <span class="text-xs font-bold text-amber-700 dark:text-amber-400">Pagamentos Realizados — Protocolo {{ imp.protocolo|floatformat:0|default:'—' }}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">{{ imp.parcelas.count }} pagamento{{ imp.parcelas.count|pluralize:"s" }}</span>
+            </div>
+            <div class="space-y-1.5">
+                {% for p in imp.parcelas.all %}
+                <div class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs {% if p.pk == parcela.pk %}bg-amber-500/10 border border-amber-500/30{% else %}bg-white/60 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544]{% endif %}">
+                    <span class="font-mono font-bold text-slate-600 dark:text-slate-300 w-6 text-center">#{{ p.numero_parcela }}</span>
+                    <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400 w-[90px]">R$ {{ p.valor|floatformat:2 }}</span>
+                    <span class="text-slate-500 dark:text-slate-400 flex items-center gap-0.5">
+                        <span class="material-symbols-outlined text-[10px]">payments</span>
+                        {{ p.forma_pagamento.nome|default:'—' }}
+                    </span>
+                    <span class="text-slate-500 dark:text-slate-400 flex items-center gap-0.5 ml-auto">
+                        <span class="material-symbols-outlined text-[10px]">schedule</span>
+                        {{ p.recebido_em|date:"d/m/Y H:i" }}
+                    </span>
+                    <span class="text-slate-500 dark:text-slate-400 flex items-center gap-0.5">
+                        <span class="material-symbols-outlined text-[10px]">person</span>
+                        {{ p.recebido_por.get_short_name|default:p.recebido_por.username }}
+                    </span>
+                    {% if p.pk == parcela.pk %}
+                    <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">atual</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% if imp.saldo_pendente > 0 %}
+                <div class="flex items-center gap-3 px-3 py-2 rounded-lg text-xs bg-red-50/50 dark:bg-red-500/5 border border-dashed border-red-300 dark:border-red-500/30">
+                    <span class="font-mono font-bold text-slate-400 w-6 text-center">#{{ imp.parcelas.count|add:1 }}</span>
+                    <span class="font-mono font-bold text-red-500 dark:text-red-400 w-[90px]">R$ {{ imp.saldo_pendente|floatformat:2 }}</span>
+                    <span class="text-red-500 dark:text-red-400 italic">Saldo pendente</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endwith %}
+    {% endwith %}
+    {% endif %}
+
     <!-- Details Accordion -->
     <div x-show="details" x-collapse class="border-t border-slate-200 dark:border-[#2d3544]">
         <div class="px-5 py-4 space-y-3">
@@ -233,7 +295,7 @@
             </div>
 
             <!-- Installment History (for PARCIAL imports) -->
-            {% if show_origen and mov.parcelas.all %}
+            {% if show_origem and mov.parcelas.all %}
             <div class="mt-2">
                 <span class="text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 font-bold block mb-1">Histórico de Parcelas</span>
                 <div class="space-y-1">

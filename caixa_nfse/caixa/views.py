@@ -23,8 +23,10 @@ from .models import (
     Caixa,
     FechamentoCaixa,
     MovimentoCaixa,
+    MovimentoImportado,
     StatusCaixa,
     StatusFechamento,
+    StatusRecebimento,
 )
 from .tables import CaixaTable, MovimentoTable
 
@@ -247,6 +249,20 @@ class FecharCaixaView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
                 .order_by("-total")
             )
 
+            # Aviso de protocolos pendentes (recebimento parcial)
+            pendentes = MovimentoImportado.objects.filter(
+                abertura=abertura,
+                status_recebimento__in=[
+                    StatusRecebimento.PENDENTE,
+                    StatusRecebimento.PARCIAL,
+                ],
+            )
+            pendentes_count = pendentes.count()
+            if pendentes_count:
+                total_pendente = sum(p.saldo_pendente for p in pendentes)
+                context["pendentes_count"] = pendentes_count
+                context["total_saldo_pendente"] = total_pendente
+
         return context
 
     def get_template_names(self):
@@ -415,6 +431,10 @@ class ListaMovimentosView(LoginRequiredMixin, TenantMixin, SingleTableMixin, Fil
             qs.filter(abertura_id=self.kwargs["pk"])
             .select_related("cliente", "forma_pagamento")
             .annotate(itens_count=Count("itens"))
+            .prefetch_related(
+                "parcela_recebimento__movimento_importado__parcelas__forma_pagamento",
+                "parcela_recebimento__movimento_importado__parcelas__recebido_por",
+            )
         )
 
     def get_context_data(self, **kwargs):
@@ -425,6 +445,25 @@ class ListaMovimentosView(LoginRequiredMixin, TenantMixin, SingleTableMixin, Fil
             tenant=self.request.user.tenant,
         )
         context["page_title"] = "Movimentos"
+
+        # Totais gerais (sobre todo o queryset filtrado, sem paginação)
+        qs = self.get_filterset(self.filterset_class).qs
+        totais = qs.aggregate(
+            total_emolumento=Sum("emolumento"),
+            total_valor=Sum("valor"),
+            **{f"total_{f}": Sum(f) for f in MovimentoCaixa.TAXA_FIELDS if f != "emolumento"},
+        )
+        total_emolumento = totais.get("total_emolumento") or Decimal("0.00")
+        total_taxas = sum(
+            totais.get(f"total_{f}") or Decimal("0.00")
+            for f in MovimentoCaixa.TAXA_FIELDS
+            if f != "emolumento"
+        )
+        context["total_emolumento"] = total_emolumento
+        context["total_taxas"] = total_taxas
+        context["total_geral"] = total_emolumento + total_taxas
+        context["total_valor_pago"] = totais.get("total_valor") or Decimal("0.00")
+
         return context
 
 
@@ -871,14 +910,24 @@ class ListaImportadosView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             tenant=self.request.user.tenant, ativo=True
         )
 
-        # Split imports into "previous sessions" vs "current session"
-        importados = list(context["importados"])
-        pendentes_anteriores = [i for i in importados if i.importado_em < abertura.data_hora]
-        importados_sessao_atual = [i for i in importados if i.importado_em >= abertura.data_hora]
+        # Separate: new imports vs partially paid (already confirmed)
+        all_importados = list(context["importados"])
+        pendentes_novos = [i for i in all_importados if not i.confirmado]
+        parciais = [i for i in all_importados if i.confirmado and i.status_recebimento == "PARCIAL"]
+
+        # Session split only for new imports
+        pendentes_anteriores = [i for i in pendentes_novos if i.importado_em < abertura.data_hora]
+        importados_sessao_atual = [
+            i for i in pendentes_novos if i.importado_em >= abertura.data_hora
+        ]
 
         if pendentes_anteriores or importados_sessao_atual:
             context["pendentes_anteriores"] = pendentes_anteriores
             context["importados_sessao_atual"] = importados_sessao_atual
+
+        context["parciais"] = parciais
+        # Override importados to only count pendentes (for select-all counter)
+        context["importados"] = pendentes_novos
         return context
 
 

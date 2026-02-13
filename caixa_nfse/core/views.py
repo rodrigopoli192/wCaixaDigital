@@ -11,7 +11,8 @@ from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.db import models
-from django.db.models import Q, Sum
+from django.db.models import Case, F, Q, Sum, Value, When
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
@@ -286,6 +287,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         total_entradas = 0
         total_saidas = 0
         pendentes_count = 0
+        parciais_count = 0
+        importados_count = 0
+        parciais_list = []
+        importados_list = []
 
         if tenant:
             # Find operator's open caixa
@@ -302,21 +307,47 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 movimentos = MovimentoCaixa.objects.filter(abertura=abertura_atual)
                 ultimos_movimentos = movimentos.order_by("-data_hora")[:5]
 
+                # Use mov.valor (actual payment) with fallback to taxa_sum for legacy records
+                taxa_sum = sum(
+                    Coalesce(F(f), Value(Decimal("0.00"))) for f in MovimentoCaixa.TAXA_FIELDS
+                )
+                valor_real = Case(
+                    When(valor__gt=Decimal("0.00"), then=F("valor")),
+                    default=taxa_sum,
+                    output_field=models.DecimalField(),
+                )
                 totais = movimentos.aggregate(
-                    entradas=Sum("valor", filter=Q(tipo="ENTRADA")),
-                    saidas=Sum("valor", filter=Q(tipo="SAIDA")),
+                    entradas=Sum(
+                        valor_real,
+                        filter=Q(tipo__in=["ENTRADA", "SUPRIMENTO"]),
+                        output_field=models.DecimalField(),
+                    ),
+                    saidas=Sum(
+                        valor_real,
+                        filter=Q(tipo__in=["SAIDA", "SANGRIA", "ESTORNO"]),
+                        output_field=models.DecimalField(),
+                    ),
                 )
                 total_entradas = totais["entradas"] or 0
                 total_saidas = totais["saidas"] or 0
 
-                pendentes_count = (
+                pendentes_qs = (
                     MovimentoImportado.objects.filter(
                         abertura=abertura_atual,
                         tenant=tenant,
                     )
                     .exclude(status_recebimento=StatusRecebimento.QUITADO)
-                    .count()
+                    .select_related("rotina", "conexao")
                 )
+                pendentes_count = pendentes_qs.count()
+                parciais_list = list(
+                    pendentes_qs.filter(
+                        confirmado=True, status_recebimento=StatusRecebimento.PARCIAL
+                    )
+                )
+                importados_list = list(pendentes_qs.filter(confirmado=False))
+                parciais_count = len(parciais_list)
+                importados_count = len(importados_list)
 
             # All active caixas (available and in use)
             todos_caixas = (
@@ -335,6 +366,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             todos_caixas = Caixa.objects.none()
             historico_aberturas = []
 
+        # Saldo atual: usar caixa.saldo_atual (real) ou calcular com saldo_abertura
+        if caixa_atual:
+            saldo_atual = caixa_atual.saldo_atual
+        elif abertura_atual:
+            saldo_atual = (abertura_atual.saldo_abertura or 0) + total_entradas - total_saidas
+        else:
+            saldo_atual = 0
+
         return {
             "page_title": "Meu Caixa",
             "is_admin": False,
@@ -343,10 +382,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             "ultimos_movimentos": ultimos_movimentos,
             "total_entradas": total_entradas,
             "total_saidas": total_saidas,
-            "saldo_atual": total_entradas - total_saidas,
+            "saldo_atual": saldo_atual,
             "todos_caixas": todos_caixas if not abertura_atual else [],
             "historico_aberturas": historico_aberturas,
             "pendentes_count": pendentes_count,
+            "parciais_count": parciais_count,
+            "importados_count": importados_count,
+            "parciais_list": parciais_list,
+            "importados_list": importados_list,
             "hoje": timezone.now().date(),
         }
 
@@ -398,7 +441,29 @@ class MovimentosListView(LoginRequiredMixin, TemplateView):
         if caixa and is_gerente:
             movimentos = movimentos.filter(abertura__caixa__pk=caixa)
 
-        movimentos = movimentos.order_by("-data_hora")
+        movimentos = movimentos.order_by("-data_hora").prefetch_related(
+            "parcela_recebimento",
+            "parcela_recebimento__movimento_importado__parcelas",
+            "parcela_recebimento__movimento_importado__parcelas__forma_pagamento",
+            "parcela_recebimento__movimento_importado__parcelas__recebido_por",
+        )
+
+        # Totais gerais (antes da paginação, sobre todo o queryset filtrado)
+        from django.db.models import Sum
+
+        totais_geral = movimentos.aggregate(
+            total_emolumento=Sum("emolumento"),
+            total_valor=Sum("valor"),
+            **{f"total_{f}": Sum(f) for f in MovimentoCaixa.TAXA_FIELDS if f != "emolumento"},
+        )
+        total_emolumento = totais_geral.get("total_emolumento") or Decimal("0.00")
+        total_taxas = sum(
+            totais_geral.get(f"total_{f}") or Decimal("0.00")
+            for f in MovimentoCaixa.TAXA_FIELDS
+            if f != "emolumento"
+        )
+        total_geral = total_emolumento + total_taxas
+        total_valor_pago = totais_geral.get("total_valor") or Decimal("0.00")
 
         # Paginação
         paginator = Paginator(movimentos, 10)
@@ -418,6 +483,15 @@ class MovimentosListView(LoginRequiredMixin, TemplateView):
         context["filtro_tipo"] = tipo
         context["filtro_caixa"] = caixa
         context["is_gerente"] = is_gerente
+        context["total_emolumento"] = total_emolumento
+        context["total_taxas"] = total_taxas
+        context["total_geral"] = total_geral
+        context["total_valor_pago"] = total_valor_pago
+
+        # Para link 'Ver Todos' no partial
+        if not is_gerente:
+            ab = AberturaCaixa.objects.filter(operador=user, fechado=False).first()
+            context["movimentos_abertura_pk"] = ab.pk if ab else None
 
         return context
 

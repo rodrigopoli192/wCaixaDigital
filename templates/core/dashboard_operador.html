@@ -67,7 +67,7 @@
     </div>
     
     <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Saldo Inicial -->
         <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark p-5 shadow-sm dark:shadow-none">
             <div class="flex items-start justify-between mb-4">
@@ -109,6 +109,21 @@
                 </div>
                 <p class="text-3xl font-bold text-emerald-400">R$ {{ saldo_atual|floatformat:2 }}</p>
                 <p class="text-xs text-primary mt-1">Disponível em caixa agora</p>
+            </div>
+        </div>
+        
+        <!-- Informações do Terminal -->
+        <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark p-5 shadow-sm dark:shadow-none">
+            <div class="flex items-start justify-between mb-4">
+                <div class="size-10 rounded-xl bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-slate-400">computer</span>
+                </div>
+                <span class="text-[10px] uppercase tracking-wider text-slate-500">Terminal</span>
+            </div>
+            <p class="text-sm font-bold text-slate-900 dark:text-white">{{ caixa_atual.identificador }}</p>
+            <div class="flex items-center gap-2 mt-1">
+                <span class="size-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-xs text-slate-500">{{ caixa_atual.get_tipo_display }} · Troco R$ {{ abertura_atual.fundo_troco|floatformat:2 }}</span>
             </div>
         </div>
     </div>
@@ -157,126 +172,99 @@
         {% endif %}
     </div>
     
-    <!-- Layout 2 Colunas: Movimentações + Histórico/Info -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Movimentações do Caixa (2/3) -->
-        <div class="lg:col-span-2 bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm dark:shadow-none">
-            <div class="px-6 py-4 border-b border-border-dark flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">schedule</span>
-                    <h4 class="font-bold text-slate-900 dark:text-white">Movimentações do Caixa</h4>
-                </div>
-                <a href="{% url 'caixa:lista_movimentos' abertura_atual.pk %}" class="text-sm text-primary hover:text-orange-400 flex items-center gap-1 transition-colors">
-                    Ver Todos
-                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                </a>
-            </div>
-            
-            <!-- Container HTMX para movimentos paginados -->
-            <div class="p-4"
-                 hx-get="{% url 'core:movimentos_list' %}" 
-                 hx-trigger="load" 
-                 hx-swap="innerHTML">
-                <div class="flex justify-center items-center py-8">
-                    <span class="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Sidebar: Histórico + Info (1/3) -->
-        <div class="space-y-6">
-            
-            <!-- Meu Histórico -->
-            <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm dark:shadow-none">
-                <div class="px-5 py-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2">
-                    <span class="material-symbols-outlined text-slate-400">trending_up</span>
-                    <h4 class="font-bold text-slate-900 dark:text-white">Meu Histórico</h4>
-                </div>
-                <div class="divide-y divide-slate-100 dark:divide-border-dark">
-                    {% for abertura in historico_aberturas %}
-                    <div class="px-5 py-3 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="size-9 rounded-lg bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
-                                <span class="material-symbols-outlined text-slate-500 text-lg">laptop_mac</span>
-                            </div>
-                            <div>
-                                <p class="font-semibold text-slate-900 dark:text-white text-sm">{{ abertura.caixa.identificador }}</p>
-                                <p class="text-xs text-slate-500">{{ abertura.data_hora|date:"d/m/Y H:i" }}</p>
-                            </div>
-                        </div>
-                        {% if abertura.fechado %}
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-red-600 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">
-                            Fechado
-                        </span>
-                        {% else %}
-                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-100 text-emerald-600 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
-                            Aberto
-                        </span>
-                        {% endif %}
-                    </div>
-                    {% empty %}
-                    <div class="p-5 text-center text-slate-500">
-                        <span class="material-symbols-outlined text-2xl text-slate-600 mb-2">inbox</span>
-                        <p class="text-sm">Nenhum registro.</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            
-            <!-- Informações do Terminal -->
-            <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm dark:shadow-none">
-                <div class="px-5 py-4 border-b border-slate-200 dark:border-border-dark">
-                    <p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Informações do Terminal</p>
-                </div>
-                <div class="p-5 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-slate-500">Caixa</span>
-                        <div class="flex items-center gap-2">
-                            <span class="size-1.5 rounded-full bg-emerald-400"></span>
-                            <span class="text-sm text-slate-300">{{ caixa_atual.identificador }}</span>
-                            <span class="text-xs text-slate-600 ml-2">v 2.4.1</span>
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-slate-500">Tipo</span>
-                        <span class="text-sm text-slate-700 dark:text-slate-300">{{ caixa_atual.get_tipo_display }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-slate-500">Fundo de Troco</span>
-                        <span class="text-sm font-bold text-primary">R$ {{ abertura_atual.fundo_troco|floatformat:2 }}</span>
-                    </div>
-                </div>
-            </div>
-            
+    <!-- Movimentações do Caixa (full-width) -->
+    <div hx-get="{% url 'core:movimentos_list' %}" 
+         hx-trigger="load" 
+         hx-swap="innerHTML">
+        <div class="flex justify-center items-center py-8">
+            <span class="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></span>
         </div>
     </div>
 
-    <!-- Movimentações Pendentes (full-width) -->
-    {% if pendentes_count %}
-    <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm dark:shadow-none">
-        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-amber-500">cloud_download</span>
-                <h4 class="font-bold text-slate-900 dark:text-white">Movimentações Pendentes</h4>
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">{{ pendentes_count }}</span>
-            </div>
+    <!-- Aguardando Saldo Restante (parciais) -->
+    {% if parciais_count %}
+    <div class="bg-white dark:bg-surface-dark rounded-2xl border border-amber-500/30 dark:border-amber-500/20 overflow-hidden shadow-sm dark:shadow-none"
+         x-data="{ expanded: true }">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-amber-500/20">
+            <button @click="expanded = !expanded" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <span class="material-symbols-outlined text-amber-500">hourglass_top</span>
+                <h4 class="font-bold text-amber-700 dark:text-amber-400">Aguardando Saldo Restante</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">{{ parciais_count }}</span>
+                <span class="material-symbols-outlined text-amber-400 transition-transform" :class="expanded ? 'rotate-180' : ''">expand_more</span>
+            </button>
             <a href="{% url 'caixa:lista_importados' abertura_atual.pk %}" class="text-sm text-primary hover:text-orange-400 flex items-center gap-1 transition-colors">
-                Ver Importados
+                Ver Todos
                 <span class="material-symbols-outlined text-sm">arrow_forward</span>
             </a>
         </div>
-
-        <div class="p-4"
-             hx-get="{% url 'caixa:lista_importados' abertura_atual.pk %}"
-             hx-trigger="load"
-             hx-swap="innerHTML">
-            <div class="flex justify-center items-center py-8">
-                <span class="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></span>
-            </div>
+        <div x-show="expanded" x-collapse class="px-4 py-3 space-y-2">
+            {% for mov in parciais_list %}
+            {% include "caixa/partials/_movimento_card.html" with mov=mov show_checkbox=False show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
+            {% endfor %}
         </div>
     </div>
     {% endif %}
+
+    <!-- Movimentos Importados (Aguardando Confirmação) -->
+    {% if importados_count %}
+    <div class="bg-white dark:bg-surface-dark rounded-2xl border border-blue-500/30 dark:border-blue-500/20 overflow-hidden shadow-sm dark:shadow-none"
+         x-data="{ expanded: true }">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-blue-500/20">
+            <button @click="expanded = !expanded" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <span class="material-symbols-outlined text-blue-500">cloud_queue</span>
+                <h4 class="font-bold text-blue-700 dark:text-blue-400">Movimentos Importados (Aguardando Confirmação)</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold">{{ importados_count }}</span>
+                <span class="material-symbols-outlined text-blue-400 transition-transform" :class="expanded ? 'rotate-180' : ''">expand_more</span>
+            </button>
+            <a href="{% url 'caixa:lista_importados' abertura_atual.pk %}" class="text-sm text-primary hover:text-orange-400 flex items-center gap-1 transition-colors">
+                Ver Todos
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+        </div>
+        <div x-show="expanded" x-collapse class="px-4 py-3 space-y-2">
+            {% for mov in importados_list %}
+            {% include "caixa/partials/_movimento_card.html" with mov=mov show_checkbox=False show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Meu Histórico (full-width) -->
+    <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark overflow-hidden shadow-sm dark:shadow-none">
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center gap-2">
+            <span class="material-symbols-outlined text-slate-400">trending_up</span>
+            <h4 class="font-bold text-slate-900 dark:text-white">Meu Histórico</h4>
+        </div>
+        <div class="divide-y divide-slate-100 dark:divide-border-dark">
+            {% for abertura in historico_aberturas %}
+            <div class="px-6 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="size-9 rounded-lg bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-slate-500 text-lg">laptop_mac</span>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-slate-900 dark:text-white text-sm">{{ abertura.caixa.identificador }}</p>
+                        <p class="text-xs text-slate-500">{{ abertura.data_hora|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+                {% if abertura.fechado %}
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-red-600 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">
+                    Fechado
+                </span>
+                {% else %}
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-100 text-emerald-600 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+                    Aberto
+                </span>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div class="p-5 text-center text-slate-500">
+                <span class="material-symbols-outlined text-2xl text-slate-600 mb-2">inbox</span>
+                <p class="text-sm">Nenhum registro.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
     {% else %}
     <!-- Nenhum Caixa Aberto - Terminal Selection -->

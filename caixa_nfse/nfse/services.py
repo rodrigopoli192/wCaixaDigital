@@ -63,8 +63,12 @@ def criar_nfse_de_movimento(movimento, servico_municipal=None):
     # Alíquota ISS padrão do serviço ou fallback
     aliquota_iss = getattr(servico_municipal, "aliquota_padrao", None) or Decimal("0.0500")
 
-    # Valor líquido e base de cálculo
-    valor_servicos = movimento.valor
+    # Valor dos serviços: na quitação de parcial, usar valor total do protocolo
+    importado = movimento.importacao_origem.first()
+    if importado:
+        valor_servicos = importado.valor  # valor total do protocolo
+    else:
+        valor_servicos = movimento.valor
     valor_deducoes = Decimal("0.00")
     base_calculo = valor_servicos - valor_deducoes
     valor_iss = base_calculo * aliquota_iss
