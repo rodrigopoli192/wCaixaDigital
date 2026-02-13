@@ -18,6 +18,7 @@ urlpatterns = [
     # Financeiros
     path("movimentacoes/", views.MovimentacoesReportView.as_view(), name="movimentacoes"),
     path("resumo-caixa/", views.ResumoCaixaReportView.as_view(), name="resumo_caixa"),
+    path("relatorio-diario/", views.RelatorioDiarioView.as_view(), name="relatorio_diario"),
     path("formas-pagamento/", views.FormasPagamentoReportView.as_view(), name="formas_pagamento"),
     # Operacionais
     path(

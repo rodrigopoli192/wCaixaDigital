@@ -472,6 +472,7 @@ class ImportadorMovimentos:
                 "status_item": imp.status_item,
                 "quantidade": imp.quantidade,
                 "cliente": cliente,
+                "cliente_nome": imp.cliente_nome or "",
                 "data_ato": imp.data_ato,
             }
 

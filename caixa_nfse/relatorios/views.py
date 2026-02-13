@@ -182,6 +182,7 @@ class MovimentacoesReportView(ExportMixin, GerenteRequiredMixin, TemplateView):
                 "movimentos": movimentos[:100],
                 "total_entradas": totais["total_entradas"] or 0,
                 "total_saidas": totais["total_saidas"] or 0,
+                "saldo_liquido": (totais["total_entradas"] or 0) - (totais["total_saidas"] or 0),
                 "total_registros": totais["count"] or 0,
                 "caixas": caixas,
                 "formas_pagamento": formas_pagamento,
@@ -912,6 +913,194 @@ class ProtocolosPendentesView(ExportMixin, GerenteRequiredMixin, TemplateView):
                 "filtro_status": self.request.GET.get("status", ""),
                 "filtro_data_inicio": self.request.GET.get("data_inicio", ""),
                 "filtro_data_fim": self.request.GET.get("data_fim", ""),
+                "filtro_caixa": self.request.GET.get("caixa", ""),
+            }
+        )
+        return context
+
+
+class RelatorioDiarioView(ExportMixin, GerenteRequiredMixin, TemplateView):
+    """Relatório diário agrupado por dia e caixa."""
+
+    template_name = "relatorios/financeiros/relatorio_diario.html"
+    export_title = "Relatório Diário de Caixas"
+    export_columns = [
+        {"key": "data", "label": "Data", "align": "left"},
+        {"key": "caixa", "label": "Caixa", "align": "left"},
+        {"key": "operador", "label": "Operador", "align": "left"},
+        {"key": "movimentos", "label": "Movimentos", "align": "right"},
+        {"key": "entradas", "label": "Entradas", "align": "right"},
+        {"key": "saidas", "label": "Saídas", "align": "right"},
+        {"key": "saldo", "label": "Saldo", "align": "right"},
+    ]
+
+    def _get_filtros(self):
+        data_inicio = self.request.GET.get("data_inicio", "")
+        data_fim = self.request.GET.get("data_fim", "")
+        caixa_id = self.request.GET.get("caixa", "")
+
+        if not data_inicio:
+            data_inicio = (timezone.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+        if not data_fim:
+            data_fim = timezone.now().strftime("%Y-%m-%d")
+
+        return data_inicio, data_fim, caixa_id
+
+    def _get_base_qs(self):
+        tenant = self.request.user.tenant
+        data_inicio, data_fim, caixa_id = self._get_filtros()
+
+        movimentos = MovimentoCaixa.objects.filter(abertura__caixa__tenant=tenant).select_related(
+            "abertura__caixa", "abertura__operador", "forma_pagamento"
+        )
+
+        movimentos = movimentos.filter(data_hora__date__gte=data_inicio)
+        movimentos = movimentos.filter(data_hora__date__lte=data_fim)
+
+        if caixa_id:
+            movimentos = movimentos.filter(abertura__caixa__pk=caixa_id)
+
+        return movimentos
+
+    def get_dados_diarios(self):
+        movimentos = self._get_base_qs()
+
+        # Aggregate by day + caixa
+        agrupado = (
+            movimentos.annotate(dia=TruncDate("data_hora"))
+            .values(
+                "dia",
+                "abertura__caixa__identificador",
+                "abertura__caixa__pk",
+                "abertura__operador__first_name",
+                "abertura__operador__email",
+            )
+            .annotate(
+                total_movimentos=Count("id"),
+                total_entradas=Sum("valor", filter=Q(tipo__in=["ENTRADA", "SUPRIMENTO"])),
+                total_saidas=Sum("valor", filter=Q(tipo__in=["SAIDA", "SANGRIA", "ESTORNO"])),
+            )
+            .order_by("-dia", "abertura__caixa__identificador")
+        )
+
+        # Formas de pagamento by day + caixa
+        formas_raw = (
+            movimentos.annotate(dia=TruncDate("data_hora"))
+            .values(
+                "dia",
+                "abertura__caixa__pk",
+                "forma_pagamento__nome",
+            )
+            .annotate(
+                total=Sum("valor"),
+                qtd=Count("id"),
+            )
+            .order_by("-dia", "abertura__caixa__pk", "-total")
+        )
+
+        # Build formas lookup
+        formas_map = {}
+        for f in formas_raw:
+            key = (f["dia"], f["abertura__caixa__pk"])
+            formas_map.setdefault(key, []).append(
+                {
+                    "nome": f["forma_pagamento__nome"] or "Não informado",
+                    "total": f["total"] or Decimal("0"),
+                    "qtd": f["qtd"],
+                }
+            )
+
+        # Group by day
+        dias = {}
+        for item in agrupado:
+            dia = item["dia"]
+            entradas = item["total_entradas"] or Decimal("0")
+            saidas = item["total_saidas"] or Decimal("0")
+            caixa_pk = item["abertura__caixa__pk"]
+            operador_nome = (
+                item["abertura__operador__first_name"] or item["abertura__operador__email"]
+            )
+
+            caixa_data = {
+                "caixa": item["abertura__caixa__identificador"],
+                "caixa_pk": caixa_pk,
+                "operador": operador_nome,
+                "total_movimentos": item["total_movimentos"],
+                "entradas": entradas,
+                "saidas": saidas,
+                "saldo": entradas - saidas,
+                "formas": formas_map.get((dia, caixa_pk), []),
+            }
+
+            if dia not in dias:
+                dias[dia] = {
+                    "data": dia,
+                    "caixas": [],
+                    "total_entradas": Decimal("0"),
+                    "total_saidas": Decimal("0"),
+                    "total_movimentos": 0,
+                }
+
+            dias[dia]["caixas"].append(caixa_data)
+            dias[dia]["total_entradas"] += entradas
+            dias[dia]["total_saidas"] += saidas
+            dias[dia]["total_movimentos"] += item["total_movimentos"]
+
+        # Add saldo to each day
+        for dia_data in dias.values():
+            dia_data["saldo"] = dia_data["total_entradas"] - dia_data["total_saidas"]
+
+        return sorted(dias.values(), key=lambda d: d["data"], reverse=True)
+
+    def get_export_data(self):
+        rows = []
+        for dia in self.get_dados_diarios():
+            for c in dia["caixas"]:
+                rows.append(
+                    {
+                        "data": dia["data"].strftime("%d/%m/%Y"),
+                        "caixa": c["caixa"],
+                        "operador": c["operador"],
+                        "movimentos": c["total_movimentos"],
+                        "entradas": format_currency(c["entradas"]),
+                        "saidas": format_currency(c["saidas"]),
+                        "saldo": format_currency(c["saldo"]),
+                    }
+                )
+        return rows
+
+    def get_export_totals(self):
+        dados = self.get_dados_diarios()
+        total_ent = sum(d["total_entradas"] for d in dados)
+        total_sai = sum(d["total_saidas"] for d in dados)
+        return {
+            "entradas": format_currency(total_ent),
+            "saidas": format_currency(total_sai),
+            "saldo": format_currency(total_ent - total_sai),
+        }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tenant = self.request.user.tenant
+        data_inicio, data_fim, _ = self._get_filtros()
+        dados_diarios = self.get_dados_diarios()
+
+        total_entradas = sum(d["total_entradas"] for d in dados_diarios)
+        total_saidas = sum(d["total_saidas"] for d in dados_diarios)
+
+        caixas = Caixa.objects.filter(tenant=tenant, ativo=True)
+
+        context.update(
+            {
+                "page_title": self.export_title,
+                "dados_diarios": dados_diarios,
+                "total_entradas": total_entradas,
+                "total_saidas": total_saidas,
+                "saldo_liquido": total_entradas - total_saidas,
+                "total_dias": len(dados_diarios),
+                "caixas": caixas,
+                "filtro_data_inicio": data_inicio,
+                "filtro_data_fim": data_fim,
                 "filtro_caixa": self.request.GET.get("caixa", ""),
             }
         )

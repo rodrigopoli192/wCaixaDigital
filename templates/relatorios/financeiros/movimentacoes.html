@@ -60,6 +60,9 @@
     <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
         <p class="text-sm text-slate-500 mb-1">Total de Registros</p>
         <p class="text-2xl font-bold">{{ total_registros }}</p>
+        {% if total_registros > movimentos|length %}
+        <p class="text-xs text-amber-500 mt-1">Exibindo {{ movimentos|length }} de {{ total_registros }}</p>
+        {% endif %}
     </div>
 </div>
 
@@ -107,9 +110,14 @@
             </tbody>
             <tfoot class="bg-slate-100 dark:bg-background-dark border-t-2 border-slate-300 dark:border-border-dark">
                 <tr class="font-bold">
-                    <td colspan="5" class="px-6 py-4 text-sm uppercase">Total</td>
-                    <td class="px-6 py-4 text-right text-sm text-success">+R$ {{ total_entradas|floatformat:2 }}</td>
-                    <td class="px-6 py-4 text-right text-sm text-danger">-R$ {{ total_saidas|floatformat:2 }}</td>
+                    <td colspan="6" class="px-6 py-4 text-sm">
+                        <span class="uppercase">Total</span>
+                        <span class="ml-4 text-success">Entradas: +R$ {{ total_entradas|floatformat:2 }}</span>
+                        <span class="ml-4 text-danger">Saídas: -R$ {{ total_saidas|floatformat:2 }}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right text-sm font-bold {% if saldo_liquido >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        R$ {{ saldo_liquido|floatformat:2 }}
+                    </td>
                 </tr>
             </tfoot>
         </table>

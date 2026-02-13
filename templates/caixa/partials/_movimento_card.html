@@ -36,15 +36,31 @@
                 <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-600 dark:text-slate-400 font-bold shrink-0">Estorno</span>
                 {% endif %}
 
-                <!-- Partial Payment Badge (when MovimentoCaixa is linked to a ParcelaRecebimento) -->
-                {% if mov.parcela_recebimento.exists %}
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold shrink-0 flex items-center gap-0.5 cursor-pointer"
-                      @click.stop="showPayments = !showPayments"
-                      title="Este movimento é um pagamento parcial — clique para ver todos os pagamentos">
-                    <span class="material-symbols-outlined text-[10px]">hourglass_top</span>
-                    Pgto. Parcial
+                <!-- Payment Status Badge (from original import) -->
+                {% with imp_ref=mov.importacao_origem.first %}
+                {% if imp_ref and imp_ref.parcelas.count > 1 %}
+                    {% if imp_ref.status_recebimento == 'QUITADO' %}
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold shrink-0 flex items-center gap-0.5 cursor-pointer"
+                          @click.stop="showPayments = !showPayments"
+                          title="Protocolo quitado em {{ imp_ref.parcelas.count }} parcelas — clique para ver histórico">
+                        <span class="material-symbols-outlined text-[10px]">check_circle</span>
+                        Quitado ({{ mov.parcela_recebimento.first.numero_parcela }}/{{ imp_ref.parcelas.count }})
+                    </span>
+                    {% else %}
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold shrink-0 flex items-center gap-0.5 cursor-pointer"
+                          @click.stop="showPayments = !showPayments"
+                          title="Protocolo pago parcialmente — clique para ver histórico">
+                        <span class="material-symbols-outlined text-[10px]">hourglass_top</span>
+                        Pgto. Parcial ({{ mov.parcela_recebimento.first.numero_parcela }}/{{ imp_ref.parcelas.count }})
+                    </span>
+                    {% endif %}
+                {% elif imp_ref and imp_ref.status_recebimento == 'QUITADO' %}
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold shrink-0 flex items-center gap-0.5">
+                    <span class="material-symbols-outlined text-[10px]">check_circle</span>
+                    Quitado
                 </span>
                 {% endif %}
+                {% endwith %}
                 {% else %}
                 <!-- Status Badge (MovimentoImportado) - valor bruto do sistema externo -->
                 {% if mov.status_item %}
@@ -128,13 +144,11 @@
 
             <!-- Row 2: Subtitle -->
             <div class="flex items-center gap-2 pl-0">
-                {% if show_origem %}
-                    {% if mov.cliente_nome %}
+                {% if mov.cliente_nome %}
                     <span class="text-[11px] text-primary font-medium truncate flex items-center gap-1" title="{{ mov.cliente_nome }}">
                         <span class="material-symbols-outlined text-[11px] text-primary">person</span>
                         {{ mov.cliente_nome }}
                     </span>
-                    {% endif %}
                 {% elif show_tipo and mov.cliente %}
                     <span class="text-[11px] text-primary font-medium truncate flex items-center gap-1" title="{{ mov.cliente.razao_social }}">
                         <span class="material-symbols-outlined text-[11px] text-primary">person</span>

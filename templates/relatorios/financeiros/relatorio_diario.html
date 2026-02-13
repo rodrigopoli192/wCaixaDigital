@@ -1,0 +1,166 @@
+{% extends "relatorios/base_relatorio.html" %}
+
+{% block export_buttons %}
+{% include "relatorios/includes/export_buttons.html" %}
+{% endblock %}
+
+{% block report_content %}
+<!-- Filtros -->
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Início</label>
+            <input type="date" name="data_inicio" value="{{ filtro_data_inicio }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Data Fim</label>
+            <input type="date" name="data_fim" value="{{ filtro_data_fim }}"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">Caixa</label>
+            <select name="caixa" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark text-sm">
+                <option value="">Todos os caixas</option>
+                {% for c in caixas %}
+                <option value="{{ c.pk }}" {% if filtro_caixa == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.identificador }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex items-end">
+            <button type="submit" class="w-full px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors">
+                <span class="material-symbols-outlined text-sm align-middle mr-1">filter_alt</span>
+                Filtrar
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- KPIs -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+        <p class="text-sm text-slate-500 mb-1">Total de Entradas</p>
+        <p class="text-2xl font-bold text-success">R$ {{ total_entradas|floatformat:2 }}</p>
+    </div>
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+        <p class="text-sm text-slate-500 mb-1">Total de Saídas</p>
+        <p class="text-2xl font-bold text-danger">R$ {{ total_saidas|floatformat:2 }}</p>
+    </div>
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+        <p class="text-sm text-slate-500 mb-1">Saldo Líquido</p>
+        <p class="text-2xl font-bold {% if saldo_liquido >= 0 %}text-success{% else %}text-danger{% endif %}">R$ {{ saldo_liquido|floatformat:2 }}</p>
+    </div>
+    <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-6">
+        <p class="text-sm text-slate-500 mb-1">Dias com Movimentação</p>
+        <p class="text-2xl font-bold">{{ total_dias }}</p>
+    </div>
+</div>
+
+<!-- Dados por Dia -->
+<div class="space-y-8">
+{% for dia in dados_diarios %}
+<div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark shadow-sm dark:shadow-none border-l-4 border-l-primary dark:border-l-primary overflow-hidden ring-1 ring-transparent dark:ring-border-dark">
+
+    <!-- Day Header -->
+    <div class="bg-primary/5 dark:bg-background-dark px-6 py-4 flex items-center justify-between border-b border-slate-200 dark:border-border-dark">
+        <div class="flex items-center gap-3">
+            <div class="size-11 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center border border-primary/20 dark:border-primary/40">
+                <span class="material-symbols-outlined text-primary text-xl">calendar_today</span>
+            </div>
+            <div>
+                <h4 class="text-xl font-bold text-slate-900 dark:text-white">{{ dia.data|date:"d/m/Y" }}</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400">{{ dia.data|date:"l" }} · {{ dia.total_movimentos }} movimento{{ dia.total_movimentos|pluralize:"s" }}</p>
+            </div>
+        </div>
+        <div class="hidden md:flex items-center gap-5 text-sm">
+            <span class="font-mono font-bold text-success">+R$ {{ dia.total_entradas|floatformat:2 }}</span>
+            <span class="font-mono font-bold text-danger">-R$ {{ dia.total_saidas|floatformat:2 }}</span>
+            <span class="font-mono font-bold px-3 py-1 rounded-lg {% if dia.saldo >= 0 %}bg-success/10 text-success{% else %}bg-danger/10 text-danger{% endif %}">R$ {{ dia.saldo|floatformat:2 }}</span>
+        </div>
+    </div>
+
+    <!-- Caixa Cards -->
+    <div class="divide-y divide-slate-100 dark:divide-border-dark">
+    {% for cx in dia.caixas %}
+    <div>
+        <div class="px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="size-9 rounded-lg bg-slate-100 dark:bg-background-dark flex items-center justify-center">
+                    <span class="material-symbols-outlined text-slate-500 dark:text-slate-400 text-lg">point_of_sale</span>
+                </div>
+                <div>
+                    <h5 class="font-semibold text-sm text-slate-800 dark:text-slate-100">{{ cx.caixa }}</h5>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-[11px] align-middle">person</span>
+                        {{ cx.operador }} · {{ cx.total_movimentos }} mov.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-6 text-sm">
+                <div class="text-right">
+                    <span class="text-[10px] uppercase text-slate-400 dark:text-slate-500 block">Entradas</span>
+                    <span class="font-mono font-bold text-success">+R$ {{ cx.entradas|floatformat:2 }}</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] uppercase text-slate-400 dark:text-slate-500 block">Saídas</span>
+                    <span class="font-mono font-bold text-danger">-R$ {{ cx.saidas|floatformat:2 }}</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] uppercase text-slate-400 dark:text-slate-500 block">Saldo</span>
+                    <span class="font-mono font-bold {% if cx.saldo >= 0 %}text-success{% else %}text-danger{% endif %}">R$ {{ cx.saldo|floatformat:2 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formas de Pagamento -->
+        {% if cx.formas %}
+        <div class="px-6 py-3 bg-slate-50 dark:bg-background-dark border-t border-slate-100 dark:border-border-dark">
+            <p class="text-[10px] uppercase text-slate-400 dark:text-slate-500 font-medium mb-2">Por Forma de Pagamento</p>
+            <div class="flex flex-wrap gap-3">
+                {% for forma in cx.formas %}
+                <div class="flex items-center gap-2 bg-white dark:bg-surface-dark px-3 py-1.5 rounded-lg border border-slate-200 dark:border-border-dark">
+                    <span class="text-xs font-medium text-slate-600 dark:text-slate-300">{{ forma.nome }}</span>
+                    <span class="text-xs font-mono font-bold text-slate-800 dark:text-white">R$ {{ forma.total|floatformat:2 }}</span>
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500">({{ forma.qtd }}x)</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    </div>
+
+    <!-- Daily Total -->
+    <div class="bg-primary/5 dark:bg-background-dark px-6 py-3 border-t-2 border-primary/20 dark:border-primary/40">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <span class="text-xs font-bold uppercase text-primary/70 dark:text-primary">
+                <span class="material-symbols-outlined text-sm align-middle mr-1">summarize</span>
+                Total do Dia {{ dia.data|date:"d/m" }}
+            </span>
+            <div class="flex items-center gap-6 text-sm">
+                <div class="text-right">
+                    <span class="text-[10px] uppercase text-slate-400 dark:text-slate-500 block">Entradas</span>
+                    <span class="font-mono font-bold text-success">+R$ {{ dia.total_entradas|floatformat:2 }}</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] uppercase text-slate-400 dark:text-slate-500 block">Saídas</span>
+                    <span class="font-mono font-bold text-danger">-R$ {{ dia.total_saidas|floatformat:2 }}</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] uppercase text-slate-400 dark:text-slate-500 block">Saldo</span>
+                    <span class="font-mono font-bold {% if dia.saldo >= 0 %}text-success{% else %}text-danger{% endif %}">R$ {{ dia.saldo|floatformat:2 }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% empty %}
+<div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm p-8 text-center">
+    <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">calendar_month</span>
+    <p class="text-slate-500">Nenhum movimento encontrado no período selecionado.</p>
+</div>
+{% endfor %}
+</div>
+{% endblock %}

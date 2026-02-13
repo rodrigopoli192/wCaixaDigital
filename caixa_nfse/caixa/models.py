@@ -365,6 +365,12 @@ class MovimentoCaixa(TenantAwareModel):
         blank=True,
         null=True,
     )
+    cliente_nome = models.CharField(
+        _("nome do apresentante"),
+        max_length=200,
+        blank=True,
+        default="",
+    )
 
     # --- Taxas Cartoriais ---
     iss = models.DecimalField(
