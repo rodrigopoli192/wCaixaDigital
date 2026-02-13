@@ -171,6 +171,12 @@
                     Ato: {{ mov.data_ato|date:"d/m/Y" }}
                 </span>
                 {% endif %}
+                {% if show_origem and mov.importado_em %}
+                <span class="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-0.5 shrink-0">
+                    <span class="material-symbols-outlined text-[10px]">schedule</span>
+                    Importado: {{ mov.importado_em|date:"d/m H:i" }}
+                </span>
+                {% endif %}
             </div>
 
             <!-- Progress Bar (for PARCIAL status) -->

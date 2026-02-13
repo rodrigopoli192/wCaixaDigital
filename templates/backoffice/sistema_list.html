@@ -6,19 +6,19 @@
 <div class="p-8 space-y-8">
     <!-- Header -->
     <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Sistemas Integrados</h1>
-            <p class="text-slate-500 mt-1">Gerencie os sistemas e suas rotinas SQL associadas</p>
-        </div>
-        <div class="flex gap-3">
+        <div class="flex items-center gap-4">
             <a href="{% url 'backoffice:dashboard' %}" class="size-10 rounded-xl bg-slate-800 dark:bg-[#2B2C30] flex items-center justify-center text-orange-500 hover:bg-slate-700 dark:hover:bg-[#3a3b40] transition-colors">
                 <span class="material-symbols-outlined">arrow_back</span>
             </a>
-            <button hx-get="{% url 'backoffice:sistema_add' %}" hx-target="body" hx-swap="beforeend" class="bg-primary hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors">
-                <span class="material-symbols-outlined text-lg">add_circle</span>
-                Novo Sistema
-            </button>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Sistemas Integrados</h1>
+                <p class="text-slate-500 mt-1">Gerencie os sistemas e suas rotinas SQL associadas</p>
+            </div>
         </div>
+        <button hx-get="{% url 'backoffice:sistema_add' %}" hx-target="body" hx-swap="beforeend" class="bg-primary hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors">
+            <span class="material-symbols-outlined text-lg">add_circle</span>
+            Novo Sistema
+        </button>
     </div>
 
     <!-- Sistemas List -->

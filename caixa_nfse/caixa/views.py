@@ -1012,6 +1012,9 @@ class ListaImportadosView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         context["parciais"] = parciais
         # Override importados to only count pendentes (for select-all counter)
         context["importados"] = pendentes_novos
+        # Totals for header display
+        context["total_pendente"] = sum(i.saldo_pendente for i in pendentes_novos)
+        context["total_parciais"] = sum(i.saldo_pendente for i in parciais)
         return context
 
 

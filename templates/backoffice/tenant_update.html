@@ -8,17 +8,19 @@
     
     <!-- Header -->
     <div class="flex justify-between items-center">
-        <div>
-            <h2 class="text-2xl font-bold flex items-center gap-3">
-                <span class="material-symbols-outlined text-primary">edit_square</span>
-                Editar Empresa
-            </h2>
-            <p class="text-slate-500 dark:text-slate-400 mt-1">{{ tenant.razao_social }}</p>
-        </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-4">
             <a href="{% url 'backoffice:dashboard' %}" class="size-10 rounded-xl bg-slate-800 dark:bg-[#2B2C30] flex items-center justify-center text-orange-500 hover:bg-slate-700 dark:hover:bg-[#3a3b40] transition-colors">
                 <span class="material-symbols-outlined">arrow_back</span>
             </a>
+            <div>
+                <h2 class="text-2xl font-bold flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">edit_square</span>
+                    Editar Empresa
+                </h2>
+                <p class="text-slate-500 dark:text-slate-400 mt-1">{{ tenant.razao_social }}</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
             <a href="{% url 'backoffice:tenant_delete' tenant.pk %}" class="text-red-500 hover:text-red-700 font-medium text-sm flex items-center gap-2 px-4 py-2.5 rounded-lg border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                 <span class="material-symbols-outlined text-lg">delete</span>
                 Excluir Empresa
