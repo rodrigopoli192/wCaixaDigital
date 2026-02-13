@@ -5,6 +5,7 @@ Caixa URL configuration.
 from django.urls import path
 
 from . import views
+from .views_editar_saldo import EditarSaldoInicialView
 
 app_name = "caixa"
 
@@ -44,6 +45,12 @@ urlpatterns = [
         "abertura/<uuid:pk>/importados/excluir/",
         views.ExcluirImportadosView.as_view(),
         name="excluir_importados",
+    ),
+    # Editar saldo inicial (once-per-day)
+    path(
+        "abertura/<uuid:pk>/editar-saldo/",
+        EditarSaldoInicialView.as_view(),
+        name="editar_saldo_inicial",
     ),
     # Recibo detalhado
     path(

@@ -33,10 +33,19 @@
                     </label>
                     <div class="relative group">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium group-focus-within:text-emerald-500 transition-colors">R$</span>
-                        <input type="number" step="0.01" min="0" name="saldo_abertura" id="id_saldo_abertura" required
-                               value="0.00"
+                        <input type="text" id="id_saldo_abertura_display" required
+                               oninput="
+                                   let v = this.value.replace(/\D/g, '');
+                                   if (!v) { this.value = ''; document.getElementById('id_saldo_abertura').value = ''; return; }
+                                   v = (parseInt(v) / 100).toFixed(2);
+                                   let parts = v.split('.');
+                                   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                                   this.value = parts.join(',');
+                                   document.getElementById('id_saldo_abertura').value = this.value;
+                               "
                                class="w-full bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg pl-10 pr-4 py-2.5 text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-600 font-medium"
                                placeholder="0,00">
+                        <input type="hidden" name="saldo_abertura" id="id_saldo_abertura" value="0,00">
                     </div>
                     <p class="text-[10px] text-slate-500">Valor em dinheiro no caixa no momento da abertura</p>
                     {% if form.saldo_abertura.errors %}
@@ -51,10 +60,19 @@
                     </label>
                     <div class="relative group">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-medium group-focus-within:text-emerald-500 transition-colors">R$</span>
-                         <input type="number" step="0.01" min="0" name="fundo_troco" id="id_fundo_troco"
-                               value="0.00"
+                        <input type="text" id="id_fundo_troco_display"
+                               oninput="
+                                   let v = this.value.replace(/\D/g, '');
+                                   if (!v) { this.value = ''; document.getElementById('id_fundo_troco').value = '0,00'; return; }
+                                   v = (parseInt(v) / 100).toFixed(2);
+                                   let parts = v.split('.');
+                                   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                                   this.value = parts.join(',');
+                                   document.getElementById('id_fundo_troco').value = this.value;
+                               "
                                class="w-full bg-slate-50 dark:bg-[#2B2C30] border border-slate-200 dark:border-[#2d3544] rounded-lg pl-10 pr-4 py-2.5 text-slate-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder-slate-400 dark:placeholder-slate-600 font-medium"
                                placeholder="0,00">
+                        <input type="hidden" name="fundo_troco" id="id_fundo_troco" value="0,00">
                     </div>
                     <p class="text-[10px] text-slate-500">Valor reservado para dar troco aos clientes (opcional)</p>
                 </div>

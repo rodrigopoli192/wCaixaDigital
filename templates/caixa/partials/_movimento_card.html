@@ -1,8 +1,9 @@
+{% load l10n %}
 <!-- Reusable Movement Card with Collapsible Details -->
 <!-- Variables: mov, show_checkbox (bool), show_tipo (bool), show_origem (bool), show_caixa (bool) -->
 
 <div class="bg-white dark:bg-[#2B2C30] rounded-xl border border-slate-200 dark:border-[#2d3544] overflow-hidden transition-colors shadow-sm dark:shadow-none"
-     {% if show_origem %}data-imp-id="{{ mov.pk }}" data-saldo="{{ mov.saldo_pendente }}" data-valor-total="{{ mov.valor }}" data-recebido="{{ mov.valor_recebido }}" data-protocolo="{{ mov.protocolo|floatformat:0|default:'—' }}" data-descricao="{{ mov.descricao|default:'' }}"{% endif %}
+     {% if show_origem %}data-imp-id="{{ mov.pk }}" data-saldo="{{ mov.saldo_pendente|unlocalize }}" data-valor-total="{{ mov.valor|unlocalize }}" data-recebido="{{ mov.valor_recebido|unlocalize }}" data-protocolo="{{ mov.protocolo|floatformat:0|default:'—' }}" data-descricao="{{ mov.descricao|default:'' }}"{% endif %}
      {% if show_checkbox %}:class="selected.includes('{{ mov.pk }}') ? 'border-primary/50 bg-primary/5' : ''"{% endif %}
      x-data="{ details: false, showPayments: false }">
 

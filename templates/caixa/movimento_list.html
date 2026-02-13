@@ -99,14 +99,43 @@
         <div class="bg-white dark:bg-[#2B2C30] p-5 rounded-2xl border border-slate-200 dark:border-[#2d3544] shadow-sm dark:shadow-none relative group">
             <div class="flex justify-between items-start">
                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Saldo Inicial</span>
-                <div class="size-8 rounded-full bg-slate-100 dark:bg-[#2d3544] flex items-center justify-center">
-                    <span class="material-symbols-outlined text-slate-400 text-sm">account_balance</span>
+                <div class="flex items-center gap-2">
+                    <div class="size-8 rounded-full bg-slate-100 dark:bg-[#2d3544] flex items-center justify-center">
+                        <span class="material-symbols-outlined text-slate-400 text-sm">account_balance</span>
+                    </div>
+                    
+                    <!-- Botão Editar (visível apenas se pode editar) -->
+                    {% if abertura.pode_editar_saldo_inicial %}
+                    <button
+                        hx-get="{% url 'caixa:editar_saldo_inicial' abertura.pk %}"
+                        hx-target="#modal-content"
+                        hx-trigger="click"
+                        hx-swap="innerHTML"
+                        @click.prevent="open = true"
+                        title="Editar saldo inicial (permitido 1x/dia)"
+                        class="size-8 rounded-full bg-orange-500/10 hover:bg-orange-500/20 flex items-center justify-center transition-colors group/edit">
+                        <span class="material-symbols-outlined text-orange-500 text-sm">edit</span>
+                    </button>
+                    {% elif abertura.saldo_inicial_editado %}
+                    <!-- Indicador de já editado -->
+                    <div title="Saldo já foi editado hoje" class="size-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-amber-500 text-sm">check</span>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="mt-4">
                 <span class="text-slate-500 text-lg font-medium mr-1">R$</span>
                 <span class="text-3xl font-bold text-slate-900 dark:text-white">{{ abertura.saldo_abertura|floatformat:2 }}</span>
             </div>
+            
+            <!-- Indicador de edição (se editado) -->
+            {% if abertura.saldo_inicial_editado %}
+            <div class="mt-2 flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400">
+                <span class="material-symbols-outlined text-xs">info</span>
+                <span>Editado em {{ abertura.saldo_editado_em|date:"d/m H:i" }}</span>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Entradas -->

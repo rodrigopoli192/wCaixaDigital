@@ -113,7 +113,7 @@
                                :checked="isConexaoChecked('{{ item.conexao.pk }}', [{% for r in item.rotinas %}'{{ r.pk }}'{% if not forloop.last %},{% endif %}{% endfor %}])"
                                :indeterminate="isConexaoPartial('{{ item.conexao.pk }}', [{% for r in item.rotinas %}'{{ r.pk }}'{% if not forloop.last %},{% endif %}{% endfor %}])"
                                class="w-4 h-4 text-primary rounded focus:ring-primary">
-                        <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ item.conexao.sistema }}</span>
+                        <span class="text-lg font-black text-primary">{{ item.conexao.sistema }}</span>
                     </label>
                     <!-- Rotinas -->
                     <div class="divide-y divide-slate-100 dark:divide-border-dark">

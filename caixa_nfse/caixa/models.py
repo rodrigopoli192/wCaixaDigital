@@ -153,6 +153,35 @@ class AberturaCaixa(TenantAwareModel):
         blank=True,
     )
 
+    # Edição de saldo inicial (once-per-day)
+    saldo_inicial_editado = models.BooleanField(
+        _("saldo inicial editado"),
+        default=False,
+        help_text=_("Se True, já foi editado hoje e não pode ser alterado novamente"),
+    )
+    saldo_inicial_original = models.DecimalField(
+        _("saldo inicial original"),
+        max_digits=14,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text=_("Valor original antes da edição (para auditoria)"),
+    )
+    saldo_editado_em = models.DateTimeField(
+        _("editado em"),
+        null=True,
+        blank=True,
+        help_text=_("Data/hora da última edição"),
+    )
+    saldo_editado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="aberturas_editadas",
+        verbose_name=_("editado por"),
+        null=True,
+        blank=True,
+    )
+
     # Auditoria imutável
     hash_registro = models.CharField(
         _("hash do registro"),
@@ -198,6 +227,23 @@ class AberturaCaixa(TenantAwareModel):
             self.hash_registro = generate_hash(data, self.hash_anterior)
 
         super().save(*args, **kwargs)
+
+    @property
+    def pode_editar_saldo_inicial(self) -> bool:
+        """
+        Retorna True se o saldo inicial ainda pode ser editado hoje.
+        Regras:
+        - Caixa não pode estar fechado
+        - Deve ser no mesmo dia da abertura
+        - Não pode ter sido editado antes (once-per-day)
+        """
+        if self.fechado:
+            return False
+        if self.data_hora.date() != timezone.now().date():
+            return False
+        if self.saldo_inicial_editado:
+            return False
+        return True
 
     @property
     def saldo_movimentos(self) -> Decimal:

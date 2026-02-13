@@ -71,13 +71,42 @@
         <!-- Saldo Inicial -->
         <div class="bg-white dark:bg-surface-dark rounded-2xl border border-slate-200 dark:border-border-dark p-5 shadow-sm dark:shadow-none">
             <div class="flex items-start justify-between mb-4">
-                <div class="size-10 rounded-xl bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-slate-400">login</span>
+                <div class="flex items-center gap-2">
+                    <div class="size-10 rounded-xl bg-slate-100 dark:bg-slate-700/50 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-slate-400">login</span>
+                    </div>
+                    
+                    <!-- Botão Editar (visível apenas se pode editar) -->
+                    {% if abertura_atual.pode_editar_saldo_inicial %}
+                    <button
+                        hx-get="{% url 'caixa:editar_saldo_inicial' abertura_atual.pk %}"
+                        hx-target="#modal-content"
+                        hx-trigger="click"
+                        hx-swap="innerHTML"
+                        @click.prevent="open = true"
+                        title="Editar saldo inicial (permitido 1x/dia)"
+                        class="size-8 rounded-full bg-orange-500/10 hover:bg-orange-500/20 flex items-center justify-center transition-colors">
+                        <span class="material-symbols-outlined text-orange-500 text-sm">edit</span>
+                    </button>
+                    {% elif abertura_atual.saldo_inicial_editado %}
+                    <!-- Indicador de já editado -->
+                    <div title="Saldo já foi editado hoje" class="size-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-amber-500 text-sm">check</span>
+                    </div>
+                    {% endif %}
                 </div>
                 <span class="text-[10px] uppercase tracking-wider text-slate-500">Saldo Inicial</span>
             </div>
             <p class="text-3xl font-bold text-slate-900 dark:text-white">R$ {{ abertura_atual.saldo_abertura|floatformat:2 }}</p>
             <p class="text-xs text-slate-500 mt-1">Valor de abertura do terminal</p>
+            
+            <!-- Indicador de edição (se editado) -->
+            {% if abertura_atual.saldo_inicial_editado %}
+            <div class="mt-2 flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400">
+                <span class="material-symbols-outlined text-xs">info</span>
+                <span>Editado em {{ abertura_atual.saldo_editado_em|date:"d/m H:i" }}</span>
+            </div>
+            {% endif %}
         </div>
         
         <!-- Fluxo de Caixa -->
@@ -181,50 +210,14 @@
         </div>
     </div>
 
-    <!-- Aguardando Saldo Restante (parciais) -->
-    {% if parciais_count %}
-    <div class="bg-white dark:bg-surface-dark rounded-2xl border border-amber-500/30 dark:border-amber-500/20 overflow-hidden shadow-sm dark:shadow-none"
-         x-data="{ expanded: true }">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-amber-500/20">
-            <button @click="expanded = !expanded" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                <span class="material-symbols-outlined text-amber-500">hourglass_top</span>
-                <h4 class="font-bold text-amber-700 dark:text-amber-400">Aguardando Saldo Restante</h4>
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold">{{ parciais_count }}</span>
-                <span class="material-symbols-outlined text-amber-400 transition-transform" :class="expanded ? 'rotate-180' : ''">expand_more</span>
-            </button>
-            <a href="{% url 'caixa:lista_importados' abertura_atual.pk %}" class="text-sm text-primary hover:text-orange-400 flex items-center gap-1 transition-colors">
-                Ver Todos
-                <span class="material-symbols-outlined text-sm">arrow_forward</span>
-            </a>
-        </div>
-        <div x-show="expanded" x-collapse class="px-4 py-3 space-y-2">
-            {% for mov in parciais_list %}
-            {% include "caixa/partials/_movimento_card.html" with mov=mov show_checkbox=False show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Movimentos Importados (Aguardando Confirmação) -->
-    {% if importados_count %}
-    <div class="bg-white dark:bg-surface-dark rounded-2xl border border-blue-500/30 dark:border-blue-500/20 overflow-hidden shadow-sm dark:shadow-none"
-         x-data="{ expanded: true }">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-blue-500/20">
-            <button @click="expanded = !expanded" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                <span class="material-symbols-outlined text-blue-500">cloud_queue</span>
-                <h4 class="font-bold text-blue-700 dark:text-blue-400">Movimentos Importados (Aguardando Confirmação)</h4>
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold">{{ importados_count }}</span>
-                <span class="material-symbols-outlined text-blue-400 transition-transform" :class="expanded ? 'rotate-180' : ''">expand_more</span>
-            </button>
-            <a href="{% url 'caixa:lista_importados' abertura_atual.pk %}" class="text-sm text-primary hover:text-orange-400 flex items-center gap-1 transition-colors">
-                Ver Todos
-                <span class="material-symbols-outlined text-sm">arrow_forward</span>
-            </a>
-        </div>
-        <div x-show="expanded" x-collapse class="px-4 py-3 space-y-2">
-            {% for mov in importados_list %}
-            {% include "caixa/partials/_movimento_card.html" with mov=mov show_checkbox=False show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
-            {% endfor %}
+    <!-- Movimentos Importados e Parciais (carregado via HTMX com checkboxes + modal) -->
+    {% if importados_count or parciais_count %}
+    <div id="importados-container"
+         hx-get="{% url 'caixa:lista_importados' abertura_atual.pk %}"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+        <div class="flex justify-center items-center py-8">
+            <span class="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></span>
         </div>
     </div>
     {% endif %}
