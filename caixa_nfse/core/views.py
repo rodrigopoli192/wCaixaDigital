@@ -402,6 +402,7 @@ class MovimentosListView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         from django.core.paginator import Paginator
+        from django.db.models import Q
 
         from caixa_nfse.caixa.models import AberturaCaixa, Caixa, MovimentoCaixa
 
@@ -412,6 +413,9 @@ class MovimentosListView(LoginRequiredMixin, TemplateView):
         # Pegar parâmetros de filtro
         tipo = self.request.GET.get("tipo", "")
         caixa = self.request.GET.get("caixa", "")
+        busca = self.request.GET.get("busca", "").strip()
+        data_inicio = self.request.GET.get("data_inicio", "")
+        data_fim = self.request.GET.get("data_fim", "")
         page = self.request.GET.get("page", 1)
 
         # Query base - depende se é gerente ou operador
@@ -440,6 +444,28 @@ class MovimentosListView(LoginRequiredMixin, TemplateView):
             movimentos = movimentos.filter(tipo=tipo)
         if caixa and is_gerente:
             movimentos = movimentos.filter(abertura__caixa__pk=caixa)
+        if busca:
+            movimentos = movimentos.filter(
+                Q(protocolo__icontains=busca)
+                | Q(descricao__icontains=busca)
+                | Q(cliente_nome__icontains=busca)
+            )
+        if data_inicio:
+            try:
+                from datetime import datetime as dt
+
+                d = dt.strptime(data_inicio, "%Y-%m-%d").date()
+                movimentos = movimentos.filter(data_hora__date__gte=d)
+            except ValueError:
+                pass
+        if data_fim:
+            try:
+                from datetime import datetime as dt
+
+                d = dt.strptime(data_fim, "%Y-%m-%d").date()
+                movimentos = movimentos.filter(data_hora__date__lte=d)
+            except ValueError:
+                pass
 
         movimentos = movimentos.order_by("-data_hora").prefetch_related(
             "parcela_recebimento",
@@ -482,6 +508,9 @@ class MovimentosListView(LoginRequiredMixin, TemplateView):
         context["caixas"] = caixas
         context["filtro_tipo"] = tipo
         context["filtro_caixa"] = caixa
+        context["filtro_busca"] = busca
+        context["filtro_data_inicio"] = data_inicio
+        context["filtro_data_fim"] = data_fim
         context["is_gerente"] = is_gerente
         context["total_emolumento"] = total_emolumento
         context["total_taxas"] = total_taxas

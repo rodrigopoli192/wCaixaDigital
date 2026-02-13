@@ -4,8 +4,8 @@
     <!-- Header -->
     <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">schedule</span>
-            <h4 class="font-bold text-slate-900 dark:text-white">Movimentações do Caixa</h4>
+            <span class="material-symbols-outlined text-primary">receipt_long</span>
+            <h4 class="font-bold text-slate-900 dark:text-white">Movimentações do Dia</h4>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">{{ page_obj.paginator.count }}</span>
         </div>
         {% if movimentos_abertura_pk %}
@@ -17,45 +17,80 @@
     </div>
 
     <!-- Filtros -->
-    <div class="px-4 py-3 border-b border-slate-100 dark:border-border-dark bg-slate-50/50 dark:bg-[#23242a]">
-        <div class="flex flex-wrap items-center gap-3">
-            <select name="tipo" id="filtro-tipo"
-                hx-get="{% url 'core:movimentos_list' %}"
-                hx-target="#movimentos-container"
-                hx-swap="outerHTML"
-                hx-include="#filtro-tipo, #filtro-caixa"
-                class="text-xs px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
-                <option value="">Todos os tipos</option>
-                <option value="ENTRADA" {% if filtro_tipo == 'ENTRADA' %}selected{% endif %}>Entrada</option>
-                <option value="SAIDA" {% if filtro_tipo == 'SAIDA' %}selected{% endif %}>Saída</option>
-                <option value="SUPRIMENTO" {% if filtro_tipo == 'SUPRIMENTO' %}selected{% endif %}>Suprimento</option>
-                <option value="SANGRIA" {% if filtro_tipo == 'SANGRIA' %}selected{% endif %}>Sangria</option>
-                <option value="ESTORNO" {% if filtro_tipo == 'ESTORNO' %}selected{% endif %}>Estorno</option>
-            </select>
+    <div class="border-b border-slate-100 dark:border-border-dark bg-slate-50/50 dark:bg-[#23242a]">
+        <!-- Busca full-width -->
+        <div class="px-5 pt-4 pb-3">
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base text-slate-400 pointer-events-none">search</span>
+                <input type="text" name="busca" id="filtro-busca"
+                    value="{{ filtro_busca }}"
+                    placeholder="Buscar por protocolo, descrição ou cliente..."
+                    hx-get="{% url 'core:movimentos_list' %}"
+                    hx-target="#movimentos-container"
+                    hx-swap="outerHTML"
+                    hx-trigger="input changed delay:400ms, search"
+                    hx-include="#filtro-tipo, #filtro-caixa, #filtro-busca, #filtro-data-inicio, #filtro-data-fim"
+                    class="w-full text-sm pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-slate-400">
+            </div>
+        </div>
+
+        <!-- Filtros em linha -->
+        <div class="px-5 pb-4 flex flex-wrap items-end gap-3">
+            <!-- Tipo de Lançamento -->
+            <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Tipo de Lançamento</label>
+                <select name="tipo" id="filtro-tipo"
+                    class="text-xs px-3 py-2.5 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all min-w-[160px]">
+                    <option value="">Todos os Movimentos</option>
+                    <option value="ENTRADA" {% if filtro_tipo == 'ENTRADA' %}selected{% endif %}>Entrada</option>
+                    <option value="SAIDA" {% if filtro_tipo == 'SAIDA' %}selected{% endif %}>Saída</option>
+                    <option value="SUPRIMENTO" {% if filtro_tipo == 'SUPRIMENTO' %}selected{% endif %}>Suprimento</option>
+                    <option value="SANGRIA" {% if filtro_tipo == 'SANGRIA' %}selected{% endif %}>Sangria</option>
+                    <option value="ESTORNO" {% if filtro_tipo == 'ESTORNO' %}selected{% endif %}>Estorno</option>
+                </select>
+            </div>
+
+            <!-- Data Início -->
+            <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Data Início</label>
+                <input type="date" name="data_inicio" id="filtro-data-inicio"
+                    value="{{ filtro_data_inicio }}"
+                    class="text-xs px-3 py-2.5 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all min-w-[140px]">
+            </div>
+
+            <!-- Data Fim -->
+            <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Data Fim</label>
+                <input type="date" name="data_fim" id="filtro-data-fim"
+                    value="{{ filtro_data_fim }}"
+                    class="text-xs px-3 py-2.5 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all min-w-[140px]">
+            </div>
 
             {% if is_gerente %}
-            <select name="caixa" id="filtro-caixa"
-                hx-get="{% url 'core:movimentos_list' %}"
-                hx-target="#movimentos-container"
-                hx-swap="outerHTML"
-                hx-include="#filtro-tipo, #filtro-caixa"
-                class="text-xs px-3 py-2 rounded-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-background-dark focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all">
-                <option value="">Todos os caixas</option>
-                {% for c in caixas %}
-                <option value="{{ c.pk }}" {% if filtro_caixa == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.identificador }}</option>
-                {% endfor %}
-            </select>
+            <input type="hidden" id="filtro-caixa" name="caixa" value="{{ filtro_caixa }}">
             {% else %}
             <input type="hidden" id="filtro-caixa" name="caixa" value="">
             {% endif %}
 
+            <!-- Botão Filtrar -->
             <button type="button"
                 hx-get="{% url 'core:movimentos_list' %}"
                 hx-target="#movimentos-container"
                 hx-swap="outerHTML"
-                class="ml-auto text-xs px-3 py-2 rounded-lg bg-white dark:bg-background-dark hover:bg-slate-200 dark:hover:bg-border-dark text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-border-dark flex items-center gap-1 transition-all">
-                <span class="material-symbols-outlined text-sm">refresh</span>
-                Atualizar
+                hx-include="#filtro-tipo, #filtro-caixa, #filtro-busca, #filtro-data-inicio, #filtro-data-fim"
+                class="bg-primary hover:bg-orange-600 text-white text-xs font-bold px-6 py-2.5 rounded-lg flex items-center gap-2 shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5">
+                <span class="material-symbols-outlined text-sm">search</span>
+                Filtrar
+            </button>
+
+            <!-- Botão Limpar -->
+            <button type="button"
+                hx-get="{% url 'core:movimentos_list' %}"
+                hx-target="#movimentos-container"
+                hx-swap="outerHTML"
+                class="text-slate-400 hover:text-red-500 p-2.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 border border-slate-200 dark:border-border-dark transition-all"
+                title="Limpar filtros">
+                <span class="material-symbols-outlined text-sm">filter_alt_off</span>
             </button>
         </div>
     </div>
@@ -111,7 +146,7 @@
         <div class="flex items-center gap-1">
             {% if page_obj.has_previous %}
             <button type="button"
-                hx-get="{% url 'core:movimentos_list' %}?page={{ page_obj.previous_page_number }}&tipo={{ filtro_tipo }}&caixa={{ filtro_caixa }}"
+                hx-get="{% url 'core:movimentos_list' %}?page={{ page_obj.previous_page_number }}&tipo={{ filtro_tipo }}&caixa={{ filtro_caixa }}&busca={{ filtro_busca }}&data_inicio={{ filtro_data_inicio }}&data_fim={{ filtro_data_fim }}"
                 hx-target="#movimentos-container"
                 hx-swap="outerHTML"
                 class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-border-dark text-slate-500 transition-all">
@@ -124,7 +159,7 @@
                 <span class="px-3 py-1 rounded-lg bg-primary text-white text-xs font-bold">{{ num }}</span>
                 {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                 <button type="button"
-                    hx-get="{% url 'core:movimentos_list' %}?page={{ num }}&tipo={{ filtro_tipo }}&caixa={{ filtro_caixa }}"
+                    hx-get="{% url 'core:movimentos_list' %}?page={{ num }}&tipo={{ filtro_tipo }}&caixa={{ filtro_caixa }}&busca={{ filtro_busca }}&data_inicio={{ filtro_data_inicio }}&data_fim={{ filtro_data_fim }}"
                     hx-target="#movimentos-container"
                     hx-swap="outerHTML"
                     class="px-3 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-border-dark text-slate-500 text-xs font-medium transition-all">{{ num }}</button>
@@ -133,7 +168,7 @@
 
             {% if page_obj.has_next %}
             <button type="button"
-                hx-get="{% url 'core:movimentos_list' %}?page={{ page_obj.next_page_number }}&tipo={{ filtro_tipo }}&caixa={{ filtro_caixa }}"
+                hx-get="{% url 'core:movimentos_list' %}?page={{ page_obj.next_page_number }}&tipo={{ filtro_tipo }}&caixa={{ filtro_caixa }}&busca={{ filtro_busca }}&data_inicio={{ filtro_data_inicio }}&data_fim={{ filtro_data_fim }}"
                 hx-target="#movimentos-container"
                 hx-swap="outerHTML"
                 class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-border-dark text-slate-500 transition-all">

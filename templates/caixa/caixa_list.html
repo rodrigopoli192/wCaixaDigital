@@ -14,10 +14,12 @@
         
         <!-- Action Buttons or Summary -->
          <div class="flex gap-2">
+            {% if is_gerente %}
             <a href="{% url 'caixa:criar' %}" class="bg-primary hover:bg-orange-600 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-lg shadow-primary/30 transition-all">
                 <span class="material-symbols-outlined">add</span>
                 Novo Caixa
             </a>
+            {% endif %}
         </div>
     </div>
 
@@ -154,9 +156,11 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
+                                {% if is_gerente %}
                                 <a href="{% url 'caixa:editar' caixa.pk %}" class="text-slate-400 hover:text-primary transition-colors" title="Editar">
                                     <span class="material-symbols-outlined">edit</span>
                                 </a>
+                                {% endif %}
                                 <a href="{% url 'caixa:detail' caixa.pk %}" class="text-slate-400 hover:text-primary transition-colors" title="Ver Detalhes">
                                     <span class="material-symbols-outlined">visibility</span>
                                 </a>

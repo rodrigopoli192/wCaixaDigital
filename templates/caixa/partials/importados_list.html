@@ -189,7 +189,7 @@
                     <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary font-bold">{{ importados_sessao_atual|length }}</span>
                 </div>
                 {% for imp in importados_sessao_atual %}
-                <div class="border-l-[3px] border-primary/60 rounded-r-xl">
+                <div class="border-l-[3px] border-primary/60 rounded-xl overflow-hidden">
                 {% include "caixa/partials/_movimento_card.html" with mov=imp show_checkbox=True show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
                 </div>
                 {% endfor %}
@@ -205,7 +205,7 @@
                     <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold">{{ pendentes_anteriores|length }}</span>
                 </div>
                 {% for imp in pendentes_anteriores %}
-                <div class="border-l-[3px] border-blue-400/40 rounded-r-xl">
+                <div class="border-l-[3px] border-blue-400/40 rounded-xl overflow-hidden">
                 {% include "caixa/partials/_movimento_card.html" with mov=imp show_checkbox=True show_tipo=False show_origem=True show_caixa=False model_type="importado" %}
                 </div>
                 {% endfor %}

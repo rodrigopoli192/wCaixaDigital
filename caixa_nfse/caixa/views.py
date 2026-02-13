@@ -42,7 +42,7 @@ class TenantMixin:
 
 
 class CaixaListView(LoginRequiredMixin, TenantMixin, SingleTableMixin, FilterView):
-    """Lista de caixas."""
+    """Lista de caixas — somente gerentes. Operadores são redirecionados."""
 
     model = Caixa
     table_class = CaixaTable
@@ -50,20 +50,41 @@ class CaixaListView(LoginRequiredMixin, TenantMixin, SingleTableMixin, FilterVie
     template_name = "caixa/caixa_list.html"
     paginate_by = 20
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and not request.user.pode_aprovar_fechamento:
+            # Operador: redireciona para o detalhe do seu caixa (se existir abertura ativa)
+            abertura = (
+                AberturaCaixa.objects.filter(
+                    caixa__tenant=request.user.tenant,
+                    operador=request.user,
+                    fechamento__isnull=True,
+                )
+                .select_related("caixa")
+                .first()
+            )
+            if abertura:
+                return redirect("caixa:lista_movimentos", pk=abertura.pk)
+            return redirect("core:dashboard")
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["page_title"] = "Caixas"
         context["hoje"] = timezone.now().date()
+        context["is_gerente"] = self.request.user.pode_aprovar_fechamento
         return context
 
 
-class CaixaCreateView(LoginRequiredMixin, TenantMixin, CreateView):
-    """Criar novo caixa."""
+class CaixaCreateView(LoginRequiredMixin, UserPassesTestMixin, TenantMixin, CreateView):
+    """Criar novo caixa — somente gerentes."""
 
     model = Caixa
     fields = ["identificador", "tipo"]
     template_name = "caixa/caixa_form.html"
     success_url = reverse_lazy("caixa:list")
+
+    def test_func(self):
+        return self.request.user.pode_aprovar_fechamento
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -76,13 +97,16 @@ class CaixaCreateView(LoginRequiredMixin, TenantMixin, CreateView):
         return super().form_valid(form)
 
 
-class CaixaUpdateView(LoginRequiredMixin, TenantMixin, UpdateView):
-    """Editar caixa existente."""
+class CaixaUpdateView(LoginRequiredMixin, UserPassesTestMixin, TenantMixin, UpdateView):
+    """Editar caixa existente — somente gerentes."""
 
     model = Caixa
     fields = ["identificador", "tipo", "ativo"]
     template_name = "caixa/caixa_form.html"
     success_url = reverse_lazy("caixa:list")
+
+    def test_func(self):
+        return self.request.user.pode_aprovar_fechamento
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
