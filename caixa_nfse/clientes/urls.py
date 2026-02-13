@@ -9,4 +9,5 @@ urlpatterns = [
     path("novo/", views.ClienteCreateView.as_view(), name="create"),
     path("<uuid:pk>/", views.ClienteDetailView.as_view(), name="detail"),
     path("<uuid:pk>/editar/", views.ClienteUpdateView.as_view(), name="update"),
+    path("api/cep-lookup/", views.CepLookupView.as_view(), name="cep_lookup"),
 ]

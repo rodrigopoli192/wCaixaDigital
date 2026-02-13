@@ -222,18 +222,18 @@
 </div>
 {% endif %}
 
-{% if parcela_atual %}
+{% if parcela_atual and total_parcelas > 1 %}
 <div style="margin: 16px 0; padding: 8px 16px; background: {% if is_parcial %}#fef3c7{% else %}#dcfce7{% endif %}; border-radius: 6px; border: 1px solid {% if is_parcial %}#f59e0b{% else %}#16a34a{% endif %}; text-align: center;">
     <strong style="font-size: 14px; color: {% if is_parcial %}#b45309{% else %}#15803d{% endif %};">
         {% if is_parcial %}⚠️{% else %}✅{% endif %}
-        PARCELA {{ parcela_atual.numero_parcela }} de {{ total_parcelas }}
+        PAGAMENTO PARCIAL {{ parcela_atual.numero_parcela }} de {{ total_parcelas }}
         {% if not is_parcial %} — QUITADO{% endif %}
     </strong>
 </div>
 {% endif %}
 
 {% if historico_parcelas and total_parcelas > 1 %}
-<h3 class="section-title" style="margin-top: 16px;">Histórico de Parcelas</h3>
+<h3 class="section-title" style="margin-top: 16px;">Histórico de Pagamentos</h3>
 <table>
     <thead>
         <tr>

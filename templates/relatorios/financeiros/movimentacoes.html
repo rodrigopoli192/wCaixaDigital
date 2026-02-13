@@ -108,18 +108,6 @@
                 </tr>
                 {% endfor %}
             </tbody>
-            <tfoot class="bg-slate-100 dark:bg-background-dark border-t-2 border-slate-300 dark:border-border-dark">
-                <tr class="font-bold">
-                    <td colspan="6" class="px-6 py-4 text-sm">
-                        <span class="uppercase">Total</span>
-                        <span class="ml-4 text-success">Entradas: +R$ {{ total_entradas|floatformat:2 }}</span>
-                        <span class="ml-4 text-danger">Saídas: -R$ {{ total_saidas|floatformat:2 }}</span>
-                    </td>
-                    <td class="px-6 py-4 text-right text-sm font-bold {% if saldo_liquido >= 0 %}text-success{% else %}text-danger{% endif %}">
-                        R$ {{ saldo_liquido|floatformat:2 }}
-                    </td>
-                </tr>
-            </tfoot>
         </table>
     </div>
 </div>

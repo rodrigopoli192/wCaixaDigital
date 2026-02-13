@@ -82,12 +82,14 @@
     
     <!-- Sidebar -->
     <aside class="w-64 border-r border-slate-200 dark:border-border-dark flex flex-col bg-white dark:bg-surface-dark fixed h-full z-20">
-        <div class="p-6 flex items-center gap-3">
-            <img src="{% static 'img/simbolo-degrade@4x-8.png' %}" alt="wCaixaDigital" class="h-10 w-auto rounded-lg shadow-lg shadow-primary/20">
-            <div>
-                <h1 class="text-sm font-bold leading-none">wCaixaDigital</h1>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Caixa integrado</p>
-            </div>
+        <div class="p-6">
+            <a href="{% if request.resolver_match.app_name == 'backoffice' %}{% url 'backoffice:dashboard' %}{% else %}{% url 'core:dashboard' %}{% endif %}" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <img src="{% static 'img/simbolo-degrade@4x-8.png' %}" alt="wCaixaDigital" class="h-10 w-auto rounded-lg shadow-lg shadow-primary/20">
+                <div>
+                    <h1 class="text-sm font-bold leading-none">wCaixaDigital</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Caixa integrado</p>
+                </div>
+            </a>
         </div>
 
         <nav class="flex-1 px-4 space-y-1 mt-4">

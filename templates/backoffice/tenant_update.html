@@ -43,15 +43,21 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="md:col-span-2 space-y-2">
                     <label class="text-sm font-medium">Razão Social</label>
-                    {% render_field form.razao_social class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    {% render_field form.razao_social class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_razao_social" %}
                 </div>
                 <div class="md:col-span-2 space-y-2">
                     <label class="text-sm font-medium">Nome Fantasia</label>
-                    {% render_field form.nome_fantasia class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    {% render_field form.nome_fantasia class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_nome_fantasia" %}
                 </div>
                 <div class="space-y-2">
                     <label class="text-sm font-medium">CNPJ</label>
-                    {% render_field form.cnpj class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    <div class="flex gap-2">
+                        {% render_field form.cnpj class="flex-1 bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_cnpj" %}
+                        <button type="button" id="btn-buscar-cnpj" onclick="buscarCNPJ()" class="px-4 py-2.5 bg-primary hover:bg-orange-600 text-white rounded-lg font-medium text-sm flex items-center gap-2 transition-colors whitespace-nowrap shadow-lg shadow-primary/20">
+                            <span class="material-symbols-outlined text-lg" id="cnpj-icon">search</span>
+                            <span id="cnpj-btn-text">Buscar</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="space-y-2">
                     <label class="text-sm font-medium">Regime Tributário</label>
@@ -59,11 +65,33 @@
                 </div>
                 <div class="space-y-2">
                     <label class="text-sm font-medium">Telefone</label>
-                    {% render_field form.telefone class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    {% render_field form.telefone class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_telefone" %}
                 </div>
                  <div class="flex items-center gap-3 pt-6">
                     {% render_field form.ativo class="w-5 h-5 text-primary rounded focus:ring-primary focus:ring-offset-0 bg-slate-50 dark:bg-background-dark border-slate-300 dark:border-border-dark" %}
                     <label class="text-sm font-medium">Empresa Ativa</label>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dados Fiscais / NFS-e -->
+        <section class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark p-6">
+            <h3 class="text-sm font-bold uppercase text-slate-400 mb-4 tracking-wider flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg text-primary">receipt_long</span>
+                Dados Fiscais / NFS-e
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Inscrição Municipal</label>
+                    {% render_field form.inscricao_municipal class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_inscricao_municipal" %}
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">Código IBGE do Município</label>
+                    {% render_field form.codigo_ibge class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_codigo_ibge" %}
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium">CNAE Principal</label>
+                    {% render_field form.cnae_principal class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_cnae_principal" %}
                 </div>
             </div>
         </section>
@@ -74,27 +102,27 @@
             <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
                 <div class="md:col-span-1 space-y-2">
                     <label class="text-sm font-medium">CEP</label>
-                    {% render_field form.cep class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    {% render_field form.cep class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_cep" %}
                 </div>
                 <div class="md:col-span-4 space-y-2">
                     <label class="text-sm font-medium">Logradouro</label>
-                    {% render_field form.logradouro class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    {% render_field form.logradouro class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_logradouro" %}
                 </div>
                 <div class="md:col-span-1 space-y-2">
                     <label class="text-sm font-medium">Número</label>
-                    {% render_field form.numero class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    {% render_field form.numero class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_numero" %}
                 </div>
                  <div class="md:col-span-2 space-y-2">
                     <label class="text-sm font-medium">Bairro</label>
-                    {% render_field form.bairro class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    {% render_field form.bairro class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_bairro" %}
                 </div>
                 <div class="md:col-span-3 space-y-2">
                     <label class="text-sm font-medium">Cidade</label>
-                    {% render_field form.cidade class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" %}
+                    {% render_field form.cidade class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none" id="id_cidade" %}
                 </div>
                 <div class="md:col-span-1 space-y-2">
                     <label class="text-sm font-medium">UF</label>
-                    {% render_field form.uf class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none uppercase" maxlength="2" %}
+                    {% render_field form.uf class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-primary focus:border-primary placeholder-slate-400 transition-all outline-none uppercase" id="id_uf" maxlength="2" %}
                 </div>
             </div>
         </section>
@@ -227,4 +255,128 @@
 
 <!-- Modal Container -->
 <div id="modal-container"></div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-6 right-6 z-50 hidden">
+    <div class="flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border border-slate-700 bg-slate-800 text-white text-sm">
+        <span class="material-symbols-outlined text-lg" id="toast-icon">check_circle</span>
+        <span id="toast-msg"></span>
+    </div>
+</div>
+
+<style>
+@keyframes field-flash { 0%{box-shadow:0 0 0 3px rgba(249,115,22,.5)} 100%{box-shadow:none} }
+.field-flash { animation: field-flash .8s ease-out; }
+</style>
+
+<script>
+function showToast(msg, ok=true) {
+    const t = document.getElementById('toast');
+    document.getElementById('toast-msg').textContent = msg;
+    const icon = document.getElementById('toast-icon');
+    icon.textContent = ok ? 'check_circle' : 'error';
+    icon.className = 'material-symbols-outlined text-lg ' + (ok ? 'text-green-400' : 'text-red-400');
+    t.classList.remove('hidden');
+    setTimeout(() => t.classList.add('hidden'), 4000);
+}
+
+async function buscarCNPJ() {
+    const cnpj = document.getElementById('id_cnpj').value;
+    if (!cnpj || cnpj.replace(/\D/g,'').length !== 14) {
+        showToast('Digite um CNPJ válido (14 dígitos)', false);
+        return;
+    }
+
+    const btn = document.getElementById('btn-buscar-cnpj');
+    const icon = document.getElementById('cnpj-icon');
+    const txt = document.getElementById('cnpj-btn-text');
+    btn.disabled = true;
+    icon.textContent = 'sync';
+    icon.classList.add('animate-spin');
+    txt.textContent = 'Buscando…';
+
+    try {
+        const resp = await fetch(`/platform/api/cnpj-lookup/?cnpj=${encodeURIComponent(cnpj)}`);
+        const data = await resp.json();
+
+        if (!resp.ok) {
+            showToast(data.error || 'Erro na consulta', false);
+            return;
+        }
+
+        const map = {
+            'id_razao_social': 'razao_social',
+            'id_nome_fantasia': 'nome_fantasia',
+            'id_logradouro': 'logradouro',
+            'id_numero': 'numero',
+            'id_bairro': 'bairro',
+            'id_cidade': 'cidade',
+            'id_uf': 'uf',
+            'id_cep': 'cep',
+            'id_telefone': 'telefone',
+            'id_cnae_principal': 'cnae_principal',
+            'id_codigo_ibge': 'codigo_ibge',
+        };
+
+        let filled = 0;
+        for (const [elemId, key] of Object.entries(map)) {
+            const el = document.getElementById(elemId);
+            if (el && data[key]) {
+                el.value = data[key];
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.classList.add('field-flash');
+                setTimeout(() => el.classList.remove('field-flash'), 900);
+                filled++;
+            }
+        }
+
+        showToast(`${filled} campos preenchidos via Receita Federal ✓`);
+    } catch (e) {
+        showToast('Falha na conexão. Tente novamente.', false);
+    } finally {
+        btn.disabled = false;
+        icon.textContent = 'search';
+        icon.classList.remove('animate-spin');
+        txt.textContent = 'Buscar';
+    }
+}
+
+// CNPJ mask: XX.XXX.XXX/XXXX-XX
+function maskCNPJ(el) {
+    el.addEventListener('input', () => {
+        let v = el.value.replace(/\D/g, '').slice(0, 14);
+        if (v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
+        else if (v.length > 8) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{1,4})/, '$1.$2.$3/$4');
+        else if (v.length > 5) v = v.replace(/^(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+        else if (v.length > 2) v = v.replace(/^(\d{2})(\d{1,3})/, '$1.$2');
+        el.value = v;
+    });
+}
+function maskPhone(el) {
+    el.addEventListener('input', () => {
+        let v = el.value.replace(/\D/g, '').slice(0, 11);
+        if (v.length > 10) v = v.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d{1,4})/, '($1) $2-$3');
+        else if (v.length > 2) v = v.replace(/^(\d{2})(\d{1,5})/, '($1) $2');
+        else if (v.length > 0) v = v.replace(/^(\d{1,2})/, '($1');
+        el.value = v;
+    });
+}
+function maskCEP(el) {
+    el.addEventListener('input', () => {
+        let v = el.value.replace(/\D/g, '').slice(0, 8);
+        if (v.length > 5) v = v.replace(/^(\d{5})(\d{1,3})/, '$1-$2');
+        el.value = v;
+    });
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const cnpjEl = document.getElementById('id_cnpj');
+    if (cnpjEl) maskCNPJ(cnpjEl);
+    const phoneEl = document.getElementById('id_telefone');
+    if (phoneEl) maskPhone(phoneEl);
+    const cepEl = document.getElementById('id_cep');
+    if (cepEl) maskCEP(cepEl);
+});
+</script>
 {% endblock %}
+

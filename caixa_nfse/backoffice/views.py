@@ -1,6 +1,10 @@
+import re
+
+import requests
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count, Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -385,4 +389,42 @@ class TenantHealthCheckView(LoginRequiredMixin, PlatformAdminRequiredMixin, View
             request,
             "backoffice/partials/health_check_results.html",
             {"results": results, "tenant": tenant},
+        )
+
+
+class CnpjLookupView(PlatformAdminRequiredMixin, LoginRequiredMixin, View):
+    """Proxy para busca de CNPJ via BrasilAPI."""
+
+    def get(self, request):
+        cnpj = re.sub(r"\D", "", request.GET.get("cnpj", ""))
+        if len(cnpj) != 14:
+            return JsonResponse({"error": "CNPJ inválido"}, status=400)
+
+        try:
+            resp = requests.get(
+                f"https://brasilapi.com.br/api/cnpj/v1/{cnpj}",
+                timeout=10,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+        except (requests.RequestException, ValueError):
+            return JsonResponse(
+                {"error": "Falha na consulta. Tente novamente."},
+                status=502,
+            )
+
+        return JsonResponse(
+            {
+                "razao_social": data.get("razao_social", ""),
+                "nome_fantasia": data.get("nome_fantasia", ""),
+                "logradouro": data.get("logradouro", ""),
+                "numero": data.get("numero", ""),
+                "bairro": data.get("bairro", ""),
+                "cidade": data.get("municipio", ""),
+                "uf": data.get("uf", ""),
+                "cep": data.get("cep", ""),
+                "telefone": data.get("ddd_telefone_1", ""),
+                "cnae_principal": str(data.get("cnae_fiscal", "")),
+                "codigo_ibge": str(data.get("codigo_municipio_ibge", "")),
+            }
         )

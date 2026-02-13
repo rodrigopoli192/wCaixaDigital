@@ -47,4 +47,6 @@ urlpatterns = [
         views.TenantHealthCheckView.as_view(),
         name="tenant_health_check",
     ),
+    # API
+    path("api/cnpj-lookup/", views.CnpjLookupView.as_view(), name="cnpj_lookup"),
 ]

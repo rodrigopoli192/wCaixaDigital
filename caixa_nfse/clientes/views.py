@@ -5,7 +5,7 @@ Clientes views.
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DetailView, UpdateView
+from django.views.generic import CreateView, DetailView, UpdateView, View
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 
@@ -84,3 +84,43 @@ class ClienteUpdateView(LoginRequiredMixin, TenantMixin, UpdateView):
         form.instance.updated_by = self.request.user
         messages.success(self.request, "Cliente atualizado com sucesso!")
         return super().form_valid(form)
+
+
+class CepLookupView(LoginRequiredMixin, View):
+    """Proxy para busca de CEP via ViaCEP."""
+
+    def get(self, request):
+        import re
+
+        import requests
+        from django.http import JsonResponse
+
+        cep = re.sub(r"\D", "", request.GET.get("cep", ""))
+        if len(cep) != 8:
+            return JsonResponse({"error": "CEP inválido"}, status=400)
+
+        try:
+            resp = requests.get(
+                f"https://viacep.com.br/ws/{cep}/json/",
+                timeout=10,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+            if data.get("erro"):
+                return JsonResponse({"error": "CEP não encontrado"}, status=404)
+        except (requests.RequestException, ValueError):
+            return JsonResponse(
+                {"error": "Falha na consulta. Tente novamente."},
+                status=502,
+            )
+
+        return JsonResponse(
+            {
+                "logradouro": data.get("logradouro", ""),
+                "bairro": data.get("bairro", ""),
+                "cidade": data.get("localidade", ""),
+                "uf": data.get("uf", ""),
+                "codigo_ibge": data.get("ibge", ""),
+            }
+        )

@@ -5,7 +5,6 @@ Clientes models - Tomadores de Serviço.
 import hashlib
 import re
 
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -161,18 +160,10 @@ class Cliente(TenantAwareModel):
         return reverse("clientes:detail", kwargs={"pk": self.pk})
 
     def clean(self):
-        """Validate CPF/CNPJ based on tipo_pessoa."""
+        """Validate model fields."""
         super().clean()
-
-        if not self.cpf_cnpj:
-            return
-
-        if self.tipo_pessoa == TipoPessoa.PF:
-            if not validar_cpf(self.cpf_cnpj):
-                raise ValidationError({"cpf_cnpj": _("CPF inválido.")})
-        elif self.tipo_pessoa == TipoPessoa.PJ:
-            if not validar_cnpj(self.cpf_cnpj):
-                raise ValidationError({"cpf_cnpj": _("CNPJ inválido.")})
+        # CPF/CNPJ validation is now a soft warning on the frontend.
+        # The user is prompted with a confirmation dialog if invalid.
 
     def save(self, *args, **kwargs):
         # Generate hash for indexed search (only if document provided)

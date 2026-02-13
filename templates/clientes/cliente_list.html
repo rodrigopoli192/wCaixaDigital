@@ -17,134 +17,119 @@
         </a>
     </div>
 
-    <!-- Filters Section -->
-    <div class="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
-        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <!-- Nome / Razão Social -->
-            <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nome / Razão Social</label>
-                <div class="relative">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-                    <input type="text" name="razao_social" value="{{ request.GET.razao_social }}" 
-                           class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" 
-                           placeholder="Buscar por nome...">
-                </div>
+    <!-- Filters -->
+    <div class="bg-white dark:bg-surface-dark px-4 py-3 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+        <form method="get" class="flex flex-wrap items-center gap-2">
+            <div class="relative flex-1 min-w-[140px]">
+                <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">search</span>
+                <input type="text" name="razao_social" value="{{ request.GET.razao_social }}" 
+                       class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-md pl-8 pr-3 py-1.5 text-xs focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" 
+                       placeholder="Nome / Razão Social">
             </div>
-
-            <!-- CPF/CNPJ -->
-            <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CPF / CNPJ</label>
-                <div class="relative">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">badge</span>
-                    <input type="text" name="cpf_cnpj" value="{{ request.GET.cpf_cnpj }}" 
-                           class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" 
-                           placeholder="Documento...">
-                </div>
+            <div class="relative w-[150px]">
+                <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-base">badge</span>
+                <input type="text" name="cpf_cnpj" value="{{ request.GET.cpf_cnpj }}" 
+                       class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-md pl-8 pr-3 py-1.5 text-xs focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none" 
+                       placeholder="CPF / CNPJ">
             </div>
-
-            <!-- Tipo -->
-            <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tipo</label>
-                <div class="relative">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">category</span>
-                    <select name="tipo_pessoa" class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
-                        <option value="">Todos</option>
-                        <option value="PF" {% if request.GET.tipo_pessoa == 'PF' %}selected{% endif %}>Pessoa Física</option>
-                        <option value="PJ" {% if request.GET.tipo_pessoa == 'PJ' %}selected{% endif %}>Pessoa Jurídica</option>
-                    </select>
-                </div>
+            <div class="relative w-[130px]">
+                <select name="tipo_pessoa" class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-md pl-3 pr-7 py-1.5 text-xs focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none appearance-none">
+                    <option value="">Tipo: Todos</option>
+                    <option value="PF" {% if request.GET.tipo_pessoa == 'PF' %}selected{% endif %}>Pessoa Física</option>
+                    <option value="PJ" {% if request.GET.tipo_pessoa == 'PJ' %}selected{% endif %}>Pessoa Jurídica</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm">arrow_drop_down</span>
             </div>
-
-            <!-- Status Cadastro -->
-            <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status Cadastro</label>
-                <div class="relative">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">verified</span>
-                    <select name="cadastro_completo" class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none appearance-none">
-                        <option value="">Todos</option>
-                        <option value="true" {% if request.GET.cadastro_completo == 'true' %}selected{% endif %}>Completo</option>
-                        <option value="false" {% if request.GET.cadastro_completo == 'false' %}selected{% endif %}>Incompleto</option>
-                    </select>
-                </div>
+            <div class="relative w-[130px]">
+                <select name="cadastro_completo" class="w-full bg-slate-50 dark:bg-background-dark border border-slate-200 dark:border-border-dark rounded-md pl-3 pr-7 py-1.5 text-xs focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all outline-none appearance-none">
+                    <option value="">Status: Todos</option>
+                    <option value="true" {% if request.GET.cadastro_completo == 'true' %}selected{% endif %}>Completo</option>
+                    <option value="false" {% if request.GET.cadastro_completo == 'false' %}selected{% endif %}>Incompleto</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm">arrow_drop_down</span>
             </div>
-
-            <!-- Actions -->
-            <div class="flex gap-2">
-                <button type="submit" class="flex-1 bg-primary hover:bg-orange-600 text-white rounded-lg py-2 text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-primary/20">
-                    <span class="material-symbols-outlined text-sm">filter_list</span>
-                    Filtrar
-                </button>
-                <a href="{% url 'clientes:list' %}" class="px-4 py-2 rounded-lg border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-background-dark flex items-center justify-center transition-colors">
-                    <span class="material-symbols-outlined">close</span>
-                </a>
-            </div>
+            <button type="submit" class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white rounded-md text-xs font-bold flex items-center gap-1 transition-colors shadow-sm">
+                <span class="material-symbols-outlined text-sm">filter_list</span>
+                Filtrar
+            </button>
+            <a href="{% url 'clientes:list' %}" class="p-1.5 rounded-md border border-slate-200 dark:border-border-dark text-slate-400 hover:text-white hover:bg-slate-700 transition-colors" title="Limpar filtros">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </a>
         </form>
     </div>
 
-    <!-- Table Section -->
+    <!-- Table -->
     <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden w-full">
         <div class="overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="bg-slate-50 dark:bg-background-dark/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
-                        <th class="px-6 py-4">Nome / Razão Social</th>
-                        <th class="px-6 py-4">Documento</th>
-                        <th class="px-6 py-4">Tipo</th>
-                        <th class="px-6 py-4">Contato</th>
-                        <th class="px-6 py-4">Localização</th>
-                        <th class="px-6 py-4 text-center">Cadastro</th>
-                        <th class="px-6 py-4 text-center">Ações</th>
+                    <tr class="bg-slate-50 dark:bg-background-dark/50 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <th class="px-4 py-2.5">Cliente</th>
+                        <th class="px-4 py-2.5">Documento</th>
+                        <th class="px-4 py-2.5">Contato</th>
+                        <th class="px-4 py-2.5">Localização</th>
+                        <th class="px-4 py-2.5 text-center">Tipo</th>
+                        <th class="px-4 py-2.5 text-center">Status</th>
+                        <th class="px-4 py-2.5 text-center">Cadastro</th>
+                        <th class="px-4 py-2.5 text-center w-20"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-border-dark">
                     {% for row in table.page.object_list|default:table.rows %}
                     {% with cliente=row.record %}
-                    <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="size-8 rounded-full bg-slate-100 dark:bg-background-dark flex items-center justify-center text-slate-500 font-bold border border-slate-200 dark:border-border-dark">
+                    <tr class="hover:bg-slate-50/50 dark:hover:bg-background-dark/30 transition-colors group cursor-pointer" onclick="window.location='{% url 'clientes:detail' cliente.pk %}'">
+                        <td class="px-4 py-2">
+                            <div class="flex items-center gap-2.5">
+                                <div class="size-7 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
                                     {{ cliente.razao_social|slice:":1" }}
                                 </div>
-                                <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ cliente.razao_social }}</span>
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[200px]">{{ cliente.razao_social }}</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 font-mono text-sm text-slate-600 dark:text-slate-300">
+                        <td class="px-4 py-2 font-mono text-xs text-slate-500 dark:text-slate-400">
                             {{ cliente.documento_formatado }}
                         </td>
-                        <td class="px-6 py-4">
-                            {% if cliente.tipo_pessoa == 'PJ' %}
-                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-primary/10 text-primary border border-primary/20">Jurídica</span>
-                            {% else %}
-                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Física</span>
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4">
-                            <div class="flex flex-col">
-                                <span class="text-xs text-slate-500 dark:text-slate-400">{{ cliente.email|default:"-" }}</span>
-                                <span class="text-xs text-slate-500 dark:text-slate-400">{{ cliente.telefone|default:"" }}</span>
+                        <td class="px-4 py-2">
+                            <div class="flex flex-col leading-tight">
+                                <span class="text-xs text-slate-600 dark:text-slate-300 truncate max-w-[180px]">{{ cliente.email|default:"-" }}</span>
+                                {% if cliente.telefone %}<span class="text-[10px] text-slate-400">{{ cliente.telefone }}</span>{% endif %}
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
-                            {% if cliente.cidade %}
-                            {{ cliente.cidade }}/{{ cliente.uf }}
+                        <td class="px-4 py-2 text-xs text-slate-500 dark:text-slate-400">
+                            {% if cliente.cidade %}{{ cliente.cidade }}/{{ cliente.uf }}{% else %}<span class="text-slate-400">—</span>{% endif %}
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            {% if cliente.tipo_pessoa == 'PJ' %}
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-orange-500/10 text-orange-500 border border-orange-500/20">PJ</span>
                             {% else %}
-                            <span class="text-slate-400">-</span>
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-sky-500/10 text-sky-500 border border-sky-500/20">PF</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 text-center">
+                        <td class="px-4 py-2 text-center">
+                            {% if cliente.ativo %}
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                <span class="size-1.5 rounded-full bg-emerald-500"></span>Ativo
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-red-500/10 text-red-500 border border-red-500/20">
+                                <span class="size-1.5 rounded-full bg-red-500"></span>Inativo
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-2 text-center">
                             {% if cliente.cadastro_completo %}
-                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-success/10 text-success border border-success/20">Completo</span>
+                            <span class="material-symbols-outlined text-emerald-500 text-base" title="Completo">check_circle</span>
                             {% else %}
-                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-warning/10 text-warning border border-warning/20">Incompleto</span>
+                            <span class="material-symbols-outlined text-amber-500 text-base" title="Incompleto">warning</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4">
-                            <div class="flex items-center justify-center gap-2">
-                                <a href="{% url 'clientes:detail' cliente.pk %}" class="p-1 rounded text-slate-400 hover:text-primary hover:bg-primary/10 transition-colors" title="Visualizar">
-                                    <span class="material-symbols-outlined text-lg">visibility</span>
+                        <td class="px-4 py-2" onclick="event.stopPropagation()">
+                            <div class="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <a href="{% url 'clientes:detail' cliente.pk %}" class="p-1 rounded text-slate-400 hover:text-orange-500 hover:bg-orange-500/10 transition-colors" title="Ver">
+                                    <span class="material-symbols-outlined text-base">visibility</span>
                                 </a>
-                                <a href="{% url 'clientes:update' cliente.pk %}" class="p-1 rounded text-slate-400 hover:text-warning hover:bg-warning/10 transition-colors" title="Editar">
-                                    <span class="material-symbols-outlined text-lg">edit</span>
+                                <a href="{% url 'clientes:update' cliente.pk %}" class="p-1 rounded text-slate-400 hover:text-sky-500 hover:bg-sky-500/10 transition-colors" title="Editar">
+                                    <span class="material-symbols-outlined text-base">edit</span>
                                 </a>
                             </div>
                         </td>
@@ -152,10 +137,10 @@
                     {% endwith %}
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="px-6 py-8 text-center text-sm text-slate-500">
-                            <div class="flex flex-col items-center gap-2">
-                                <span class="material-symbols-outlined text-4xl text-slate-300">group_off</span>
-                                <p>Nenhum cliente encontrado.</p>
+                        <td colspan="8" class="px-4 py-10 text-center">
+                            <div class="flex flex-col items-center gap-2 text-slate-400">
+                                <span class="material-symbols-outlined text-3xl">group_off</span>
+                                <p class="text-xs">Nenhum cliente encontrado.</p>
                             </div>
                         </td>
                     </tr>
@@ -166,22 +151,19 @@
         
         <!-- Pagination -->
         {% if table.page %}
-        <div class="p-4 border-t border-slate-200 dark:border-border-dark flex items-center justify-between">
-            <div class="text-xs text-slate-500">
-                Mostrando {{ table.page.start_index }} a {{ table.page.end_index }} de {{ table.page.paginator.count }} resultados
-            </div>
-            
-            <div class="flex gap-1">
+        <div class="px-4 py-2.5 border-t border-slate-200 dark:border-border-dark flex items-center justify-between">
+            <span class="text-[10px] text-slate-400">
+                {{ table.page.start_index }}–{{ table.page.end_index }} de {{ table.page.paginator.count }}
+            </span>
+            <div class="flex gap-0.5">
                 {% if table.page.has_previous %}
-                <a href="?page={{ table.page.previous_page_number }}{% if request.GET.razao_social %}&razao_social={{ request.GET.razao_social }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                <a href="?page={{ table.page.previous_page_number }}{% if request.GET.razao_social %}&razao_social={{ request.GET.razao_social }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-400">
                     <span class="material-symbols-outlined text-sm">chevron_left</span>
                 </a>
                 {% endif %}
-                
-                <span class="px-3 py-1 bg-primary/10 text-primary rounded text-xs font-bold">{{ table.page.number }}</span>
-                
+                <span class="px-2.5 py-0.5 bg-orange-500/10 text-orange-500 rounded text-[10px] font-bold">{{ table.page.number }}</span>
                 {% if table.page.has_next %}
-                <a href="?page={{ table.page.next_page_number }}{% if request.GET.razao_social %}&razao_social={{ request.GET.razao_social }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-500">
+                <a href="?page={{ table.page.next_page_number }}{% if request.GET.razao_social %}&razao_social={{ request.GET.razao_social }}{% endif %}" class="p-1 rounded hover:bg-slate-100 dark:hover:bg-surface-dark text-slate-400">
                     <span class="material-symbols-outlined text-sm">chevron_right</span>
                 </a>
                 {% endif %}

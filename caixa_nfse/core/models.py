@@ -116,6 +116,12 @@ class Tenant(BaseModel):
         max_length=50,
         blank=True,
     )
+    cnae_principal = models.CharField(
+        _("CNAE principal"),
+        max_length=7,
+        blank=True,
+        help_text=_("Código CNAE fiscal principal (7 dígitos)"),
+    )
 
     # Regime tributário
     regime_tributario = models.CharField(

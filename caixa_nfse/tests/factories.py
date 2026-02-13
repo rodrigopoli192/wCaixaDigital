@@ -17,6 +17,7 @@ class TenantFactory(factory.django.DjangoModelFactory):
     nome_fantasia = factory.Sequence(lambda n: f"Empresa {n}")
     cnpj = factory.Sequence(lambda n: f"{n:014d}")
     inscricao_municipal = factory.Sequence(lambda n: f"{n:06d}")
+    codigo_ibge = "3550308"
     email = factory.LazyAttribute(lambda o: f"{o.nome_fantasia.lower().replace(' ', '')}@teste.com")
     telefone = "11999999999"
     logradouro = "Rua Teste"
