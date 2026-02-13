@@ -24,6 +24,7 @@ class MovimentoFilter(django_filters.FilterSet):
 
     tipo = django_filters.ChoiceFilter(choices=TipoMovimento.choices)
     protocolo = django_filters.CharFilter(lookup_expr="icontains", label=_("Protocolo"))
+    busca = django_filters.CharFilter(method="filter_busca", label=_("Buscar"))
     data_hora = django_filters.DateFromToRangeFilter(
         label=_("Período"),
         widget=django_filters.widgets.RangeWidget(attrs={"type": "date"}),
@@ -33,4 +34,15 @@ class MovimentoFilter(django_filters.FilterSet):
 
     class Meta:
         model = MovimentoCaixa
-        fields = ["tipo", "forma_pagamento", "protocolo"]
+        fields = ["tipo", "forma_pagamento", "protocolo", "busca"]
+
+    def filter_busca(self, queryset, name, value):
+        from django.db.models import Q
+
+        if not value:
+            return queryset
+        return queryset.filter(
+            Q(protocolo__icontains=value)
+            | Q(descricao__icontains=value)
+            | Q(cliente__razao_social__icontains=value)
+        )
