@@ -60,6 +60,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "caixa_nfse.core.logging_middleware.RequestLoggingMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
@@ -219,26 +220,39 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
-            "style": "{",
+        "json": {
+            "()": "pythonjsonlogger.json.JsonFormatter",
+            "fmt": "%(asctime)s %(levelname)s %(name)s %(message)s",
+            "rename_fields": {
+                "asctime": "timestamp",
+                "levelname": "level",
+                "name": "logger",
+            },
         },
         "simple": {
-            "format": "{levelname} {message}",
+            "format": "{levelname} {asctime} {name} | {message}",
             "style": "{",
+        },
+    },
+    "filters": {
+        "request_context": {
+            "()": "caixa_nfse.core.logging_filters.RequestContextFilter",
         },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "simple",
+            "filters": ["request_context"],
         },
-        "file": {
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs" / "django.log",
-            "maxBytes": 10485760,  # 10MB
-            "backupCount": 10,
-            "formatter": "verbose",
+        "file_json": {
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": BASE_DIR / "logs" / "app.json.log",
+            "when": "midnight",
+            "backupCount": 30,
+            "encoding": "utf-8",
+            "formatter": "json",
+            "filters": ["request_context"],
         },
     },
     "root": {
@@ -247,12 +261,17 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["console", "file"],
+            "handlers": ["console", "file_json"],
             "level": config("DJANGO_LOG_LEVEL", default="INFO"),
             "propagate": False,
         },
+        "django.server": {
+            "handlers": ["console", "file_json"],
+            "level": "INFO",
+            "propagate": False,
+        },
         "caixa_nfse": {
-            "handlers": ["console", "file"],
+            "handlers": ["console", "file_json"],
             "level": "DEBUG",
             "propagate": False,
         },

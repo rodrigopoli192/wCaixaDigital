@@ -30,11 +30,13 @@ CACHES = {
 LOGGING["handlers"]["console"]["level"] = "DEBUG"  # noqa: F405
 LOGGING["loggers"]["caixa_nfse"]["level"] = "DEBUG"  # noqa: F405
 
-# Fix: Use FileHandler instead of RotatingFileHandler on Windows to avoid PermissionError
-LOGGING["handlers"]["file"] = {
+# Fix: Use FileHandler instead of TimedRotatingFileHandler on Windows to avoid PermissionError
+LOGGING["handlers"]["file_json"] = {  # noqa: F405
     "class": "logging.FileHandler",
-    "filename": BASE_DIR / "logs" / "django_local.log",  # noqa: F405
-    "formatter": "verbose",
+    "filename": BASE_DIR / "logs" / "app.json.log",  # noqa: F405
+    "encoding": "utf-8",
+    "formatter": "json",
+    "filters": ["request_context"],
 }
 
 # Use SQLite for quick testing without PostgreSQL

@@ -37,6 +37,7 @@ dependencies = [
     
     # Observability
     "sentry-sdk[django,celery]>=2.0",
+    "python-json-logger>=3.0",
     "opentelemetry-sdk>=1.25",
     "opentelemetry-instrumentation-django>=0.46b0",
     "opentelemetry-instrumentation-celery>=0.46b0",

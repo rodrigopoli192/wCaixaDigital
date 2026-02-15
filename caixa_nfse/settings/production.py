@@ -38,5 +38,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")  # noqa: F405
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")  # noqa: F405
 
-# Logging - More verbose in production
-LOGGING["handlers"]["file"]["level"] = "WARNING"  # noqa: F405
+# Logging - JSON on console for container capture, file only WARNING+
+LOGGING["handlers"]["console"]["formatter"] = "json"  # noqa: F405
+LOGGING["handlers"]["file_json"]["level"] = "WARNING"  # noqa: F405
