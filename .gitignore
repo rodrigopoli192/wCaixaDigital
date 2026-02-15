@@ -45,6 +45,7 @@ db.sqlite3
 media/
 staticfiles/
 logs/*.log
+logs/*.json.log*
 
 # Environment
 .env
@@ -61,6 +62,8 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+coverage_*.txt
+docs/coverage/
 
 # mypy
 .mypy_cache/
