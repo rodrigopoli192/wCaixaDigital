@@ -1,5 +1,0 @@
-ERROR: usage: python.exe C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\Scripts\pytest [options] [file_or_dir] [file_or_dir] [...]
-python.exe C:\Users\Rodrigo\AppData\Local\Programs\Python\Python314\Scripts\pytest: error: unrecognized arguments: --cov=caixa_nfse.caixa
-  inifile: C:\Users\Rodrigo\Projetos\wCaixaDigital\pytest.ini
-  rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
-

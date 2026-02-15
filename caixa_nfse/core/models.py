@@ -12,6 +12,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from caixa_nfse.core.encrypted_fields import EncryptedCharField
+
 
 class BaseModel(models.Model):
     """
@@ -442,7 +444,7 @@ class ConexaoExterna(TenantAwareModel):
         help_text=_("Nome do banco ou caminho do arquivo (Firebird)"),
     )
     usuario = models.CharField(_("usuário"), max_length=100)
-    senha = models.CharField(_("senha"), max_length=255)
+    senha = EncryptedCharField(_("senha"), max_length=500)
     charset = models.CharField(_("charset"), max_length=20, default="WIN1252")
     instancia = models.CharField(
         _("instância"),
