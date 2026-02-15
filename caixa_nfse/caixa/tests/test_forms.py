@@ -5,6 +5,7 @@ Unit tests for caixa forms.
 from decimal import Decimal
 
 import pytest
+from django import forms
 
 from caixa_nfse.caixa.forms import (
     AbrirCaixaForm,
@@ -292,3 +293,55 @@ class TestFechamentoCaixaFormExtra:
         )
         assert form.is_valid() is False
         assert "saldo_informado" in form.errors
+
+    def test_saldo_informado_empty_triggers_clean_error(self):
+        """Falsy saldo_informado triggers custom ValidationError (L308)."""
+        form = FechamentoCaixaForm(
+            data={"saldo_informado": "100,00"},
+            saldo_sistema=Decimal("100.00"),
+        )
+        form.is_valid()
+        # Force falsy value to bypass Django's required check and hit L308
+        form.cleaned_data["saldo_informado"] = ""
+        with pytest.raises(forms.ValidationError, match="obrigatório"):
+            form.clean_saldo_informado()
+
+
+@pytest.mark.django_db
+class TestAbrirCaixaFormEdgeCases:
+    """Edge cases for AbrirCaixaForm._clean_money_field."""
+
+    def test_clean_money_field_none_value(self):
+        """_clean_money_field returns None when cleaned_data value is None (L60)."""
+        form = AbrirCaixaForm(data={"saldo_abertura": "100"})
+        form.is_valid()
+        # Force None into cleaned_data to hit L60
+        form.cleaned_data["saldo_abertura"] = None
+        result = form._clean_money_field("saldo_abertura")
+        assert result is None
+
+    def test_clean_money_field_invalid_operation(self):
+        """_clean_money_field with invalid value raises ValidationError (L72-73)."""
+        form = AbrirCaixaForm(data={"saldo_abertura": "abc"})
+        form.is_valid()
+        # Force non-Decimal invalid string to hit InvalidOperation branch
+        form.cleaned_data["saldo_abertura"] = "abc"
+        with pytest.raises(forms.ValidationError):
+            form._clean_money_field("saldo_abertura")
+
+
+@pytest.mark.django_db
+class TestMovimentoCaixaFormEdgeCases:
+    """Edge cases for MovimentoCaixaForm.clean_valor."""
+
+    def test_clean_valor_whitespace_only_returns_zero(self, tenant):
+        """Whitespace-only valor → Decimal(0) after strip (L228)."""
+        form = MovimentoCaixaForm(
+            data={"tipo": "ENTRADA", "valor": "  ", "descricao": "x"},
+            tenant=tenant,
+        )
+        form.is_valid()
+        # Force whitespace into cleaned_data to hit L228
+        form.cleaned_data["valor"] = "   "
+        result = form.clean_valor()
+        assert result == Decimal("0")

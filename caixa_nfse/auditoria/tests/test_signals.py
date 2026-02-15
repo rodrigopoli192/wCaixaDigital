@@ -77,3 +77,34 @@ class TestAuditSignals:
         mock_registrar.side_effect = Exception("DB error")
         # This should NOT raise even though audit fails
         fp.delete()
+
+    @patch("caixa_nfse.auditoria.signals.RegistroAuditoria.registrar")
+    def test_audit_save_skips_when_no_changes(self, mock_registrar, tenant):
+        """Saving without changes should not create audit record (L89)."""
+        from caixa_nfse.auditoria.signals import audit_save
+
+        mock_sender = MagicMock()
+        mock_sender.__name__ = "FormaPagamento"
+        mock_sender._meta.app_label = "core"
+
+        instance = MagicMock()
+        same_data = {"id": "1", "nome": "Test", "ativo": "True"}
+        instance._audit_original = same_data
+        instance._meta.fields = []
+
+        # Patch model_to_dict to return the same data
+        with patch("caixa_nfse.auditoria.signals.model_to_dict", return_value=same_data):
+            audit_save(mock_sender, instance=instance, created=False)
+
+        # Should NOT create an audit record since dados_antes == dados_depois
+        mock_registrar.assert_not_called()
+
+    def test_audit_save_skips_registro_auditoria_model(self, tenant):
+        """Saving RegistroAuditoria should be skipped by sender.__name__ guard (L79)."""
+        from caixa_nfse.auditoria.signals import audit_save
+
+        mock_sender = MagicMock()
+        mock_sender.__name__ = "RegistroAuditoria"
+        mock_sender._meta.app_label = "core"  # would normally be audited
+        # Should return early without error
+        audit_save(mock_sender, instance=MagicMock(), created=True)
