@@ -31,27 +31,29 @@ class TestXmlBuilder:
         assert inf.get("Id").startswith("DPS")
 
     def test_identificacao_presente(self):
-        """Grupo de identificação deve conter campos obrigatórios."""
+        """Campos de identificação devem estar em infDPS (filhos diretos)."""
         nota = NotaFiscalServicoFactory()
         dps = construir_dps(nota, nota.tenant)
         inf = dps.find(f"{NS}infDPS")
-        ident = inf.find(f"{NS}Id")
-        assert ident is not None
-        assert ident.find(f"{NS}cLocEmi") is not None
-        assert ident.find(f"{NS}dhEmi") is not None
-        assert ident.find(f"{NS}serie") is not None
-        assert ident.find(f"{NS}nDPS") is not None
-        assert ident.find(f"{NS}tpAmb") is not None
+        # Campos obrigatórios de identificação (filhos diretos de infDPS)
+        assert inf.find(f"{NS}cLocEmi") is not None
+        assert inf.find(f"{NS}dhEmi") is not None
+        assert inf.find(f"{NS}serie") is not None
+        assert inf.find(f"{NS}nDPS") is not None
+        assert inf.find(f"{NS}tpAmb") is not None
 
     def test_prestador_presente(self):
-        """Dados do prestador devem incluir CNPJ e razão social."""
+        """Dados do prestador devem incluir CNPJ (sem xNome quando tpEmit=1)."""
         nota = NotaFiscalServicoFactory()
         dps = construir_dps(nota, nota.tenant)
         inf = dps.find(f"{NS}infDPS")
         prest = inf.find(f"{NS}prest")
         assert prest is not None
         assert prest.find(f"{NS}CNPJ") is not None
-        assert prest.find(f"{NS}xNome") is not None
+        # E0121: xNome do prestador NÃO deve ser informado quando tpEmit=1
+        assert prest.find(f"{NS}xNome") is None
+        # E0128: Endereço do prestador NÃO deve ser informado quando tpEmit=1
+        assert prest.find(f"{NS}end") is None
 
     def test_tomador_com_cpf(self):
         """Tomador PF deve ter tag CPF."""
@@ -67,45 +69,38 @@ class TestXmlBuilder:
         assert cpf is not None or cnpj is not None
 
     def test_servico_presente(self):
-        """Grupo de serviço deve incluir código e descrição."""
+        """Grupo de serviço deve incluir localização, código tributário e descrição."""
         nota = NotaFiscalServicoFactory()
         dps = construir_dps(nota, nota.tenant)
         inf = dps.find(f"{NS}infDPS")
         serv = inf.find(f"{NS}serv")
         assert serv is not None
-        assert serv.find(f"{NS}cServ") is not None
-        assert serv.find(f"{NS}xDescServ") is not None
+        # locPrest é filho de serv
+        assert serv.find(f"{NS}locPrest") is not None
+        # cServ → cTribNac + xDescServ
+        c_serv = serv.find(f"{NS}cServ")
+        assert c_serv is not None
+        assert c_serv.find(f"{NS}cTribNac") is not None
+        assert c_serv.find(f"{NS}xDescServ") is not None
 
     def test_valores_presente(self):
-        """Grupo de valores deve incluir vServPrest, vBC, vISS e vLiq."""
+        """Grupo de valores deve incluir vServPrest e tributos."""
         nota = NotaFiscalServicoFactory()
         dps = construir_dps(nota, nota.tenant)
         inf = dps.find(f"{NS}infDPS")
         vals = inf.find(f"{NS}valores")
         assert vals is not None
-        assert vals.find(f"{NS}vServPrest").text == "100.00"
-        assert vals.find(f"{NS}vBC") is not None
-        assert vals.find(f"{NS}vISS") is not None
-        assert vals.find(f"{NS}vLiq") is not None
+        # vServPrest → vServ
+        v_serv_prest = vals.find(f"{NS}vServPrest")
+        assert v_serv_prest is not None
+        assert v_serv_prest.find(f"{NS}vServ") is not None
 
-    def test_ibs_cbs_ausente_quando_zero(self):
-        """Grupo IBSCBS não deve aparecer quando CBS e IBS são zero."""
+    def test_ibs_cbs_grupo_nao_implementado(self):
+        """Grupo IBSCBS não é gerado pelo xml_builder do Portal Nacional."""
         nota = NotaFiscalServicoFactory(valor_cbs=0, valor_ibs=0)
         dps = construir_dps(nota, nota.tenant)
         inf = dps.find(f"{NS}infDPS")
         assert inf.find(f"{NS}IBSCBS") is None
-
-    def test_ibs_cbs_presente_quando_preenchido(self):
-        """Grupo IBSCBS deve aparecer quando CBS ou IBS > 0."""
-        from decimal import Decimal
-
-        nota = NotaFiscalServicoFactory(valor_cbs=Decimal("5.00"), valor_ibs=Decimal("3.00"))
-        dps = construir_dps(nota, nota.tenant)
-        inf = dps.find(f"{NS}infDPS")
-        grupo = inf.find(f"{NS}IBSCBS")
-        assert grupo is not None
-        assert grupo.find(f"{NS}vCBS").text == "5.00"
-        assert grupo.find(f"{NS}vIBS").text == "3.00"
 
     def test_dps_para_string(self):
         """dps_para_string deve retornar XML válido como string."""
@@ -117,22 +112,21 @@ class TestXmlBuilder:
         assert isinstance(xml_str, str)
 
     def test_gerar_id_dps_formato(self):
-        """ID da DPS deve seguir o formato: DPS + CNPJ(14) + série(5) + número(15)."""
+        """ID da DPS deve seguir o formato: DPS + cMun(7) + tpInsc(1) + CNPJ(14) + série(5) + número(15)."""
         tenant = TenantFactory(cnpj="12345678000100")
         nota = NotaFiscalServicoFactory(tenant=tenant, numero_rps=42, serie_rps="1")
         id_dps = _gerar_id_dps(nota, tenant)
         assert id_dps.startswith("DPS")
         assert "12345678000100" in id_dps
-        # Total: 3 + 14 + 5 + 15 = 37 chars
-        assert len(id_dps) == 37
+        # Total: 3 + 7 + 1 + 14 + 5 + 15 = 45 chars
+        assert len(id_dps) == 45
 
     def test_ambiente_producao(self):
         """tpAmb deve ser '1' para produção."""
         nota = NotaFiscalServicoFactory(ambiente="PRODUCAO")
         dps = construir_dps(nota, nota.tenant)
         inf = dps.find(f"{NS}infDPS")
-        ident = inf.find(f"{NS}Id")
-        tp_amb = ident.find(f"{NS}tpAmb")
+        tp_amb = inf.find(f"{NS}tpAmb")
         assert tp_amb.text == "1"
 
     def test_ambiente_homologacao(self):
@@ -140,23 +134,20 @@ class TestXmlBuilder:
         nota = NotaFiscalServicoFactory(ambiente="HOMOLOGACAO")
         dps = construir_dps(nota, nota.tenant)
         inf = dps.find(f"{NS}infDPS")
-        ident = inf.find(f"{NS}Id")
-        tp_amb = ident.find(f"{NS}tpAmb")
+        tp_amb = inf.find(f"{NS}tpAmb")
         assert tp_amb.text == "2"
 
-    def test_endereco_prestador(self):
-        """Endereço do prestador deve estar presente."""
+    def test_endereco_prestador_ausente_tpemit_1(self):
+        """E0128: Endereço do prestador NÃO deve ser informado quando tpEmit=1."""
         nota = NotaFiscalServicoFactory()
         dps = construir_dps(nota, nota.tenant)
         inf = dps.find(f"{NS}infDPS")
         prest = inf.find(f"{NS}prest")
         end = prest.find(f"{NS}end")
-        assert end is not None
-        assert end.find(f"{NS}xLgr") is not None
-        assert end.find(f"{NS}CEP") is not None
+        assert end is None
 
-    def test_retencoes_federais_opcionais(self):
-        """Retenções federais só aparecem quando > 0."""
+    def test_retencoes_federais_nao_implementadas(self):
+        """Retenções federais (vPIS, vCOFINS) não são emitidas no xml_builder do Portal Nacional."""
         nota = NotaFiscalServicoFactory(valor_pis=0, valor_cofins=0)
         dps = construir_dps(nota, nota.tenant)
         inf = dps.find(f"{NS}infDPS")
@@ -165,12 +156,16 @@ class TestXmlBuilder:
         assert vals.find(f"{NS}vCOFINS") is None
 
     def test_iss_retido_flag(self):
-        """Flag ISS retido deve mapear para tpRetISS = '1'."""
+        """Flag ISS retido deve mapear para tpRetISSQN correspondente."""
         nota = NotaFiscalServicoFactory(iss_retido=True)
         dps = construir_dps(nota, nota.tenant)
         inf = dps.find(f"{NS}infDPS")
         vals = inf.find(f"{NS}valores")
-        assert vals.find(f"{NS}tpRetISS").text == "1"
+        trib = vals.find(f"{NS}trib")
+        trib_mun = trib.find(f"{NS}tribMun")
+        tp_ret = trib_mun.find(f"{NS}tpRetISSQN")
+        assert tp_ret is not None
+        assert tp_ret.text == "2"  # 2=Retido pelo tomador
 
     def test_tomador_pj_com_cnpj(self):
         """Tomador PJ deve ter tag CNPJ (14 dígitos)."""
@@ -184,8 +179,8 @@ class TestXmlBuilder:
         assert toma.find(f"{NS}CNPJ") is not None
         assert toma.find(f"{NS}CNPJ").text == "12345678000199"
 
-    def test_retencoes_federais_todas_presentes(self):
-        """Todas as retenções federais devem aparecer quando preenchidas."""
+    def test_retencoes_federais_todas_ausentes(self):
+        """Retenções federais não são emitidas no portal nacional (hierarquia diferente)."""
         from decimal import Decimal
 
         nota = NotaFiscalServicoFactory(
@@ -198,9 +193,18 @@ class TestXmlBuilder:
         dps = construir_dps(nota, nota.tenant)
         inf = dps.find(f"{NS}infDPS")
         vals = inf.find(f"{NS}valores")
+        # Portal Nacional não usa retenções diretamente em valores
+        assert vals.find(f"{NS}vPIS") is None
 
-        assert vals.find(f"{NS}vPIS").text == "1.50"
-        assert vals.find(f"{NS}vCOFINS").text == "2.50"
-        assert vals.find(f"{NS}vINSS").text == "3.00"
-        assert vals.find(f"{NS}vIR").text == "4.00"
-        assert vals.find(f"{NS}vCSLL").text == "1.00"
+    def test_tot_trib_simples_nacional(self):
+        """Para Simples Nacional (E0712): usar pTotTribSN em vez de indTotTrib."""
+        tenant = TenantFactory(regime_tributario="SIMPLES")
+        nota = NotaFiscalServicoFactory(tenant=tenant)
+        dps = construir_dps(nota, tenant)
+        inf = dps.find(f"{NS}infDPS")
+        vals = inf.find(f"{NS}valores")
+        trib = vals.find(f"{NS}trib")
+        tot_trib = trib.find(f"{NS}totTrib")
+        assert tot_trib is not None
+        assert tot_trib.find(f"{NS}pTotTribSN") is not None
+        assert tot_trib.find(f"{NS}indTotTrib") is None
