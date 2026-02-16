@@ -1,209 +1,326 @@
 {% extends "base_dark.html" %}
+{% load static %}
 
-{% block title %}{% if object %}Editar{% else %}Nova{% endif %} NFS-e - wCaixaDigital{% endblock %}
-{% block page_title %}{% if object %}Editar NFS-e{% else %}Nova NFS-e{% endif %}{% endblock %}
+{% block page_title %}
+    {% if object %}Editar NFS-e {% if object.numero_nfse %}{{ object.numero_nfse }}{% else %}RPS {{ object.numero_rps }}{% endif %}{% else %}Nova NFS-e{% endif %}
+{% endblock %}
 
 {% block content %}
-<div class="p-6 w-full max-w-5xl mx-auto space-y-6">
+<form method="post" class="max-w-5xl mx-auto px-4 py-6 space-y-6" x-data="nfseForm()" @input.debounce.150ms="sync()" @change="sync()" novalidate>
+    {% csrf_token %}
 
-    <!-- Header -->
-    <div class="flex items-center gap-4">
-        <a href="{% url 'nfse:list' %}" class="size-10 rounded-xl bg-slate-800 dark:bg-[#2B2C30] flex items-center justify-center text-orange-500 hover:bg-slate-700 dark:hover:bg-[#3a3b40] transition-colors">
-            <span class="material-symbols-outlined">arrow_back</span>
-        </a>
-        <div class="flex-1">
-            <div class="flex items-center gap-3">
-                <h3 class="text-2xl font-bold tracking-tight">{% if object %}Editar NFS-e{% else %}Nova NFS-e{% endif %}</h3>
-                {% if ambiente %}
-                <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase
-                    {% if ambiente == 'PRODUCAO' %}bg-danger/10 text-danger border border-danger/20{% else %}bg-warning/10 text-warning border border-warning/20{% endif %}">
-                    {{ ambiente }}
-                </span>
-                {% endif %}
+    {# ─── Messages ─── #}
+    {% if form.errors %}
+    <div class="border border-red-500/30 bg-red-500/10 text-red-400 px-4 py-3 rounded-lg text-sm">
+        <span class="font-semibold">Corrija os erros abaixo:</span>
+        <ul class="mt-1 list-disc list-inside">
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                <li>{{ field|title }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {# ────────────────────────────────────────────────────────── #}
+    {# SECTION 1 — Tomador do Serviço                            #}
+    {# ────────────────────────────────────────────────────────── #}
+    <section class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden">
+        <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 dark:border-border-dark">
+            <span class="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold">1</span>
+            <h3 class="text-sm font-semibold tracking-wide uppercase text-slate-700 dark:text-slate-200">Tomador do Serviço</h3>
+            {% if ambiente %}
+            <span class="ml-auto text-[10px] font-medium uppercase tracking-widest px-2.5 py-0.5 rounded-full
+                {% if ambiente == 'Produção' %}bg-emerald-500/10 text-emerald-400{% else %}bg-amber-500/10 text-amber-400{% endif %}">
+                {{ ambiente }}
+            </span>
+            {% endif %}
+        </div>
+
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {# Cliente #}
+            <div class="md:col-span-2">
+                <label for="id_cliente" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                    Cliente / Tomador
+                </label>
+                {{ form.cliente }}
+                {% if form.cliente.errors %}<p class="text-red-400 text-xs mt-1">{{ form.cliente.errors.0 }}</p>{% endif %}
+                <a href="{% url 'clientes:create' %}" class="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 mt-2 transition-colors">
+                    <span class="material-symbols-outlined text-sm">add_circle</span>
+                    Cadastrar novo cliente
+                </a>
             </div>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Preencha os dados para gerar o RPS</p>
+
+            {# Competência #}
+            <div>
+                <label for="id_competencia" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                    Competência
+                </label>
+                {{ form.competencia }}
+                {% if form.competencia.errors %}<p class="text-red-400 text-xs mt-1">{{ form.competencia.errors.0 }}</p>{% endif %}
+                <p class="text-[11px] text-slate-400 mt-1">Mês/ano de referência</p>
+            </div>
+        </div>
+    </section>
+
+    {# ────────────────────────────────────────────────────────── #}
+    {# SECTION 2 — Serviço                                       #}
+    {# ────────────────────────────────────────────────────────── #}
+    <section class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden">
+        <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 dark:border-border-dark">
+            <span class="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold">2</span>
+            <h3 class="text-sm font-semibold tracking-wide uppercase text-slate-700 dark:text-slate-200">Serviço</h3>
+        </div>
+
+        <div class="p-6 space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {# Código de Serviço #}
+                <div>
+                    <label for="id_servico" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                        Código de Serviço
+                    </label>
+                    {{ form.servico }}
+                    {% if form.servico.errors %}<p class="text-red-400 text-xs mt-1">{{ form.servico.errors.0 }}</p>{% endif %}
+                </div>
+
+                {# Local de Prestação (IBGE) #}
+                <div>
+                    <label for="id_local_prestacao_ibge" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                        Local de Prestação (IBGE)
+                    </label>
+                    {{ form.local_prestacao_ibge }}
+                    {% if form.local_prestacao_ibge.errors %}<p class="text-red-400 text-xs mt-1">{{ form.local_prestacao_ibge.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            {# Discriminação #}
+            <div>
+                <label for="id_discriminacao" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                    Discriminação do Serviço
+                </label>
+                {{ form.discriminacao }}
+                {% if form.discriminacao.errors %}<p class="text-red-400 text-xs mt-1">{{ form.discriminacao.errors.0 }}</p>{% endif %}
+                <p class="text-[11px] text-slate-400 mt-1">Descreva detalhadamente os serviços prestados</p>
+            </div>
+        </div>
+    </section>
+
+    {# ────────────────────────────────────────────────────────── #}
+    {# SECTION 3 — Valores                                       #}
+    {# ────────────────────────────────────────────────────────── #}
+    <section class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden">
+        <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 dark:border-border-dark">
+            <span class="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold">3</span>
+            <h3 class="text-sm font-semibold tracking-wide uppercase text-slate-700 dark:text-slate-200">Valores</h3>
+        </div>
+
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {# Valor dos Serviços #}
+                <div>
+                    <label for="id_valor_servicos" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                        Valor dos Serviços
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">R$</span>
+                        {{ form.valor_servicos }}
+                    </div>
+                    {% if form.valor_servicos.errors %}<p class="text-red-400 text-xs mt-1">{{ form.valor_servicos.errors.0 }}</p>{% endif %}
+                </div>
+
+                {# Deduções #}
+                <div>
+                    <label for="id_valor_deducoes" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                        Deduções
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">R$</span>
+                        {{ form.valor_deducoes }}
+                    </div>
+                    {% if form.valor_deducoes.errors %}<p class="text-red-400 text-xs mt-1">{{ form.valor_deducoes.errors.0 }}</p>{% endif %}
+                </div>
+
+                {# Alíquota ISS #}
+                <div>
+                    <label for="id_aliquota_iss" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
+                        Alíquota ISS (%)
+                    </label>
+                    <div class="relative">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">%</span>
+                        {{ form.aliquota_iss }}
+                    </div>
+                    {% if form.aliquota_iss.errors %}<p class="text-red-400 text-xs mt-1">{{ form.aliquota_iss.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+
+            {# ISS Retido — toggle style #}
+            <div class="mt-5 flex items-center gap-3">
+                {{ form.iss_retido }}
+                <label for="id_iss_retido" class="text-sm text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+                    ISS Retido na Fonte
+                </label>
+            </div>
+        </div>
+    </section>
+
+    {# ────────────────────────────────────────────────────────── #}
+    {# SECTION 4 — Retenções Federais                            #}
+    {# ────────────────────────────────────────────────────────── #}
+    <section class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark overflow-hidden">
+        <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 dark:border-border-dark">
+            <span class="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold">4</span>
+            <h3 class="text-sm font-semibold tracking-wide uppercase text-slate-700 dark:text-slate-200">Retenções Federais</h3>
+        </div>
+
+        <div class="p-6 grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div>
+                <label for="id_valor_pis" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">PIS</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">R$</span>
+                    {{ form.valor_pis }}
+                </div>
+            </div>
+            <div>
+                <label for="id_valor_cofins" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">COFINS</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">R$</span>
+                    {{ form.valor_cofins }}
+                </div>
+            </div>
+            <div>
+                <label for="id_valor_inss" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">INSS</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">R$</span>
+                    {{ form.valor_inss }}
+                </div>
+            </div>
+            <div>
+                <label for="id_valor_ir" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">IR</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">R$</span>
+                    {{ form.valor_ir }}
+                </div>
+            </div>
+            <div>
+                <label for="id_valor_csll" class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">CSLL</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">R$</span>
+                    {{ form.valor_csll }}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {# ────────────────────────────────────────────────────────── #}
+    {# SECTION 5 — Resumo (computed)                              #}
+    {# ────────────────────────────────────────────────────────── #}
+    <section class="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-800/60 dark:to-slate-900/60 rounded-xl border border-border-dark overflow-hidden">
+        <div class="px-6 py-4 flex items-center gap-3 border-b border-slate-700/50">
+            <span class="material-symbols-outlined text-primary text-lg">calculate</span>
+            <h3 class="text-sm font-semibold tracking-wide uppercase text-slate-200">Resumo</h3>
+        </div>
+
+        <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div>
+                <p class="text-[11px] uppercase tracking-wider text-slate-400 mb-1">Valor Serviços</p>
+                <p class="text-lg font-bold text-white" x-text="'R$ ' + fmt(valorServicos)">R$ 0,00</p>
+            </div>
+            <div>
+                <p class="text-[11px] uppercase tracking-wider text-slate-400 mb-1">Base de Cálculo</p>
+                <p class="text-lg font-bold text-white" x-text="'R$ ' + fmt(baseCalculo)">R$ 0,00</p>
+            </div>
+            <div>
+                <p class="text-[11px] uppercase tracking-wider text-slate-400 mb-1">Total Retenções</p>
+                <p class="text-lg font-bold text-amber-400" x-text="'R$ ' + fmt(totalRetencoes)">R$ 0,00</p>
+            </div>
+            <div>
+                <p class="text-[11px] uppercase tracking-wider text-slate-400 mb-1">Valor Líquido</p>
+                <p class="text-xl font-bold text-emerald-400" x-text="'R$ ' + fmt(valorLiquido)">R$ 0,00</p>
+            </div>
+        </div>
+    </section>
+
+    {# ────────────────────────────────────────────────────────── #}
+    {# ACTIONS                                                    #}
+    {# ────────────────────────────────────────────────────────── #}
+    <div class="flex items-center justify-between pt-2 pb-8">
+        <a href="{% url 'nfse:list' %}"
+           class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition-colors">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Cancelar
+        </a>
+
+        <div class="flex items-center gap-3">
+            <button type="submit" name="status" value="RASCUNHO"
+               class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg
+                      bg-slate-700 text-slate-200 border border-slate-600
+                      hover:bg-slate-600 transition-all">
+                <span class="material-symbols-outlined text-lg">save</span>
+                Salvar Rascunho
+            </button>
+
+            <button type="submit" name="status" value="ENVIANDO"
+               class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-medium rounded-lg
+                      bg-primary text-white shadow-lg shadow-primary/20
+                      hover:bg-primary/90 transition-all">
+                <span class="material-symbols-outlined text-lg">send</span>
+                Salvar e Enviar
+            </button>
         </div>
     </div>
+</form>
+{% endblock %}
 
-    <!-- Form -->
-    <form method="post" novalidate class="space-y-6">
-        {% csrf_token %}
+{% block extra_js %}
+<script>
+function nfseForm() {
+    return {
+        valorServicos: 0,
+        valorDeducoes: 0,
+        aliquotaIss: 0,
+        issRetido: false,
+        valorPis: 0,
+        valorCofins: 0,
+        valorInss: 0,
+        valorIr: 0,
+        valorCsll: 0,
 
-        <!-- Non-field errors -->
-        {% if form.non_field_errors %}
-        <div class="bg-danger/5 border border-danger/20 rounded-xl p-4 flex items-start gap-3">
-            <span class="material-symbols-outlined text-danger mt-0.5">error</span>
-            <div>
-                {% for error in form.non_field_errors %}
-                <p class="text-sm text-danger">{{ error }}</p>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
+        get baseCalculo() {
+            return Math.max(0, this.valorServicos - this.valorDeducoes);
+        },
+        get valorIss() {
+            return this.baseCalculo * (this.aliquotaIss / 100);
+        },
+        get totalRetencoes() {
+            let r = this.valorPis + this.valorCofins + this.valorInss + this.valorIr + this.valorCsll;
+            if (this.issRetido) r += this.valorIss;
+            return r;
+        },
+        get valorLiquido() {
+            return Math.max(0, this.valorServicos - this.totalRetencoes);
+        },
 
-        <!-- Tomador do Serviço -->
-        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-lg">person</span>
-                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Tomador do Serviço</h4>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="md:col-span-2 space-y-1">
-                        <label for="id_cliente" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Cliente</label>
-                        {{ form.cliente }}
-                        {% if form.cliente.errors %}
-                        <p class="text-xs text-danger mt-1">{{ form.cliente.errors.0 }}</p>
-                        {% endif %}
-                        <p class="text-xs text-slate-400 mt-1">
-                            <a href="{% url 'clientes:create' %}" class="text-primary hover:underline">+ Cadastrar novo cliente</a>
-                        </p>
-                    </div>
-                    <div class="space-y-1">
-                        <label for="id_competencia" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Competência</label>
-                        {{ form.competencia }}
-                        {% if form.competencia.errors %}
-                        <p class="text-xs text-danger mt-1">{{ form.competencia.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
+        fmt(v) {
+            return v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        },
 
-        <!-- Serviço -->
-        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-lg">work</span>
-                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Serviço</h4>
-                </div>
-            </div>
-            <div class="p-6 space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-1">
-                        <label for="id_servico" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Código de Serviço</label>
-                        {{ form.servico }}
-                        {% if form.servico.errors %}
-                        <p class="text-xs text-danger mt-1">{{ form.servico.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="space-y-1">
-                        <label for="id_local_prestacao_ibge" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Local de Prestação (IBGE)</label>
-                        {{ form.local_prestacao_ibge }}
-                        {% if form.local_prestacao_ibge.errors %}
-                        <p class="text-xs text-danger mt-1">{{ form.local_prestacao_ibge.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="space-y-1">
-                    <label for="id_discriminacao" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Discriminação do Serviço</label>
-                    {{ form.discriminacao }}
-                    {% if form.discriminacao.errors %}
-                    <p class="text-xs text-danger mt-1">{{ form.discriminacao.errors.0 }}</p>
-                    {% endif %}
-                    <p class="text-xs text-slate-400 mt-1">Descreva detalhadamente os serviços prestados</p>
-                </div>
-            </div>
-        </div>
+        sync() {
+            this.valorServicos = parseFloat(document.getElementById('id_valor_servicos')?.value) || 0;
+            this.valorDeducoes = parseFloat(document.getElementById('id_valor_deducoes')?.value) || 0;
+            this.aliquotaIss = parseFloat(document.getElementById('id_aliquota_iss')?.value) || 0;
+            this.issRetido = document.getElementById('id_iss_retido')?.checked || false;
+            this.valorPis = parseFloat(document.getElementById('id_valor_pis')?.value) || 0;
+            this.valorCofins = parseFloat(document.getElementById('id_valor_cofins')?.value) || 0;
+            this.valorInss = parseFloat(document.getElementById('id_valor_inss')?.value) || 0;
+            this.valorIr = parseFloat(document.getElementById('id_valor_ir')?.value) || 0;
+            this.valorCsll = parseFloat(document.getElementById('id_valor_csll')?.value) || 0;
+        },
 
-        <!-- Valores -->
-        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-lg">payments</span>
-                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Valores</h4>
-                </div>
-            </div>
-            <div class="p-6 space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="space-y-1">
-                        <label for="id_valor_servicos" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Valor dos Serviços</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-bold">R$</span>
-                            {{ form.valor_servicos }}
-                        </div>
-                        {% if form.valor_servicos.errors %}
-                        <p class="text-xs text-danger mt-1">{{ form.valor_servicos.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="space-y-1">
-                        <label for="id_valor_deducoes" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Deduções</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-bold">R$</span>
-                            {{ form.valor_deducoes }}
-                        </div>
-                        {% if form.valor_deducoes.errors %}
-                        <p class="text-xs text-danger mt-1">{{ form.valor_deducoes.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                    <div class="space-y-1">
-                        <label for="id_aliquota_iss" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Alíquota ISS (%)</label>
-                        {{ form.aliquota_iss }}
-                        {% if form.aliquota_iss.errors %}
-                        <p class="text-xs text-danger mt-1">{{ form.aliquota_iss.errors.0 }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    {{ form.iss_retido }}
-                    <label for="id_iss_retido" class="text-sm text-slate-600 dark:text-slate-300 cursor-pointer select-none">ISS Retido na Fonte</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Retenções Federais -->
-        <div class="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-border-dark shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-background-dark/50">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary text-lg">percent</span>
-                    <h4 class="text-sm font-bold text-slate-700 dark:text-slate-200">Retenções Federais</h4>
-                </div>
-            </div>
-            <div class="p-6">
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div class="space-y-1">
-                        <label for="id_valor_pis" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">PIS</label>
-                        {{ form.valor_pis }}
-                    </div>
-                    <div class="space-y-1">
-                        <label for="id_valor_cofins" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">COFINS</label>
-                        {{ form.valor_cofins }}
-                    </div>
-                    <div class="space-y-1">
-                        <label for="id_valor_inss" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">INSS</label>
-                        {{ form.valor_inss }}
-                    </div>
-                    <div class="space-y-1">
-                        <label for="id_valor_ir" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">IR</label>
-                        {{ form.valor_ir }}
-                    </div>
-                    <div class="space-y-1">
-                        <label for="id_valor_csll" class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">CSLL</label>
-                        {{ form.valor_csll }}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex items-center justify-between pt-2">
-            <a href="{% url 'nfse:list' %}" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-sm font-medium flex items-center gap-1 transition-colors">
-                <span class="material-symbols-outlined text-sm">arrow_back</span>
-                Cancelar
-            </a>
-            <div class="flex gap-3">
-                <button type="submit" name="acao" value="salvar" class="border border-slate-200 dark:border-border-dark text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-surface-dark rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all">
-                    <span class="material-symbols-outlined text-sm">save</span>
-                    Salvar Rascunho
-                </button>
-                <button type="submit" name="acao" value="enviar" class="bg-success hover:bg-emerald-600 text-white rounded-lg px-6 py-2.5 text-sm font-semibold flex items-center gap-2 transition-all shadow-lg shadow-success/20">
-                    <span class="material-symbols-outlined text-sm">send</span>
-                    Salvar e Enviar
-                </button>
-            </div>
-        </div>
-    </form>
-</div>
+        init() {
+            this.sync();
+        }
+    };
+}
+</script>
 {% endblock %}

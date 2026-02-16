@@ -15,6 +15,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
+from .forms import NFSeForm
 from .models import ConfiguracaoNFSe, NotaFiscalServico, StatusNFSe
 
 logger = logging.getLogger(__name__)
@@ -98,27 +99,21 @@ class NFSeDetailView(LoginRequiredMixin, TenantMixin, UserPassesTestMixin, Detai
 
 class NFSeCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = NotaFiscalServico
-    fields = [
-        "cliente",
-        "servico",
-        "discriminacao",
-        "competencia",
-        "valor_servicos",
-        "valor_deducoes",
-        "valor_pis",
-        "valor_cofins",
-        "valor_inss",
-        "valor_ir",
-        "valor_csll",
-        "aliquota_iss",
-        "iss_retido",
-        "local_prestacao_ibge",
-    ]
+    form_class = NFSeForm
     template_name = "nfse/nfse_form.html"
     success_url = reverse_lazy("nfse:list")
 
     def test_func(self):
         return self.request.user.pode_emitir_nfse
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        try:
+            cfg = ConfiguracaoNFSe.objects.get(tenant=self.request.user.tenant)
+            ctx["ambiente"] = cfg.get_ambiente_display()
+        except ConfiguracaoNFSe.DoesNotExist:
+            pass
+        return ctx
 
     def form_valid(self, form):
         tenant = self.request.user.tenant
@@ -132,27 +127,21 @@ class NFSeCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class NFSeUpdateView(LoginRequiredMixin, TenantMixin, UserPassesTestMixin, UpdateView):
     model = NotaFiscalServico
-    fields = [
-        "cliente",
-        "servico",
-        "discriminacao",
-        "competencia",
-        "valor_servicos",
-        "valor_deducoes",
-        "valor_pis",
-        "valor_cofins",
-        "valor_inss",
-        "valor_ir",
-        "valor_csll",
-        "aliquota_iss",
-        "iss_retido",
-        "local_prestacao_ibge",
-    ]
+    form_class = NFSeForm
     template_name = "nfse/nfse_form.html"
     success_url = reverse_lazy("nfse:list")
 
     def test_func(self):
         return self.request.user.pode_emitir_nfse
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        try:
+            cfg = ConfiguracaoNFSe.objects.get(tenant=self.request.user.tenant)
+            ctx["ambiente"] = cfg.get_ambiente_display()
+        except ConfiguracaoNFSe.DoesNotExist:
+            pass
+        return ctx
 
     def get_queryset(self):
         return super().get_queryset().filter(status=StatusNFSe.RASCUNHO)
