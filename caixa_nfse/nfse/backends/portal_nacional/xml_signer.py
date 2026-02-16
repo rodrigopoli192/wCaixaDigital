@@ -48,14 +48,13 @@ def assinar_xml(
         signature_algorithm="rsa-sha256",
         c14n_algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315",
     )
-    # Portal Nacional rejeita XML com prefixo de namespace (E6155).
-    # O signxml usa "ds:" por padrão; forçar namespace default (sem prefixo).
+    # Portal Nacional rejeita XML com prefixo ds: (E6155) → usar namespace default
     signer.namespaces = {None: "http://www.w3.org/2000/09/xmldsig#"}
 
     xml_assinado = signer.sign(
         xml_element,
         key=chave_privada,
-        cert=[certificado] + list(cadeia or []),
+        cert=[certificado],
         reference_uri=reference_uri,
     )
 

@@ -37,7 +37,7 @@ def construir_dps(nota, tenant) -> etree._Element:
     _adicionar_prestador(inf_dps, tenant)
     _adicionar_tomador(inf_dps, nota)
     _adicionar_servico(inf_dps, nota)
-    _adicionar_valores(inf_dps, nota)
+    _adicionar_valores(inf_dps, nota, tenant)
 
     return dps
 
@@ -100,20 +100,20 @@ def _adicionar_prestador(parent: etree._Element, tenant) -> None:
     if im:
         _sub_text(prest, "IM", im)
 
-    _sub_text(prest, "xNome", tenant.razao_social or "")
+    # xNome: NÃO informar quando tpEmit=1 (E0121)
+    # Portal Nacional já possui dados cadastrais do prestador emitente
 
-    # Endereço (TCEndereco): choice(endNac|endExt) + xLgr + nro + [xCpl] + xBairro
-    end = etree.SubElement(prest, f"{NS}end")
-    end_nac = etree.SubElement(end, f"{NS}endNac")
-    _sub_text(end_nac, "cMun", str(getattr(tenant, "cod_ibge", "3550308") or "3550308"))
-    _sub_text(end_nac, "CEP", (tenant.cep or "").replace("-", ""))
-    _sub_text(end, "xLgr", tenant.logradouro or "")
-    _sub_text(end, "nro", tenant.numero or "S/N")
-    _sub_text(end, "xBairro", tenant.bairro or "")
-
-    # regTrib (TCRegTrib) - obrigatório: opSimpNac + regEspTrib
+    # Endereço (TCEndereco) - NÃO informar quando tpEmit=1
+    # (E0128: Portal Nacional já possui os dados do prestador emitente)
+    # regTrib (TCRegTrib) - obrigatório: opSimpNac + [regApTribSN] + regEspTrib
     reg_trib = etree.SubElement(prest, f"{NS}regTrib")
-    _sub_text(reg_trib, "opSimpNac", str(getattr(tenant, "opcao_simples", 1) or 1))
+    # Mapear regime_tributario do Tenant → opSimpNac do XSD
+    _REGIME_MAP = {"MEI": "2", "SIMPLES": "3"}
+    op_simp_nac = _REGIME_MAP.get(getattr(tenant, "regime_tributario", ""), "1")
+    _sub_text(reg_trib, "opSimpNac", op_simp_nac)
+    # regApTribSN: obrigatório quando opSimpNac=3 (ME/EPP)
+    if op_simp_nac == "3":
+        _sub_text(reg_trib, "regApTribSN", "1")  # 1=Apuração pelo SN
     _sub_text(reg_trib, "regEspTrib", str(getattr(tenant, "regime_especial", 0) or 0))
 
 
@@ -164,7 +164,7 @@ def _adicionar_servico(parent: etree._Element, nota) -> None:
     _sub_text(c_serv, "xDescServ", nota.discriminacao or "")
 
 
-def _adicionar_valores(parent: etree._Element, nota) -> None:
+def _adicionar_valores(parent: etree._Element, nota, tenant) -> None:
     """
     Grupo valores (TCInfoValores):
       vServPrest (TCVServPrest) → [vDescCondIncond] → [vDedRed] → trib (TCInfoTributacao)
@@ -178,17 +178,24 @@ def _adicionar_valores(parent: etree._Element, nota) -> None:
     # trib (TCInfoTributacao): tribMun + [tribFed] + totTrib
     trib = etree.SubElement(vals, f"{NS}trib")
 
-    # tribMun (TCTribMunicipal): tribISSQN + [cPaisResult] + [tpImunidade] +
-    #   [exigSusp] + [BM] + tpRetISSQN + [pAliq]
+    # tribMun (TCTribMunicipal): tribISSQN + ... + tpRetISSQN + [pAliq]
     trib_mun = etree.SubElement(trib, f"{NS}tribMun")
     _sub_text(trib_mun, "tribISSQN", "1")  # 1=Operação tributável
-    _sub_text(trib_mun, "tpRetISSQN", "2" if nota.iss_retido else "1")  # 1=Não retido, 2=Retido
-    if nota.aliquota_iss:
+    tp_ret = "2" if nota.iss_retido else "1"
+    _sub_text(trib_mun, "tpRetISSQN", tp_ret)
+    # pAliq: não informar para ME/EPP (opSimpNac=3) com apuração SN sem retenção (E0625)
+    regime = getattr(tenant, "regime_tributario", "")
+    is_simples_sem_retencao = regime in ("SIMPLES", "MEI") and tp_ret == "1"
+    if nota.aliquota_iss and not is_simples_sem_retencao:
         _sub_decimal(trib_mun, "pAliq", nota.aliquota_iss)
 
     # totTrib (TCTribTotal): choice(vTotTrib | pTotTrib | indTotTrib | pTotTribSN)
     tot_trib = etree.SubElement(trib, f"{NS}totTrib")
-    _sub_text(tot_trib, "indTotTrib", "0")  # 0=Não informar
+    # Para ME/EPP (E0712): usar pTotTribSN em vez de indTotTrib
+    if regime in ("SIMPLES", "MEI"):
+        _sub_decimal(tot_trib, "pTotTribSN", Decimal("0"))
+    else:
+        _sub_text(tot_trib, "indTotTrib", "0")  # 0=Não informar
 
 
 # ---------------------------------------------------------------------------
