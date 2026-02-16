@@ -382,3 +382,75 @@ class NFSeDANFSeDownloadView(LoginRequiredMixin, TenantMixin, View):
 
         messages.error(request, "DANFSe não disponível para esta nota.")
         return redirect("nfse:detail", pk=pk)
+
+
+class GerarNFSeDeMovimentoView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """POST: gera NFS-e rascunho a partir de um MovimentoCaixa de ENTRADA."""
+
+    def test_func(self):
+        return self.request.user.pode_emitir_nfse
+
+    def post(self, request, pk):
+        from caixa_nfse.caixa.models import MovimentoCaixa, TipoMovimento
+
+        from .services import criar_nfse_de_movimento
+
+        movimento = get_object_or_404(MovimentoCaixa, pk=pk, tenant=request.user.tenant)
+
+        if movimento.tipo != TipoMovimento.ENTRADA:
+            messages.error(request, "Somente movimentos de entrada geram NFS-e.")
+            return redirect("caixa:lista_movimentos", pk=movimento.abertura_id)
+
+        if movimento.nota_fiscal_id:
+            messages.info(request, "Este movimento já possui NFS-e vinculada.")
+            return redirect("nfse:detail", pk=movimento.nota_fiscal_id)
+
+        if not movimento.cliente_id:
+            return redirect("nfse:associar_cliente", pk=movimento.pk)
+
+        try:
+            nota = criar_nfse_de_movimento(movimento)
+            messages.success(
+                request,
+                f"NFS-e rascunho gerada com sucesso (RPS {nota.numero_rps}).",
+            )
+            return redirect("nfse:detail", pk=nota.pk)
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect("caixa:lista_movimentos", pk=movimento.abertura_id)
+
+
+class AssociarClienteView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """GET: modal para associar cliente ao movimento. POST: salva e gera NFS-e."""
+
+    def test_func(self):
+        return self.request.user.pode_emitir_nfse
+
+    def get(self, request, pk):
+        from caixa_nfse.caixa.models import MovimentoCaixa
+        from caixa_nfse.clientes.models import Cliente
+
+        movimento = get_object_or_404(MovimentoCaixa, pk=pk, tenant=request.user.tenant)
+        clientes = Cliente.objects.filter(tenant=request.user.tenant).order_by("razao_social")
+        html = render_to_string(
+            "nfse/partials/_associar_cliente_modal.html",
+            {"movimento": movimento, "clientes": clientes},
+            request=request,
+        )
+        return HttpResponse(html)
+
+    def post(self, request, pk):
+        from caixa_nfse.caixa.models import MovimentoCaixa
+        from caixa_nfse.clientes.models import Cliente
+
+        movimento = get_object_or_404(MovimentoCaixa, pk=pk, tenant=request.user.tenant)
+        cliente_id = request.POST.get("cliente_id")
+        if not cliente_id:
+            messages.error(request, "Selecione um cliente.")
+            return redirect("nfse:associar_cliente", pk=pk)
+
+        cliente = get_object_or_404(Cliente, pk=cliente_id, tenant=request.user.tenant)
+        movimento.cliente = cliente
+        movimento.save(update_fields=["cliente"])
+
+        return redirect("nfse:gerar_de_movimento", pk=movimento.pk)

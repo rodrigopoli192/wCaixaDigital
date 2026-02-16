@@ -9,7 +9,7 @@ import logging
 
 from cryptography.hazmat.primitives.serialization import pkcs12
 from lxml import etree
-from signxml import XMLSigner
+from signxml import SignatureConstructionMethod, XMLSigner
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +43,14 @@ def assinar_xml(
         reference_uri = _detectar_reference_uri(xml_element)
 
     signer = XMLSigner(
-        method=XMLSigner.SignatureConstructionMethod.enveloped,
+        method=SignatureConstructionMethod.enveloped,
         digest_algorithm="sha256",
         signature_algorithm="rsa-sha256",
         c14n_algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315",
     )
+    # Portal Nacional rejeita XML com prefixo de namespace (E6155).
+    # O signxml usa "ds:" por padrão; forçar namespace default (sem prefixo).
+    signer.namespaces = {None: "http://www.w3.org/2000/09/xmldsig#"}
 
     xml_assinado = signer.sign(
         xml_element,

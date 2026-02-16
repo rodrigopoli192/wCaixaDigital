@@ -72,15 +72,26 @@ def get_backend(tenant) -> BaseNFSeBackend:
         )
         return _BACKEND_MAP["mock"]()
 
+    logger.info("Backend selected for tenant %s: %s", tenant, backend_key)
     return backend_class()
 
 
 def _get_config(tenant) -> object | None:
     """Fetch ConfiguracaoNFSe for a tenant, or None."""
+    from caixa_nfse.nfse.models import ConfiguracaoNFSe
+
     try:
         return tenant.config_nfse
-    except Exception:
+    except tenant.__class__.config_nfse.RelatedObjectDoesNotExist:
         return None
+    except Exception:
+        logger.warning(
+            "Unexpected error reading config_nfse for tenant %s, trying DB query",
+            tenant,
+            exc_info=True,
+        )
+        # Fallback: direct queryset lookup (bypasses cached reverse relation)
+        return ConfiguracaoNFSe.objects.filter(tenant=tenant).first()
 
 
 def list_backends() -> dict[str, type[BaseNFSeBackend]]:

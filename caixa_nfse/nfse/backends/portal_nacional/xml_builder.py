@@ -1,11 +1,16 @@
 """
 Construtor de XML DPS (Declaração Prévia de Serviços) no padrão nacional.
 
-Gera o XML da DPS conforme especificação do Portal Nacional NFS-e,
-incluindo dados do prestador, tomador, serviço, valores, tributos (ISS, CBS, IBS)
-e informações complementares.
+Gera o XML da DPS conforme schema XSD v1.01 do Portal Nacional NFS-e,
+incluindo dados do prestador, tomador, serviço, valores e tributos.
+
+Ordem dos elementos em infDPS (TCInfDPS v1.01):
+  tpAmb → dhEmi → verAplic → serie → nDPS → dCompet → tpEmit →
+  [cMotivoEmisTI] → [chNFSeRej] → cLocEmi → [subst] →
+  prest → [toma] → [interm] → serv → valores → [IBSCBS]
 """
 
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from lxml import etree
@@ -16,6 +21,8 @@ NSMAP = {
 
 NS = "{http://www.sped.fazenda.gov.br/nfse}"
 
+VER_APLIC = "wCaixaDigital_1.0"
+
 
 def construir_dps(nota, tenant) -> etree._Element:
     """
@@ -23,7 +30,7 @@ def construir_dps(nota, tenant) -> etree._Element:
 
     Retorna o elemento raiz <DPS> pronto para assinatura.
     """
-    dps = etree.Element(f"{NS}DPS", nsmap=NSMAP)
+    dps = etree.Element(f"{NS}DPS", nsmap=NSMAP, versao="1.01")
     inf_dps = etree.SubElement(dps, f"{NS}infDPS", Id=_gerar_id_dps(nota, tenant))
 
     _adicionar_identificacao(inf_dps, nota, tenant)
@@ -31,7 +38,6 @@ def construir_dps(nota, tenant) -> etree._Element:
     _adicionar_tomador(inf_dps, nota)
     _adicionar_servico(inf_dps, nota)
     _adicionar_valores(inf_dps, nota)
-    _adicionar_ibs_cbs(inf_dps, nota)
 
     return dps
 
@@ -47,55 +53,88 @@ def dps_para_string(dps: etree._Element) -> str:
 
 
 def _gerar_id_dps(nota, tenant) -> str:
-    """Gera o ID da DPS no formato: DPS + CNPJ(14) + série(5) + número(15)."""
-    cnpj = (tenant.cnpj or "").replace(".", "").replace("/", "").replace("-", "")
-    serie = str(nota.serie_rps).zfill(5)
+    """
+    Gera o ID da DPS no formato TSIdDPS: DPS + 42 dígitos numéricos.
+
+    Formato: DPS + cMunEmi(7) + tpInscFed(1) + cpfCnpj(14) + série(5) + nDPS(15)
+    """
+    cnpj = _limpar_doc(tenant.cnpj)
+    cmun = str(nota.local_prestacao_ibge).zfill(7)
+    tp_insc = "2" if len(cnpj) == 14 else "1"
+    cpf_cnpj = cnpj.zfill(14)
+    serie = str(getattr(nota, "serie_rps", 1) or 1).zfill(5)
     numero = str(nota.numero_rps).zfill(15)
-    return f"DPS{cnpj}{serie}{numero}"
+    return f"DPS{cmun}{tp_insc}{cpf_cnpj}{serie}{numero}"
+
+
+# ---------------------------------------------------------------------------
+# Blocos de construção (na ordem do schema XSD v1.01)
+# ---------------------------------------------------------------------------
 
 
 def _adicionar_identificacao(parent: etree._Element, nota, tenant) -> None:
-    """Adiciona o grupo <Identificação> com dados gerais da DPS."""
-    ident = etree.SubElement(parent, f"{NS}Id")
-
-    _sub_text(ident, "cLocEmi", str(nota.local_prestacao_ibge))
-    _sub_text(ident, "dhEmi", nota.data_emissao.isoformat())
-    _sub_text(ident, "serie", str(nota.serie_rps).zfill(5))
-    _sub_text(ident, "nDPS", str(nota.numero_rps).zfill(15))
-    _sub_text(ident, "tpAmb", "1" if nota.ambiente == "PRODUCAO" else "2")
-    # Tipo de emissão: 1 = Normal
-    _sub_text(ident, "tpEmit", "1")
+    """Campos de identificação em infDPS na ordem do XSD v1.01."""
+    _sub_text(parent, "tpAmb", "1" if nota.ambiente == "PRODUCAO" else "2")
+    # TSDateTimeUTC: AAAA-MM-DDThh:mm:ssTZD
+    # Margem de -5min para compensar diferença de relógio com o servidor
+    BRT = timezone(timedelta(hours=-3))
+    dt_emissao = (datetime.now(tz=BRT) - timedelta(minutes=5)).isoformat(timespec="seconds")
+    _sub_text(parent, "dhEmi", dt_emissao)
+    _sub_text(parent, "verAplic", VER_APLIC)
+    _sub_text(parent, "serie", str(getattr(nota, "serie_rps", 1) or 1).zfill(5))
+    # TSNumDPS: pattern [1-9]{1}[0-9]{0,14} — sem zero-padding
+    _sub_text(parent, "nDPS", str(nota.numero_rps))
+    _sub_text(parent, "dCompet", str(nota.competencia))
+    _sub_text(parent, "tpEmit", "1")  # 1=Prestador
+    _sub_text(parent, "cLocEmi", str(nota.local_prestacao_ibge).zfill(7))
 
 
 def _adicionar_prestador(parent: etree._Element, tenant) -> None:
-    """Adiciona dados do prestador de serviço (tenant)."""
+    """Grupo prest (TCInfoPrestador): choice(CNPJ|CPF) + [IM] + [xNome] + [end] + regTrib."""
     prest = etree.SubElement(parent, f"{NS}prest")
 
-    cnpj = (tenant.cnpj or "").replace(".", "").replace("/", "").replace("-", "")
+    cnpj = _limpar_doc(tenant.cnpj)
     _sub_text(prest, "CNPJ", cnpj)
-    _sub_text(prest, "IM", tenant.inscricao_municipal or "")
+
+    im = getattr(tenant, "inscricao_municipal", None) or ""
+    if im:
+        _sub_text(prest, "IM", im)
+
     _sub_text(prest, "xNome", tenant.razao_social or "")
 
-    # Endereço
+    # Endereço (TCEndereco): choice(endNac|endExt) + xLgr + nro + [xCpl] + xBairro
     end = etree.SubElement(prest, f"{NS}end")
+    end_nac = etree.SubElement(end, f"{NS}endNac")
+    _sub_text(end_nac, "cMun", str(getattr(tenant, "cod_ibge", "3550308") or "3550308"))
+    _sub_text(end_nac, "CEP", (tenant.cep or "").replace("-", ""))
     _sub_text(end, "xLgr", tenant.logradouro or "")
     _sub_text(end, "nro", tenant.numero or "S/N")
     _sub_text(end, "xBairro", tenant.bairro or "")
-    _sub_text(end, "cMun", "3550308")  # TODO: campo no Tenant
-    _sub_text(end, "UF", tenant.uf or "")
-    _sub_text(end, "CEP", (tenant.cep or "").replace("-", ""))
+
+    # regTrib (TCRegTrib) - obrigatório: opSimpNac + regEspTrib
+    reg_trib = etree.SubElement(prest, f"{NS}regTrib")
+    _sub_text(reg_trib, "opSimpNac", str(getattr(tenant, "opcao_simples", 1) or 1))
+    _sub_text(reg_trib, "regEspTrib", str(getattr(tenant, "regime_especial", 0) or 0))
 
 
 def _adicionar_tomador(parent: etree._Element, nota) -> None:
-    """Adiciona dados do tomador do serviço (cliente)."""
-    toma = etree.SubElement(parent, f"{NS}toma")
+    """Grupo toma (TCInfoPessoa): choice(CNPJ|CPF|NIF|cNaoNIF) + xNome + [end] + [email].
 
+    Só adiciona se o cliente tiver CPF ou CNPJ válido.
+    O campo toma é opcional no schema (minOccurs=0).
+    """
     cliente = nota.cliente
-    doc = (cliente.cpf_cnpj or "").replace(".", "").replace("-", "").replace("/", "")
+    doc = _limpar_doc(cliente.cpf_cnpj)
+
+    # Se não tem documento, omitir tomador
+    if not doc or len(doc) not in (11, 14):
+        return
+
+    toma = etree.SubElement(parent, f"{NS}toma")
 
     if len(doc) == 14:
         _sub_text(toma, "CNPJ", doc)
-    elif len(doc) == 11:
+    else:
         _sub_text(toma, "CPF", doc)
 
     _sub_text(toma, "xNome", cliente.razao_social or "")
@@ -105,49 +144,78 @@ def _adicionar_tomador(parent: etree._Element, nota) -> None:
 
 
 def _adicionar_servico(parent: etree._Element, nota) -> None:
-    """Adiciona dados do serviço prestado."""
+    """
+    Grupo serv (TCServ):
+      locPrest (TCLocPrest) → cServ (TCCServ) → [comExt] → [obra] → [atvEvento] → [infoCompl]
+    """
     serv = etree.SubElement(parent, f"{NS}serv")
 
-    _sub_text(serv, "cServ", nota.servico.codigo_lc116)
-    _sub_text(serv, "xDescServ", nota.discriminacao or "")
-    _sub_text(serv, "cMunPrestacao", str(nota.local_prestacao_ibge))
+    # locPrest: choice(cLocPrestacao | cPaisPrestacao)
+    loc_prest = etree.SubElement(serv, f"{NS}locPrest")
+    _sub_text(loc_prest, "cLocPrestacao", str(nota.local_prestacao_ibge).zfill(7))
+
+    # cServ (TCCServ): cTribNac + [cTribMun] + xDescServ + [cNBS] + [cIntContrib]
+    c_serv = etree.SubElement(serv, f"{NS}cServ")
+    # cTribNac: 6 dígitos (2 item LC116 + 2 subitem + 2 desdobro)
+    codigo_lc116 = nota.servico.codigo_lc116 or ""
+    # Normaliza para formato 6 dígitos (ex: "14.01" → "140100")
+    c_trib_nac = _normalizar_codigo_trib_nac(codigo_lc116)
+    _sub_text(c_serv, "cTribNac", c_trib_nac)
+    _sub_text(c_serv, "xDescServ", nota.discriminacao or "")
 
 
 def _adicionar_valores(parent: etree._Element, nota) -> None:
-    """Adiciona grupo de valores e tributos."""
+    """
+    Grupo valores (TCInfoValores):
+      vServPrest (TCVServPrest) → [vDescCondIncond] → [vDedRed] → trib (TCInfoTributacao)
+    """
     vals = etree.SubElement(parent, f"{NS}valores")
 
-    _sub_decimal(vals, "vServPrest", nota.valor_servicos)
-    _sub_decimal(vals, "vDeducao", nota.valor_deducoes)
-    _sub_decimal(vals, "vBC", nota.base_calculo)
-    _sub_decimal(vals, "pAliqISS", nota.aliquota_iss)
-    _sub_decimal(vals, "vISS", nota.valor_iss)
-    _sub_text(vals, "tpRetISS", "1" if nota.iss_retido else "2")
+    # vServPrest (TCVServPrest): [vReceb] + vServ
+    v_serv_prest = etree.SubElement(vals, f"{NS}vServPrest")
+    _sub_decimal(v_serv_prest, "vServ", nota.valor_servicos)
 
-    # Retenções federais
-    if nota.valor_pis:
-        _sub_decimal(vals, "vPIS", nota.valor_pis)
-    if nota.valor_cofins:
-        _sub_decimal(vals, "vCOFINS", nota.valor_cofins)
-    if nota.valor_inss:
-        _sub_decimal(vals, "vINSS", nota.valor_inss)
-    if nota.valor_ir:
-        _sub_decimal(vals, "vIR", nota.valor_ir)
-    if nota.valor_csll:
-        _sub_decimal(vals, "vCSLL", nota.valor_csll)
+    # trib (TCInfoTributacao): tribMun + [tribFed] + totTrib
+    trib = etree.SubElement(vals, f"{NS}trib")
 
-    _sub_decimal(vals, "vLiq", nota.valor_liquido)
+    # tribMun (TCTribMunicipal): tribISSQN + [cPaisResult] + [tpImunidade] +
+    #   [exigSusp] + [BM] + tpRetISSQN + [pAliq]
+    trib_mun = etree.SubElement(trib, f"{NS}tribMun")
+    _sub_text(trib_mun, "tribISSQN", "1")  # 1=Operação tributável
+    _sub_text(trib_mun, "tpRetISSQN", "2" if nota.iss_retido else "1")  # 1=Não retido, 2=Retido
+    if nota.aliquota_iss:
+        _sub_decimal(trib_mun, "pAliq", nota.aliquota_iss)
+
+    # totTrib (TCTribTotal): choice(vTotTrib | pTotTrib | indTotTrib | pTotTribSN)
+    tot_trib = etree.SubElement(trib, f"{NS}totTrib")
+    _sub_text(tot_trib, "indTotTrib", "0")  # 0=Não informar
 
 
-def _adicionar_ibs_cbs(parent: etree._Element, nota) -> None:
-    """Adiciona grupo IBSCBS se houver valores da reforma tributária."""
-    valor_cbs = getattr(nota, "valor_cbs", Decimal("0.00")) or Decimal("0.00")
-    valor_ibs = getattr(nota, "valor_ibs", Decimal("0.00")) or Decimal("0.00")
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
-    if valor_cbs > 0 or valor_ibs > 0:
-        grupo = etree.SubElement(parent, f"{NS}IBSCBS")
-        _sub_decimal(grupo, "vCBS", valor_cbs)
-        _sub_decimal(grupo, "vIBS", valor_ibs)
+
+def _limpar_doc(doc: str | None) -> str:
+    """Remove pontuação de CNPJ/CPF."""
+    return (doc or "").replace(".", "").replace("/", "").replace("-", "")
+
+
+def _normalizar_codigo_trib_nac(codigo: str) -> str:
+    """
+    Converte código LC116 (ex: '14.01', '1401') para formato cTribNac de 6 dígitos.
+
+    Formato: IISSDD (2 dígitos item + 2 dígitos subitem + 2 dígitos desdobro).
+    """
+    limpo = codigo.replace(".", "").replace("-", "").replace(" ", "")
+    # Se tem 4 dígitos (ex: "1401"), adiciona "01" de desdobro (padrão nacional)
+    if len(limpo) == 4:
+        return limpo + "01"
+    # Se tem 6 dígitos, já está no formato correto
+    if len(limpo) == 6:
+        return limpo
+    # Fallback: preenche com zeros à direita
+    return limpo.ljust(6, "0")[:6]
 
 
 def _sub_text(parent: etree._Element, tag: str, texto: str) -> etree._Element:

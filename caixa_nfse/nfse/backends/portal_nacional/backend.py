@@ -166,16 +166,30 @@ class PortalNacionalBackend(BaseNFSeBackend):
 
 def _obter_certificado(tenant) -> bytes | None:
     """Obtém bytes do certificado digital A1 do tenant."""
-    if hasattr(tenant, "certificado_digital") and tenant.certificado_digital:
+    cert = getattr(tenant, "certificado_digital", None)
+    if not cert:
+        return None
+
+    # BinaryField retorna bytes diretamente; FileField teria .read()
+    if isinstance(cert, (bytes, memoryview)):
+        return bytes(cert)
+
+    if hasattr(cert, "read"):
         try:
-            return tenant.certificado_digital.read()
+            return cert.read()
         except Exception:
             logger.warning("Não foi possível ler certificado do tenant %s", tenant)
+            return None
+
+    logger.warning("Tipo inesperado de certificado para tenant %s: %s", tenant, type(cert))
     return None
 
 
 def _criar_client(nota, tenant) -> PortalNacionalClient:
     """Cria instância do client HTTP configurada para o ambiente da nota."""
+    cert_bytes = _obter_certificado(tenant)
     return PortalNacionalClient(
         ambiente=nota.ambiente or "HOMOLOGACAO",
+        certificado_bytes=cert_bytes,
+        certificado_senha=tenant.certificado_senha or "",
     )

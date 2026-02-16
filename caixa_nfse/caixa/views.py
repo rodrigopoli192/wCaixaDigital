@@ -453,7 +453,7 @@ class ListaMovimentosView(LoginRequiredMixin, TenantMixin, SingleTableMixin, Fil
         qs = super().get_queryset()
         return (
             qs.filter(abertura_id=self.kwargs["pk"])
-            .select_related("cliente", "forma_pagamento")
+            .select_related("cliente", "forma_pagamento", "nota_fiscal")
             .annotate(itens_count=Count("itens"))
             .prefetch_related(
                 "parcela_recebimento__movimento_importado__parcelas__forma_pagamento",

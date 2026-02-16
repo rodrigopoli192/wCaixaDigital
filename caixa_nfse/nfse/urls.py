@@ -20,4 +20,14 @@ urlpatterns = [
     path("<uuid:pk>/cancelar/", views.NFSeCancelarView.as_view(), name="cancelar"),
     path("<uuid:pk>/xml/", views.NFSeXMLView.as_view(), name="xml"),
     path("<uuid:pk>/danfse/", views.NFSeDANFSeDownloadView.as_view(), name="danfse"),
+    path(
+        "gerar/<uuid:pk>/",
+        views.GerarNFSeDeMovimentoView.as_view(),
+        name="gerar_de_movimento",
+    ),
+    path(
+        "associar-cliente/<uuid:pk>/",
+        views.AssociarClienteView.as_view(),
+        name="associar_cliente",
+    ),
 ]

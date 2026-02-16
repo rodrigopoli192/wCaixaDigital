@@ -1,0 +1,9 @@
+STATUS: REJEITADA
+BACKEND: portal_nacional
+AMBIENTE: HOMOLOGACAO
+MUNICIPIO: 5208707
+ERRO:
+{'tipoAmbiente': 2, 'versaoAplicativo': 'SefinNacional_1.6.0', 'dataHoraProcessamento': '2026-02-16T18:09:44.5480522-03:00', 'idDPS': 'DPS520870724349695700018300001000000000099991', 'erros': [{'Codigo': 'E0160', 'Descricao': 'No mês de competência da NFS-e, a opção de situação perante o Simples Nacional, do prestador, informada na DPS não está de acordo com o cadastro Simples Nacional.'}]}
+---
+EVENTO: ENVIO | Enviando via PortalNacionalBackend
+EVENTO: REJEICAO | {'tipoAmbiente': 2, 'versaoAplicativo': 'SefinNacional_1.6.0', 'dataHoraProcessamento': '2026-02-16T18:09:44.5480522-03:00', 'idDPS': 'DPS520870724349695700018300001000000000099991', 'erros': [{'Codigo': 'E0160', 'Descricao': 'No mês de competência da NFS-e, a opção de situação perante o Simples Nacional, do prestador, informada na DPS não está de acordo com o cadastro Simples Nacional.'}]}

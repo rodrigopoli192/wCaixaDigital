@@ -1,0 +1,79 @@
+<!-- Modal: Associar Cliente ao Movimento para gerar NFS-e -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+     x-data="{ search: '' }"
+     @keydown.escape.window="history.back()">
+
+    <div class="bg-white dark:bg-[#2B2C30] rounded-2xl shadow-2xl border border-slate-200 dark:border-[#2d3544] w-full max-w-lg mx-4 overflow-hidden">
+        <!-- Header -->
+        <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-200 dark:border-[#2d3544]">
+            <span class="material-symbols-outlined text-primary text-xl">person_add</span>
+            <div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Associar Cliente</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Protocolo: {{ movimento.protocolo|floatformat:0|default:"—" }} — R$ {{ movimento.valor|floatformat:2 }}
+                </p>
+            </div>
+            <a href="{% url 'caixa:lista_movimentos' pk=movimento.abertura_id %}"
+               class="ml-auto p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#1E1F23] transition-colors">
+                <span class="material-symbols-outlined text-slate-400 text-lg">close</span>
+            </a>
+        </div>
+
+        {% if movimento.cliente_nome %}
+        <div class="px-6 pt-3">
+            <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <span class="material-symbols-outlined text-amber-500 text-sm">info</span>
+                <span class="text-xs text-amber-700 dark:text-amber-400">
+                    Apresentante do sistema: <strong>{{ movimento.cliente_nome }}</strong>
+                </span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="post" action="{% url 'nfse:associar_cliente' pk=movimento.pk %}" class="px-6 py-4 space-y-4">
+            {% csrf_token %}
+
+            <!-- Search -->
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+                <input type="text" x-model="search"
+                       placeholder="Buscar por nome ou CPF/CNPJ..."
+                       class="w-full bg-slate-50 dark:bg-[#1E1F23] border border-slate-200 dark:border-[#2d3544] rounded-lg pl-10 pr-4 py-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all outline-none">
+            </div>
+
+            <!-- Client Select -->
+            <div class="max-h-60 overflow-y-auto space-y-1 rounded-lg border border-slate-200 dark:border-[#2d3544] p-2 bg-slate-50 dark:bg-[#1E1F23]">
+                {% for c in clientes %}
+                <label class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-primary/5 transition-colors"
+                       x-show="!search || '{{ c.razao_social|lower }} {{ c.cpf_cnpj }}'.includes(search.toLowerCase())">
+                    <input type="radio" name="cliente_id" value="{{ c.pk }}"
+                           class="w-4 h-4 text-primary focus:ring-primary">
+                    <div class="flex-1 min-w-0">
+                        <span class="text-sm font-medium text-slate-900 dark:text-white block truncate">{{ c.razao_social }}</span>
+                        <span class="text-xs text-slate-500 dark:text-slate-400">{{ c.cpf_cnpj }}</span>
+                    </div>
+                </label>
+                {% empty %}
+                <div class="text-center py-6">
+                    <span class="material-symbols-outlined text-slate-400 text-3xl block mb-1">person_off</span>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Nenhum cliente cadastrado</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-3 pt-2">
+                <a href="{% url 'caixa:lista_movimentos' pk=movimento.abertura_id %}"
+                   class="flex-1 h-10 flex items-center justify-center rounded-lg border border-slate-200 dark:border-[#2d3544] text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-[#1E1F23] transition-colors">
+                    Cancelar
+                </a>
+                <button type="submit"
+                        class="flex-1 h-10 flex items-center justify-center gap-2 rounded-lg bg-primary hover:bg-primary/90 text-white text-sm font-bold shadow-lg shadow-primary/20 transition-all active:scale-95">
+                    <span class="material-symbols-outlined text-sm">receipt</span>
+                    Associar e Gerar NFS-e
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

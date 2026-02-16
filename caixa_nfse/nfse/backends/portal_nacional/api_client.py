@@ -6,14 +6,18 @@ Endpoints:
 - Homologação: https://sefin.producaorestrita.nfse.gov.br/sefinnacional
 
 Todas as requisições enviam o XML da DPS compactado em GZip e codificado em Base64.
+A autenticação mTLS usa o certificado digital A1 (.pfx/.p12) do tenant.
 """
 
 import base64
 import gzip
 import logging
+import tempfile
 from dataclasses import dataclass
 
 import httpx
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.serialization import pkcs12
 
 logger = logging.getLogger(__name__)
 
@@ -41,21 +45,71 @@ class PortalNacionalClient:
     Cliente HTTP para comunicação com a API REST do Portal Nacional NFS-e.
 
     Utiliza certificado digital A1 para autenticação mTLS.
+    Aceita certificado PKCS#12 em bytes (do BinaryField) ou paths de arquivo PEM.
     """
 
     def __init__(
         self,
         ambiente: str = "HOMOLOGACAO",
-        certificado_path: str | None = None,
+        certificado_bytes: bytes | None = None,
         certificado_senha: str | None = None,
         timeout: int = TIMEOUT_SEGUNDOS,
     ):
         self.base_url = URLS.get(ambiente, URLS["HOMOLOGACAO"])
         self.timeout = timeout
         self._cert_config = None
+        self._temp_files: list = []
 
-        if certificado_path and certificado_senha:
-            self._cert_config = (certificado_path, certificado_senha)
+        if certificado_bytes and certificado_senha:
+            self._cert_config = self._extrair_pem(certificado_bytes, certificado_senha)
+
+    def _extrair_pem(self, pfx_bytes: bytes, senha: str) -> tuple[str, str] | None:
+        """Extrai cert e key PEM do PKCS#12 para temp files usados pelo httpx mTLS."""
+        try:
+            chave, cert, cadeia = pkcs12.load_key_and_certificates(pfx_bytes, senha.encode("utf-8"))
+            if not chave or not cert:
+                logger.error("Certificado PKCS#12 sem chave privada ou certificado")
+                return None
+
+            # Salvar cert PEM
+            cert_pem = cert.public_bytes(serialization.Encoding.PEM)
+            if cadeia:
+                for ca in cadeia:
+                    cert_pem += ca.public_bytes(serialization.Encoding.PEM)
+
+            cert_file = tempfile.NamedTemporaryFile(
+                suffix=".pem", prefix="nfse_cert_", delete=False
+            )
+            cert_file.write(cert_pem)
+            cert_file.flush()
+            self._temp_files.append(cert_file)
+
+            # Salvar key PEM
+            key_pem = chave.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption(),
+            )
+            key_file = tempfile.NamedTemporaryFile(suffix=".pem", prefix="nfse_key_", delete=False)
+            key_file.write(key_pem)
+            key_file.flush()
+            self._temp_files.append(key_file)
+
+            return (cert_file.name, key_file.name)
+
+        except Exception:
+            logger.exception("Erro ao extrair PEM do PKCS#12")
+            return None
+
+    def __del__(self):
+        """Remove temp files de cert/key PEM."""
+        import os
+
+        for f in self._temp_files:
+            try:
+                os.unlink(f.name)
+            except OSError:
+                pass
 
     def enviar_dps(self, xml_assinado: str) -> RespostaAPI:
         """
