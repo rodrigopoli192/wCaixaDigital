@@ -416,6 +416,8 @@ class TestConfirmarMovimentos:
     def test_confirm_already_confirmed_skipped(
         self, abertura, conexao, rotina, admin_user, forma_pagamento, tenant
     ):
+        from caixa_nfse.caixa.models import StatusRecebimento
+
         imp = MovimentoImportado.objects.create(
             tenant=tenant,
             abertura=abertura,
@@ -425,6 +427,7 @@ class TestConfirmarMovimentos:
             protocolo="P-004",
             valor=Decimal("10.00"),
             confirmado=True,
+            status_recebimento=StatusRecebimento.QUITADO,
         )
         count = ImportadorMovimentos.confirmar_movimentos(
             [imp.pk], abertura, forma_pagamento, TipoMovimento.ENTRADA, admin_user

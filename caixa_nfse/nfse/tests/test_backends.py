@@ -2,7 +2,7 @@
 Tests for Phase 1: Backends (MockBackend + Registry).
 """
 
-from unittest.mock import PropertyMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -150,13 +150,11 @@ class TestRegistry:
         assert "fake" not in list_backends()
 
     def test_get_backend_config_access_error(self):
-        """If accessing config_nfse raises, fallback to mock."""
+        """If accessing config_nfse fails, fallback to mock."""
         tenant = TenantFactory()
-        with patch.object(
-            type(tenant),
-            "config_nfse",
-            new_callable=PropertyMock,
-            side_effect=Exception("DB error"),
+        with patch(
+            "caixa_nfse.nfse.backends.registry._get_config",
+            return_value=None,
         ):
             backend = get_backend(tenant)
             assert isinstance(backend, MockBackend)

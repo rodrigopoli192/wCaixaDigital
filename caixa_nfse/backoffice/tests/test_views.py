@@ -43,6 +43,8 @@ class TestTenantCRUD:
             "razao_social": "Updated Corp",
             "nome_fantasia": "UpCorp",
             "cnpj": tenant.cnpj,
+            "inscricao_municipal": tenant.inscricao_municipal or "123456",
+            "codigo_ibge": "3550308",
             "cidade": "SP",
             "uf": "SP",
             "regime_tributario": "SIMPLES",

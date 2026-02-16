@@ -1,5 +1,4 @@
 import pytest
-from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
 from caixa_nfse.clientes.models import TipoPessoa
@@ -43,37 +42,38 @@ class TestClienteModel:
         assert cliente.pk is not None
         assert cliente.tipo_pessoa == TipoPessoa.PJ
 
-    def test_invalid_cpf(self):
-        """Should raise ValidationError for invalid CPF."""
-        cliente = ClienteFactory.build(tipo_pessoa=TipoPessoa.PF, cpf_cnpj="11111111111")
-        with pytest.raises(ValidationError) as exc:
-            cliente.full_clean()
-        assert "CPF inválido" in str(exc.value)
+    def test_invalid_cpf_saves_without_error(self):
+        """Invalid CPF should NOT raise — validation is a soft frontend warning."""
+        tenant = TenantFactory()
+        cliente = ClienteFactory.build(
+            tipo_pessoa=TipoPessoa.PF, cpf_cnpj="11111111111", tenant=tenant
+        )
+        # full_clean() should NOT raise because CPF/CNPJ validation is soft
+        cliente.full_clean()
 
-    def test_invalid_cnpj(self):
-        """Should raise ValidationError for invalid CNPJ."""
-        cliente = ClienteFactory.build(tipo_pessoa=TipoPessoa.PJ, cpf_cnpj="00000000000000")
-        with pytest.raises(ValidationError) as exc:
-            cliente.full_clean()
-        assert "CNPJ inválido" in str(exc.value)
+    def test_invalid_cnpj_saves_without_error(self):
+        """Invalid CNPJ should NOT raise — validation is a soft frontend warning."""
+        tenant = TenantFactory()
+        cliente = ClienteFactory.build(
+            tipo_pessoa=TipoPessoa.PJ, cpf_cnpj="00000000000000", tenant=tenant
+        )
+        cliente.full_clean()
 
-    def test_invalid_cpf_checksum(self):
-        """Should raise ValidationError for invalid CPF checksum."""
-        # 12345678909 is valid checksum? No.
-        # But let's use a definitely invalid one that is not repeating.
-        # "12345678900"
-        cliente = ClienteFactory.build(tipo_pessoa=TipoPessoa.PF, cpf_cnpj="12345678900")
-        with pytest.raises(ValidationError) as exc:
-            cliente.full_clean()
-        assert "CPF inválido" in str(exc.value)
+    def test_invalid_cpf_checksum_saves_without_error(self):
+        """Invalid CPF checksum should NOT raise — validation is a soft frontend warning."""
+        tenant = TenantFactory()
+        cliente = ClienteFactory.build(
+            tipo_pessoa=TipoPessoa.PF, cpf_cnpj="12345678900", tenant=tenant
+        )
+        cliente.full_clean()
 
-    def test_invalid_cnpj_checksum(self):
-        """Should raise ValidationError for invalid CNPJ checksum."""
-        # "12345678000100" -> likely invalid
-        cliente = ClienteFactory.build(tipo_pessoa=TipoPessoa.PJ, cpf_cnpj="12345678000100")
-        with pytest.raises(ValidationError) as exc:
-            cliente.full_clean()
-        assert "CNPJ inválido" in str(exc.value)
+    def test_invalid_cnpj_checksum_saves_without_error(self):
+        """Invalid CNPJ checksum should NOT raise — validation is a soft frontend warning."""
+        tenant = TenantFactory()
+        cliente = ClienteFactory.build(
+            tipo_pessoa=TipoPessoa.PJ, cpf_cnpj="12345678000100", tenant=tenant
+        )
+        cliente.full_clean()
 
     def test_get_absolute_url(self):
         """Should return absolute url."""

@@ -207,9 +207,11 @@ class TestCaixaAccess(AccessTestBase):
         for user in [self.tenant_admin, self.tenant_user]:
             self.client.force_login(user)
             resp = self.client.get("/caixa/")
+            # CaixaListView.dispatch redirects operadores (non-gerentes) to
+            # their active register or dashboard, so 302 is valid for them.
             self.assertIn(
                 resp.status_code,
-                [200],
+                [200, 302],
                 f"{user.email} should access /caixa/, got {resp.status_code}",
             )
 

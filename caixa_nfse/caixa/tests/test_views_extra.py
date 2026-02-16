@@ -21,8 +21,10 @@ from caixa_nfse.caixa.models import (
 class TestCaixaUpdateView:
     """Tests for CaixaUpdateView."""
 
-    def test_update_caixa_success(self, client_logged, caixa):
+    def test_update_caixa_success(self, client_logged, user, caixa):
         """Should update caixa successfully."""
+        user.pode_aprovar_fechamento = True
+        user.save()
         url = reverse("caixa:editar", kwargs={"pk": caixa.pk})
         data = {
             "identificador": "CAIXA-UPDATED",
@@ -36,8 +38,10 @@ class TestCaixaUpdateView:
         assert caixa.identificador == "CAIXA-UPDATED"
         assert caixa.tipo == "VIRTUAL"
 
-    def test_update_caixa_context(self, client_logged, caixa):
+    def test_update_caixa_context(self, client_logged, user, caixa):
         """Should have correct context data."""
+        user.pode_aprovar_fechamento = True
+        user.save()
         url = reverse("caixa:editar", kwargs={"pk": caixa.pk})
         response = client_logged.get(url)
         assert response.status_code == 200
@@ -301,8 +305,10 @@ class TestCaixaDetailView:
 class TestCaixaCreateViewExtra:
     """Extra tests for CaixaCreateView."""
 
-    def test_create_caixa_context(self, client_logged):
+    def test_create_caixa_context(self, client_logged, user):
         """Should have correct context on GET."""
+        user.pode_aprovar_fechamento = True
+        user.save()
         url = reverse("caixa:criar")
         response = client_logged.get(url)
         assert response.status_code == 200
@@ -366,13 +372,13 @@ class TestCoverageGapView:
     """Tests to close final coverage gaps."""
 
     def test_tenant_mixin_no_tenant(self, client_logged, user):
-        """Should return empty queryset if user has no tenant."""
+        """User with no tenant should be redirected."""
         user.tenant = None
         user.save()
         url = reverse("caixa:list")
         response = client_logged.get(url)
-        assert response.status_code == 200
-        assert len(response.context["object_list"]) == 0
+        # CaixaListView.dispatch redirects non-gerentes; no tenant = redirect to dashboard
+        assert response.status_code == 302
 
     def test_fechar_caixa_permission_denied(self, client_logged, user, caixa):
         """User without permission should be denied."""

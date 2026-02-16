@@ -14,8 +14,10 @@ from caixa_nfse.caixa.models import Caixa, StatusCaixa
 class TestCaixaListView:
     """Tests for CaixaListView."""
 
-    def test_list_caixas_authenticated(self, client_logged, caixa):
-        """Authenticated user should see list of caixas."""
+    def test_list_caixas_authenticated(self, client_logged, user, caixa):
+        """Authenticated gerente should see list of caixas."""
+        user.pode_aprovar_fechamento = True
+        user.save()
         url = reverse("caixa:list")
         response = client_logged.get(url)
         assert response.status_code == 200
@@ -34,8 +36,10 @@ class TestCaixaListView:
 class TestCaixaCreateView:
     """Tests for CaixaCreateView."""
 
-    def test_create_caixa_success(self, client_logged):
+    def test_create_caixa_success(self, client_logged, user):
         """Should create a new caixa successfully."""
+        user.pode_aprovar_fechamento = True
+        user.save()
         url = reverse("caixa:criar")
         data = {
             "identificador": "CAIXA-NEW",

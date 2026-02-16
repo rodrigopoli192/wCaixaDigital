@@ -282,11 +282,16 @@ class TestPortalNacionalClient:
 
     def test_cert_config_quando_fornecido(self):
         """Deve configurar certificado para mTLS quando fornecido."""
-        client = PortalNacionalClient(
-            certificado_path="/tmp/cert.pem",
-            certificado_senha="senha",
-        )
-        assert client._cert_config == ("/tmp/cert.pem", "senha")
+        with patch.object(
+            PortalNacionalClient,
+            "_extrair_pem",
+            return_value=("/tmp/cert.pem", "/tmp/key.pem"),
+        ):
+            client = PortalNacionalClient(
+                certificado_bytes=b"fake-pfx-bytes",
+                certificado_senha="senha",
+            )
+            assert client._cert_config == ("/tmp/cert.pem", "/tmp/key.pem")
 
     def test_cert_config_none_quando_ausente(self):
         """Sem certificado, _cert_config deve ser None."""
