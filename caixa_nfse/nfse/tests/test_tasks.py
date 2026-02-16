@@ -40,6 +40,7 @@ class TestEnviarNfse:
             codigo_verificacao="ABC123",
             chave_acesso="CHAVE50DIGITOS",
             protocolo="PROT001",
+            xml_envio="<DPS>assinado</DPS>",
             xml_retorno="<xml>ok</xml>",
             pdf_url="https://pdf.example.com/danfse.pdf",
             json_bruto={"status": "autorizado", "numero": 12345},
@@ -69,6 +70,7 @@ class TestEnviarNfse:
         mock_backend.emitir.return_value = MagicMock(
             sucesso=False,
             mensagem="CNPJ inválido",
+            xml_envio="<DPS>assinado</DPS>",
             xml_retorno="<erro>CNPJ</erro>",
             json_bruto={"erros": [{"mensagem": "CNPJ inválido"}]},
         )
@@ -106,6 +108,7 @@ class TestEnviarNfse:
             codigo_verificacao=None,
             chave_acesso=None,
             protocolo=None,
+            xml_envio=None,
             xml_retorno=None,
             pdf_url=None,
             json_bruto=None,
@@ -127,6 +130,7 @@ class TestEnviarNfse:
         mock_backend.emitir.return_value = MagicMock(
             sucesso=False,
             mensagem=None,
+            xml_envio=None,
             xml_retorno=None,
             json_bruto=None,
         )

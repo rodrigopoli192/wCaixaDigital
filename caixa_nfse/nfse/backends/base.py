@@ -16,6 +16,7 @@ class ResultadoEmissao:
     chave_acesso: str | None = None
     codigo_verificacao: str | None = None
     protocolo: str | None = None
+    xml_envio: str | None = None
     xml_retorno: str | None = None
     pdf_url: str | None = None
     json_bruto: dict | None = None

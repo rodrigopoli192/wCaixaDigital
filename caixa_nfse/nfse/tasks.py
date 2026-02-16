@@ -63,6 +63,9 @@ def enviar_nfse(self, nota_id: str) -> dict:
                 nota=nota,
                 tipo=TipoEventoFiscal.AUTORIZACAO,
                 mensagem=resultado.mensagem or "Nota autorizada com sucesso",
+                xml_envio=resultado.xml_envio or "",
+                xml_retorno=resultado.xml_retorno or "",
+                protocolo=resultado.protocolo or "",
                 sucesso=True,
             )
 
@@ -79,6 +82,8 @@ def enviar_nfse(self, nota_id: str) -> dict:
             nota=nota,
             tipo=TipoEventoFiscal.REJEICAO,
             mensagem=resultado.mensagem or "Emissão rejeitada",
+            xml_envio=resultado.xml_envio or "",
+            xml_retorno=resultado.xml_retorno or "",
             sucesso=False,
         )
 
@@ -235,6 +240,7 @@ def poll_nfse_status() -> dict:
                     nota=nota,
                     tipo=TipoEventoFiscal.AUTORIZACAO,
                     mensagem=f"Polling: {resultado.mensagem or 'Autorizada'}",
+                    xml_retorno=resultado.xml_retorno or "",
                     sucesso=True,
                 )
                 atualizadas += 1
@@ -249,6 +255,7 @@ def poll_nfse_status() -> dict:
                     nota=nota,
                     tipo=TipoEventoFiscal.REJEICAO,
                     mensagem=f"Polling: {resultado.mensagem or 'Rejeitada'}",
+                    xml_retorno=resultado.xml_retorno or "",
                     sucesso=False,
                 )
                 atualizadas += 1

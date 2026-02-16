@@ -65,6 +65,7 @@ class PortalNacionalBackend(BaseNFSeBackend):
                 return ResultadoEmissao(
                     sucesso=False,
                     mensagem=resposta.mensagem or f"Erro HTTP {resposta.status_code}",
+                    xml_envio=xml_assinado,
                     xml_retorno=resposta.xml_retorno,
                 )
 
@@ -76,6 +77,7 @@ class PortalNacionalBackend(BaseNFSeBackend):
                 chave_acesso=dados.get("chNFSe", ""),
                 codigo_verificacao=dados.get("cVerif", ""),
                 protocolo=dados.get("nProt", ""),
+                xml_envio=xml_assinado,
                 xml_retorno=resposta.xml_retorno,
                 pdf_url=dados.get("urlDanfse", ""),
                 mensagem="NFS-e emitida com sucesso via Portal Nacional",
