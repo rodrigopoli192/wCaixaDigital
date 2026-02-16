@@ -18,6 +18,7 @@ class ResultadoEmissao:
     protocolo: str | None = None
     xml_retorno: str | None = None
     pdf_url: str | None = None
+    json_bruto: dict | None = None
     mensagem: str = ""
 
 

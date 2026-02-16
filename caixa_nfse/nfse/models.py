@@ -2,6 +2,7 @@
 NFS-e models - Nota Fiscal de Serviço Eletrônica.
 """
 
+import uuid
 from decimal import Decimal
 
 from django.conf import settings
@@ -10,6 +11,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from caixa_nfse.core.encrypted_fields import EncryptedCharField
 from caixa_nfse.core.models import BaseModel, Tenant, TenantAwareModel
 
 
@@ -92,6 +94,15 @@ class NotaFiscalServico(TenantAwareModel):
     """
     NFS-e - Nota Fiscal de Serviço Eletrônica.
     """
+
+    # Idempotência
+    uuid_transacao = models.UUIDField(
+        _("UUID transação"),
+        default=uuid.uuid4,
+        editable=False,
+        db_index=True,
+        help_text=_("Chave de idempotência para evitar duplicidade em retries"),
+    )
 
     # Tomador
     cliente = models.ForeignKey(
@@ -308,6 +319,21 @@ class NotaFiscalServico(TenantAwareModel):
         blank=True,
     )
 
+    # Retorno bruto do gateway
+    json_retorno_gateway = models.JSONField(
+        _("retorno do gateway"),
+        null=True,
+        blank=True,
+        help_text=_("Resposta JSON/dict bruta do gateway para auditoria"),
+    )
+
+    # Mensagem de erro rápida
+    mensagem_erro = models.TextField(
+        _("mensagem de erro"),
+        blank=True,
+        help_text=_("Última mensagem de erro/rejeição para consulta rápida"),
+    )
+
     # Cancelamento
     motivo_cancelamento = models.TextField(
         _("motivo cancelamento"),
@@ -448,15 +474,15 @@ class ConfiguracaoNFSe(TenantAwareModel):
         help_text=_("Se ativo, gera NFS-e automaticamente ao confirmar movimento"),
     )
 
-    # Credenciais gateway (Focus NFe / TecnoSpeed)
-    api_token = models.CharField(
+    # Credenciais gateway (Focus NFe / TecnoSpeed) — criptografadas em repouso
+    api_token = EncryptedCharField(
         _("API token"),
-        max_length=255,
+        max_length=500,
         blank=True,
     )
-    api_secret = models.CharField(
+    api_secret = EncryptedCharField(
         _("API secret"),
-        max_length=255,
+        max_length=500,
         blank=True,
     )
     webhook_token = models.CharField(

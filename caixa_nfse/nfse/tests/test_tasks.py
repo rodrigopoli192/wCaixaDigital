@@ -42,6 +42,7 @@ class TestEnviarNfse:
             protocolo="PROT001",
             xml_retorno="<xml>ok</xml>",
             pdf_url="https://pdf.example.com/danfse.pdf",
+            json_bruto={"status": "autorizado", "numero": 12345},
             mensagem="NFS-e emitida com sucesso",
         )
         mock_get_backend.return_value = mock_backend
@@ -69,6 +70,7 @@ class TestEnviarNfse:
             sucesso=False,
             mensagem="CNPJ inválido",
             xml_retorno="<erro>CNPJ</erro>",
+            json_bruto={"erros": [{"mensagem": "CNPJ inválido"}]},
         )
         mock_get_backend.return_value = mock_backend
 
@@ -106,6 +108,7 @@ class TestEnviarNfse:
             protocolo=None,
             xml_retorno=None,
             pdf_url=None,
+            json_bruto=None,
             mensagem=None,
         )
         mock_get_backend.return_value = mock_backend
@@ -125,6 +128,7 @@ class TestEnviarNfse:
             sucesso=False,
             mensagem=None,
             xml_retorno=None,
+            json_bruto=None,
         )
         mock_get_backend.return_value = mock_backend
 

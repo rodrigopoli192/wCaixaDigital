@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 from decimal import Decimal
 
@@ -5,8 +6,9 @@ import pytest
 from django.db import IntegrityError
 from django.utils import timezone
 
-from caixa_nfse.nfse.models import StatusNFSe
+from caixa_nfse.nfse.models import ConfiguracaoNFSe, StatusNFSe
 from caixa_nfse.tests.factories import (
+    ConfiguracaoNFSeFactory,
     EventoFiscalFactory,
     NotaFiscalServicoFactory,
     ServicoMunicipalFactory,
@@ -108,6 +110,60 @@ class TestNotaFiscalServicoModel:
 
         with pytest.raises(IntegrityError):
             NotaFiscalServicoFactory(tenant=tenant, numero_rps=10, serie_rps="1")
+
+
+@pytest.mark.django_db
+class TestHardeningFields:
+    """Tests for new hardening fields (uuid_transacao, json_retorno_gateway, mensagem_erro)."""
+
+    def test_uuid_transacao_auto_generated(self):
+        """uuid_transacao should be auto-generated as a valid UUID4."""
+        nota = NotaFiscalServicoFactory()
+        assert nota.uuid_transacao is not None
+        assert isinstance(nota.uuid_transacao, uuid.UUID)
+        assert nota.uuid_transacao.version == 4
+
+    def test_uuid_transacao_unique_per_nota(self):
+        """Each nota should get a different uuid_transacao."""
+        n1 = NotaFiscalServicoFactory()
+        n2 = NotaFiscalServicoFactory()
+        assert n1.uuid_transacao != n2.uuid_transacao
+
+    def test_json_retorno_gateway_nullable(self):
+        """json_retorno_gateway should accept null and dict values."""
+        nota = NotaFiscalServicoFactory()
+        assert nota.json_retorno_gateway is None
+
+        nota.json_retorno_gateway = {"status": "autorizado", "numero": 12345}
+        nota.save()
+        nota.refresh_from_db()
+        assert nota.json_retorno_gateway == {"status": "autorizado", "numero": 12345}
+
+    def test_mensagem_erro_saved(self):
+        """mensagem_erro should persist and default to empty string."""
+        nota = NotaFiscalServicoFactory()
+        assert nota.mensagem_erro == ""
+
+        nota.mensagem_erro = "CNPJ inválido no campo tomador"
+        nota.save()
+        nota.refresh_from_db()
+        assert nota.mensagem_erro == "CNPJ inválido no campo tomador"
+
+    def test_encrypted_token_roundtrip(self):
+        """api_token and api_secret should encrypt/decrypt transparently."""
+        config = ConfiguracaoNFSeFactory(
+            api_token="my-secret-token-123",
+            api_secret="my-secret-key-456",
+        )
+        config.refresh_from_db()
+        assert config.api_token == "my-secret-token-123"
+        assert config.api_secret == "my-secret-key-456"
+
+        # Verify encryption happens via field's get_prep_value
+        field = ConfiguracaoNFSe._meta.get_field("api_token")
+        db_value = field.get_prep_value("my-secret-token-123")
+        assert db_value != "my-secret-token-123"
+        assert db_value.startswith("gAAAAA")  # Fernet token prefix
 
 
 @pytest.mark.django_db

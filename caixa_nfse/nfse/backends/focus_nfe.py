@@ -100,7 +100,7 @@ class FocusNFeBackend(BaseNFSeBackend, GatewayHttpClient):
                 mensagem="Configuração NFS-e não encontrada para este tenant",
             )
 
-        ref = str(nota.pk)
+        ref = str(nota.uuid_transacao)
         payload = self._nota_to_focus_json(nota, tenant)
 
         response = self._request(
@@ -130,12 +130,14 @@ class FocusNFeBackend(BaseNFSeBackend, GatewayHttpClient):
                     protocolo=data.get("protocolo", ""),
                     xml_retorno=data.get("xml_nfse", ""),
                     pdf_url=data.get("caminho_xml_nota_fiscal", ""),
+                    json_bruto=data,
                     mensagem="NFS-e autorizada via Focus NFe",
                 )
             # Processing (async)
             return ResultadoEmissao(
                 sucesso=True,
                 protocolo=data.get("protocolo", ref),
+                json_bruto=data,
                 mensagem=f"NFS-e em processamento: {status}",
             )
 
@@ -150,6 +152,7 @@ class FocusNFeBackend(BaseNFSeBackend, GatewayHttpClient):
         return ResultadoEmissao(
             sucesso=False,
             xml_retorno=response.text,
+            json_bruto=data,
             mensagem=msg_erro,
         )
 

@@ -29,17 +29,26 @@
 - [x] Upload de certificado A1 (.pfx) na config
 - [x] Testar Conexão (HTMX endpoint)
 
-## Fase 5: Backend Gateway — Focus NFe / TecnoSpeed
-- [ ] Pesquisar APIs dos gateways (Focus NFe, TecnoSpeed)
-- [ ] `GatewayBackend` base com interface JSON simplificada
-- [ ] `FocusNFeBackend` — Integração com Focus NFe API
-- [ ] `TecnoSpeedBackend` — Integração com TecnoSpeed API
-- [ ] Mapper de dados internos → formato do gateway (JSON)
-- [ ] Webhook receiver para callbacks assíncronos
-- [ ] Registrar novos backends no `registry.py`
-- [ ] Config dinâmica no template (seção Credenciais com Token + Secret)
-- [ ] Rastreabilidade: logs de auditoria completos (request/response, timestamps, status)
-- [ ] Testes unitários para cada gateway backend
+## Fase 5: Backend Gateway — Focus NFe / TecnoSpeed ✅
+- [x] Pesquisar APIs dos gateways (Focus NFe, TecnoSpeed)
+- [x] `GatewayHttpClient` base com interface JSON + logging automático
+- [x] `FocusNFeBackend` — Integração com Focus NFe API
+- [x] `TecnoSpeedBackend` — Integração com TecnoSpeed API
+- [x] Mapper de dados internos → formato do gateway (JSON)
+- [x] Webhook receiver para callbacks assíncronos
+- [x] Registrar novos backends no `registry.py`
+- [x] Config dinâmica no template (seção Credenciais com Token + Secret)
+- [x] Rastreabilidade: `NfseApiLog` com headers sanitizados, timing, UUID correlação
+- [x] Testes unitários para cada gateway backend
+
+## Fase 5.5: Hardening — Idempotência, Segurança, Backoff ✅
+- [x] Campo `uuid_transacao` (idempotência) no `NotaFiscalServico`
+- [x] Campo `json_retorno_gateway` (JSONField) para auditoria
+- [x] Campo `mensagem_erro` (TextField) para consulta rápida
+- [x] Criptografia de `api_token`/`api_secret` com `EncryptedCharField`
+- [x] Backoff exponencial nas tasks Celery (`retry_backoff=True`)
+- [x] `json_bruto` no `ResultadoEmissao` para rastreabilidade completa
+- [x] `uuid_transacao` como `ref` no Focus NFe (idempotência no gateway)
 
 ## Fase 6: Produção e DANFSe
 - [ ] Validação end-to-end com certificado real (Portal Nacional)

@@ -127,12 +127,13 @@ class TecnoSpeedBackend(BaseNFSeBackend, GatewayHttpClient):
                     protocolo=data.get("protocolo", ""),
                     xml_retorno=data.get("xml", ""),
                     pdf_url=data.get("link_pdf", ""),
+                    json_bruto=data,
                     mensagem="NFS-e autorizada via TecnoSpeed",
                 )
-            # Async processing
             return ResultadoEmissao(
                 sucesso=True,
                 protocolo=data.get("protocolo", str(nota.pk)),
+                json_bruto=data,
                 mensagem=f"NFS-e em processamento: {situacao}",
             )
 
@@ -150,6 +151,7 @@ class TecnoSpeedBackend(BaseNFSeBackend, GatewayHttpClient):
         return ResultadoEmissao(
             sucesso=False,
             xml_retorno=response.text,
+            json_bruto=data,
             mensagem=msg_erro,
         )
 

@@ -13,7 +13,7 @@ from .services import criar_nfse_de_movimento
 logger = logging.getLogger(__name__)
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+@shared_task(bind=True, max_retries=3, retry_backoff=True, retry_backoff_max=600)
 def enviar_nfse(self, nota_id: str) -> dict:
     """
     Emite NFS-e via backend configurado (Strategy Pattern).
@@ -21,13 +21,17 @@ def enviar_nfse(self, nota_id: str) -> dict:
     1. Busca NotaFiscalServico
     2. Obtém backend via get_backend(tenant)
     3. Chama backend.emitir(nota, tenant)
-    4. Atualiza nota com resultado
+    4. Atualiza nota com resultado (incluindo json_retorno_gateway e mensagem_erro)
     """
     try:
         nota = NotaFiscalServico.objects.select_related("tenant").get(pk=nota_id)
         tenant = nota.tenant
 
         backend = get_backend(tenant)
+
+        # Marca status ENVIANDO antes da chamada
+        nota.status = StatusNFSe.ENVIANDO
+        nota.save(update_fields=["status", "updated_at"])
 
         # Registra evento de envio
         EventoFiscal.objects.create(
@@ -40,6 +44,9 @@ def enviar_nfse(self, nota_id: str) -> dict:
 
         resultado = backend.emitir(nota, tenant)
 
+        # Salvar retorno bruto do gateway
+        nota.json_retorno_gateway = resultado.json_bruto
+
         if resultado.sucesso:
             nota.status = StatusNFSe.AUTORIZADA
             nota.numero_nfse = resultado.numero_nfse or nota.numero_rps
@@ -48,6 +55,7 @@ def enviar_nfse(self, nota_id: str) -> dict:
             nota.protocolo = resultado.protocolo or ""
             nota.xml_nfse = resultado.xml_retorno or ""
             nota.pdf_url = resultado.pdf_url or ""
+            nota.mensagem_erro = ""
             nota.save()
 
             EventoFiscal.objects.create(
@@ -63,7 +71,8 @@ def enviar_nfse(self, nota_id: str) -> dict:
         # Emissão rejeitada
         nota.status = StatusNFSe.REJEITADA
         nota.xml_nfse = resultado.xml_retorno or ""
-        nota.save(update_fields=["status", "xml_nfse"])
+        nota.mensagem_erro = resultado.mensagem or "Emissão rejeitada"
+        nota.save(update_fields=["status", "xml_nfse", "mensagem_erro", "json_retorno_gateway"])
 
         EventoFiscal.objects.create(
             tenant=tenant,
@@ -84,7 +93,7 @@ def enviar_nfse(self, nota_id: str) -> dict:
         self.retry(exc=e)
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+@shared_task(bind=True, max_retries=3, retry_backoff=True, retry_backoff_max=600)
 def emitir_nfse_movimento(self, movimento_id: str) -> dict:
     """
     Cria NFS-e a partir de um MovimentoCaixa e emite via backend.
