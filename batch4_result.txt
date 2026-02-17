@@ -1,0 +1,61 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 5.2.11, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, asyncio-1.3.0, cov-7.0.0, django-4.11.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 19 items
+
+caixa_nfse\tests\test_coverage_batch4.py .......FFF..F......             [100%]
+
+================================== FAILURES ===================================
+_______ TestRegistryFallback.test_get_config_exception_falls_back_to_db _______
+caixa_nfse\tests\test_coverage_batch4.py:158: in <lambda>
+    new_callable=lambda: property(lambda self: (_ for _ in ()).throw(RuntimeError("boom"))),
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+caixa_nfse\tests\test_coverage_batch4.py:158: in <genexpr>
+    new_callable=lambda: property(lambda self: (_ for _ in ()).throw(RuntimeError("boom"))),
+E   RuntimeError: boom
+
+During handling of the above exception, another exception occurred:
+caixa_nfse\tests\test_coverage_batch4.py:160: in test_get_config_exception_falls_back_to_db
+    result = _get_config(tenant)
+             ^^^^^^^^^^^^^^^^^^^
+caixa_nfse\nfse\backends\registry.py:85: in _get_config
+    except tenant.__class__.config_nfse.RelatedObjectDoesNotExist:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'property' object has no attribute 'RelatedObjectDoesNotExist'
+_________________ TestApiLogListFilters.test_filter_by_method _________________
+caixa_nfse\tests\test_coverage_batch4.py:204: in test_filter_by_method
+    assert resp.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+__________________ TestApiLogListFilters.test_filter_by_url ___________________
+caixa_nfse\tests\test_coverage_batch4.py:221: in test_filter_by_url
+    assert resp.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+_____________ TestFiscalTenantMixin.test_no_tenant_returns_empty ______________
+caixa_nfse\tests\test_coverage_batch4.py:262: in test_no_tenant_returns_empty
+    assert resp.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <HttpResponseNotFound status_code=404, "text/html; charset=utf-8">.status_code
+============================== warnings summary ===============================
+caixa_nfse/tests/test_coverage_batch4.py::TestApiLogListFilters::test_filter_by_method
+caixa_nfse/tests/test_coverage_batch4.py::TestApiLogListFilters::test_filter_by_url
+caixa_nfse/tests/test_coverage_batch4.py::TestFiscalTenantMixin::test_no_tenant_returns_empty
+caixa_nfse/tests/test_coverage_batch4.py::TestAuditDecorator::test_audit_exception_swallowed
+caixa_nfse/tests/test_coverage_batch4.py::TestMovimentoFilterClienteSearch::test_filter_busca_by_cliente_razao_social
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED caixa_nfse/tests/test_coverage_batch4.py::TestRegistryFallback::test_get_config_exception_falls_back_to_db
+FAILED caixa_nfse/tests/test_coverage_batch4.py::TestApiLogListFilters::test_filter_by_method
+FAILED caixa_nfse/tests/test_coverage_batch4.py::TestApiLogListFilters::test_filter_by_url
+FAILED caixa_nfse/tests/test_coverage_batch4.py::TestFiscalTenantMixin::test_no_tenant_returns_empty
+================== 4 failed, 15 passed, 5 warnings in 2.64s ===================

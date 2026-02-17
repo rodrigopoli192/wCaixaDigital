@@ -1,0 +1,96 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 5.2.11, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, asyncio-1.3.0, cov-7.0.0, django-4.11.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 5 items
+
+caixa_nfse\caixa\tests\test_importador.py F                              [ 20%]
+caixa_nfse\backoffice\tests\test_views.py F                              [ 40%]
+caixa_nfse\nfse\tests\test_backends.py F                                 [ 60%]
+caixa_nfse\tests\test_access_control.py F                                [ 80%]
+caixa_nfse\nfse\tests\test_api_client.py F                               [100%]
+
+================================== FAILURES ===================================
+_______ TestConfirmarMovimentos.test_confirm_already_confirmed_skipped ________
+caixa_nfse\caixa\tests\test_importador.py:432: in test_confirm_already_confirmed_skipped
+    assert count == 0
+E   assert 1 == 0
+______________________ TestTenantCRUD.test_update_tenant ______________________
+caixa_nfse\backoffice\tests\test_views.py:57: in test_update_tenant
+    assert response.status_code == 302
+E   assert 200 == 302
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+______________ TestRegistry.test_get_backend_config_access_error ______________
+caixa_nfse\nfse\tests\test_backends.py:161: in test_get_backend_config_access_error
+    backend = get_backend(tenant)
+              ^^^^^^^^^^^^^^^^^^^
+caixa_nfse\nfse\backends\registry.py:59: in get_backend
+    config = _get_config(tenant)
+             ^^^^^^^^^^^^^^^^^^^
+caixa_nfse\nfse\backends\registry.py:85: in _get_config
+    except tenant.__class__.config_nfse.RelatedObjectDoesNotExist:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:3063: in __get__
+    return self()
+           ^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1175: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1179: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1234: in _execute_mock_call
+    raise effect
+caixa_nfse\nfse\backends\registry.py:84: in _get_config
+    return tenant.config_nfse
+           ^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:3063: in __get__
+    return self()
+           ^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1175: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1179: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1234: in _execute_mock_call
+    raise effect
+E   Exception: DB error
+_________ TestCaixaAccess.test_caixa_list_accessible_for_tenant_users _________
+caixa_nfse\tests\test_access_control.py:210: in test_caixa_list_accessible_for_tenant_users
+    self.assertIn(
+E   AssertionError: 302 not found in [200] : caixa@cartorio1.com should access /caixa/, got 302
+_________ TestPortalNacionalClient.test_cert_config_quando_fornecido __________
+caixa_nfse\nfse\tests\test_api_client.py:285: in test_cert_config_quando_fornecido
+    client = PortalNacionalClient(
+E   TypeError: PortalNacionalClient.__init__() got an unexpected keyword argument 'certificado_path'. Did you mean 'certificado_bytes'?
+============================== warnings summary ===============================
+caixa_nfse/backoffice/tests/test_views.py::TestTenantCRUD::test_update_tenant
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+caixa_nfse/nfse/tests/test_api_client.py::TestPortalNacionalClient::test_cert_config_quando_fornecido
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\_pytest\unraisableexception.py:67: PytestUnraisableExceptionWarning: Exception ignored while calling deallocator <function PortalNacionalClient.__del__ at 0x0000028889F7C9E0>: None
+  
+  Traceback (most recent call last):
+    File "C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\nfse\backends\portal_nacional\api_client.py", line 108, in __del__
+      for f in self._temp_files:
+               ^^^^^^^^^^^^^^^^
+  AttributeError: 'PortalNacionalClient' object has no attribute '_temp_files'
+  
+  
+    warnings.warn(pytest.PytestUnraisableExceptionWarning(msg))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED caixa_nfse/caixa/tests/test_importador.py::TestConfirmarMovimentos::test_confirm_already_confirmed_skipped
+FAILED caixa_nfse/backoffice/tests/test_views.py::TestTenantCRUD::test_update_tenant
+FAILED caixa_nfse/nfse/tests/test_backends.py::TestRegistry::test_get_backend_config_access_error
+FAILED caixa_nfse/tests/test_access_control.py::TestCaixaAccess::test_caixa_list_accessible_for_tenant_users
+FAILED caixa_nfse/nfse/tests/test_api_client.py::TestPortalNacionalClient::test_cert_config_quando_fornecido
+======================== 5 failed, 2 warnings in 2.80s ========================

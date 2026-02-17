@@ -1,0 +1,38 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 5.2.11, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, asyncio-1.3.0, cov-7.0.0, django-4.11.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 29 items / 25 deselected / 4 selected
+
+caixa_nfse\caixa\tests\test_views_extra.py FFFF                          [100%]
+
+================================== FAILURES ===================================
+________________ TestCaixaUpdateView.test_update_caixa_success ________________
+caixa_nfse\caixa\tests\test_views_extra.py:33: in test_update_caixa_success
+    assert response.status_code == 302
+E   assert 403 == 302
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+________________ TestCaixaUpdateView.test_update_caixa_context ________________
+caixa_nfse\caixa\tests\test_views_extra.py:43: in test_update_caixa_context
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+_____________ TestCaixaCreateViewExtra.test_create_caixa_context ______________
+caixa_nfse\caixa\tests\test_views_extra.py:308: in test_create_caixa_context
+    assert response.status_code == 200
+E   assert 403 == 200
+E    +  where 403 = <HttpResponseForbidden status_code=403, "text/html; charset=utf-8">.status_code
+_______________ TestCoverageGapView.test_tenant_mixin_no_tenant _______________
+caixa_nfse\caixa\tests\test_views_extra.py:374: in test_tenant_mixin_no_tenant
+    assert response.status_code == 200
+E   assert 302 == 200
+E    +  where 302 = <HttpResponseRedirect status_code=302, "text/html; charset=utf-8", url="/">.status_code
+=========================== short test summary info ===========================
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaUpdateView::test_update_caixa_success
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaUpdateView::test_update_caixa_context
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestCaixaCreateViewExtra::test_create_caixa_context
+FAILED caixa_nfse/caixa/tests/test_views_extra.py::TestCoverageGapView::test_tenant_mixin_no_tenant
+====================== 4 failed, 25 deselected in 2.49s =======================

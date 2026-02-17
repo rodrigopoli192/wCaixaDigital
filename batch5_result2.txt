@@ -1,0 +1,29 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 5.2.11, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, asyncio-1.3.0, cov-7.0.0, django-4.11.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 13 items
+
+caixa_nfse\tests\test_coverage_batch5.py .......F.....                   [100%]
+
+================================== FAILURES ===================================
+_______ TestPortalNacionalClientPem.test_extrair_pem_success_with_chain _______
+caixa_nfse\tests\test_coverage_batch5.py:83: in test_extrair_pem_success_with_chain
+    assert client._cert_config is not None
+E   assert None is not None
+E    +  where None = <caixa_nfse.nfse.backends.portal_nacional.api_client.PortalNacionalClient object at 0x0000019A59BD4CD0>._cert_config
+============================== warnings summary ===============================
+caixa_nfse/tests/test_coverage_batch5.py::TestImportadorSalvarBackfillValor::test_backfill_valor_from_taxas
+caixa_nfse/tests/test_coverage_batch5.py::TestImportadorConfirmarEdgeCases::test_already_quitado_skipped
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED caixa_nfse/tests/test_coverage_batch5.py::TestPortalNacionalClientPem::test_extrair_pem_success_with_chain
+================== 1 failed, 12 passed, 2 warnings in 2.13s ===================

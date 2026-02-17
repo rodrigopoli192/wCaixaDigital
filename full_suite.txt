@@ -1,0 +1,133 @@
+============================= test session starts =============================
+collected 925 items
+
+caixa_nfse\api\tests\test_serializers.py ....                            [  0%]
+caixa_nfse\api\tests\test_views.py ........                              [  1%]
+caixa_nfse\auditoria\tests\test_auth_signals.py ........                 [  2%]
+caixa_nfse\auditoria\tests\test_internals.py .....                       [  2%]
+caixa_nfse\auditoria\tests\test_models.py ........                       [  3%]
+caixa_nfse\auditoria\tests\test_signals.py .....                         [  4%]
+caixa_nfse\auditoria\tests\test_views.py ....................            [  6%]
+caixa_nfse\backoffice\tests\test_forms.py .......                        [  7%]
+caixa_nfse\backoffice\tests\test_views.py ..................             [  8%]
+caixa_nfse\backoffice\tests\test_views_extra.py .............            [ 10%]
+caixa_nfse\caixa\tests\test_filters_extra.py ....                        [ 10%]
+caixa_nfse\caixa\tests\test_forms.py ............................        [ 13%]
+caixa_nfse\caixa\tests\test_importador.py ....................           [ 16%]
+caixa_nfse\caixa\tests\test_master_detail.py .......                     [ 16%]
+caixa_nfse\caixa\tests\test_models.py ......................             [ 19%]
+caixa_nfse\caixa\tests\test_recebimento_parcial.py ..................... [ 21%]
+..                                                                       [ 21%]
+caixa_nfse\caixa\tests\test_services_importacao.py .                     [ 21%]
+caixa_nfse\caixa\tests\test_views.py ............                        [ 23%]
+caixa_nfse\caixa\tests\test_views_coverage.py ....................       [ 25%]
+caixa_nfse\caixa\tests\test_views_editar_saldo.py ........               [ 26%]
+caixa_nfse\caixa\tests\test_views_extra.py ...........................   [ 28%]
+caixa_nfse\caixa\tests\test_views_import.py .................            [ 30%]
+caixa_nfse\clientes\tests\test_models.py .............                   [ 32%]
+caixa_nfse\clientes\tests\test_views.py .........................        [ 34%]
+caixa_nfse\contabil\tests\test_models.py ..........                      [ 36%]
+caixa_nfse\contabil\tests\test_views.py ......                           [ 36%]
+caixa_nfse\core\tests\test_admin_config.py ..                            [ 36%]
+caixa_nfse\core\tests\test_admin_detailed.py ....                        [ 37%]
+caixa_nfse\core\tests\test_commands.py ...                               [ 37%]
+caixa_nfse\core\tests\test_encrypted_field.py .......                    [ 38%]
+caixa_nfse\core\tests\test_forms.py ....                                 [ 38%]
+caixa_nfse\core\tests\test_logging.py ...                                [ 39%]
+caixa_nfse\core\tests\test_models.py ...............                     [ 40%]
+caixa_nfse\core\tests\test_sql_executor.py ..........                    [ 41%]
+caixa_nfse\core\tests\test_views.py ......................               [ 44%]
+caixa_nfse\core\tests\test_views_conexoes.py ........................... [ 47%]
+........                                                                 [ 48%]
+caixa_nfse\core\tests\test_views_dbauth.py ........                      [ 48%]
+caixa_nfse\fiscal\tests\test_views.py ....                               [ 49%]
+caixa_nfse\nfse\tests\test_backends.py ...........                       [ 50%]
+caixa_nfse\nfse\tests\test_config.py ..........                          [ 51%]
+caixa_nfse\nfse\tests\test_focus_nfe.py ...........................      [ 54%]
+caixa_nfse\nfse\tests\test_gateway_http.py .......                       [ 55%]
+caixa_nfse\nfse\tests\test_models.py ..............                      [ 56%]
+caixa_nfse\nfse\tests\test_portal_backend.py ................            [ 58%]
+caixa_nfse\nfse\tests\test_reports_signals.py ..................         [ 60%]
+caixa_nfse\nfse\tests\test_reports_views.py .........                    [ 61%]
+caixa_nfse\nfse\tests\test_services.py ...........                       [ 62%]
+caixa_nfse\nfse\tests\test_tasks.py .............                        [ 64%]
+caixa_nfse\nfse\tests\test_tecnospeed.py ..............                  [ 65%]
+caixa_nfse\nfse\tests\test_views.py .......................              [ 68%]
+caixa_nfse\nfse\tests\test_webhook.py ..............                     [ 69%]
+caixa_nfse\nfse\tests\test_xml_builder.py ..................             [ 71%]
+caixa_nfse\relatorios\tests\test_exports.py ..............               [ 72%]
+caixa_nfse\relatorios\tests\test_views.py .............                  [ 74%]
+caixa_nfse\tests\test_100_coverage.py .................................. [ 78%]
+........                                                                 [ 78%]
+caixa_nfse\tests\test_access_control.py .....................            [ 81%]
+caixa_nfse\tests\test_coverage_batch4.py ...............                 [ 82%]
+caixa_nfse\tests\test_coverage_batch5.py .....                           [ 83%]
+caixa_nfse\tests\test_coverage_gaps.py ................................. [ 86%]
+                                                                         [ 86%]
+caixa_nfse\auditoria\tests\test_signals.py ....                          [ 87%]
+caixa_nfse\caixa\tests\test_importador.py .................              [ 89%]
+caixa_nfse\caixa\tests\test_tables.py ........                           [ 90%]
+caixa_nfse\clientes\tests\test_validators.py .................           [ 91%]
+caixa_nfse\core\tests\test_logging.py ....                               [ 92%]
+caixa_nfse\core\tests\test_sql_executor.py ...                           [ 92%]
+caixa_nfse\nfse\tests\test_api_client.py .....................           [ 94%]
+caixa_nfse\nfse\tests\test_backends.py ...                               [ 95%]
+caixa_nfse\nfse\tests\test_forms_extra.py .....                          [ 95%]
+caixa_nfse\nfse\tests\test_portal_backend.py ..........                  [ 96%]
+caixa_nfse\nfse\tests\test_xml_signer.py ..........                      [ 97%]
+caixa_nfse\relatorios\tests\test_services.py .......                     [ 98%]
+caixa_nfse\tests\test_coverage_batch4.py ....                            [ 99%]
+caixa_nfse\tests\test_coverage_batch5.py ........                        [100%]
+
+============================== warnings summary ===============================
+caixa_nfse/api/tests/test_views.py: 8 warnings
+caixa_nfse/auditoria/tests/test_internals.py: 5 warnings
+caixa_nfse/auditoria/tests/test_models.py: 6 warnings
+caixa_nfse/auditoria/tests/test_views.py: 25 warnings
+caixa_nfse/backoffice/tests/test_forms.py: 5 warnings
+caixa_nfse/backoffice/tests/test_views.py: 21 warnings
+caixa_nfse/caixa/tests/test_filters_extra.py: 4 warnings
+caixa_nfse/caixa/tests/test_views_editar_saldo.py: 10 warnings
+caixa_nfse/clientes/tests/test_views.py: 26 warnings
+caixa_nfse/contabil/tests/test_views.py: 1 warning
+caixa_nfse/core/tests/test_admin_config.py: 2 warnings
+caixa_nfse/core/tests/test_admin_detailed.py: 4 warnings
+caixa_nfse/core/tests/test_logging.py: 1 warning
+caixa_nfse/core/tests/test_models.py: 1 warning
+caixa_nfse/core/tests/test_views.py: 25 warnings
+caixa_nfse/fiscal/tests/test_views.py: 4 warnings
+caixa_nfse/nfse/tests/test_reports_signals.py: 6 warnings
+caixa_nfse/nfse/tests/test_reports_views.py: 9 warnings
+caixa_nfse/nfse/tests/test_services.py: 13 warnings
+caixa_nfse/nfse/tests/test_tasks.py: 5 warnings
+caixa_nfse/nfse/tests/test_views.py: 25 warnings
+caixa_nfse/relatorios/tests/test_exports.py: 28 warnings
+caixa_nfse/relatorios/tests/test_views.py: 24 warnings
+caixa_nfse/tests/test_coverage_batch4.py: 5 warnings
+caixa_nfse/tests/test_coverage_batch5.py: 2 warnings
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+caixa_nfse/backoffice/tests/test_views.py::TestPlatformDashboardView::test_access_allowed_superuser
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_kpi_context_keys
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_search_by_name
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_search_by_cnpj
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_filter_by_status_ativo
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_filter_by_status_inativo
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_activity_log_populated
+caixa_nfse/tests/test_access_control.py::TestPlatformAdminAccess::test_backoffice_accessible_for_superuser
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\django\db\models\fields\__init__.py:1612: RuntimeWarning: DateTimeField MovimentoImportado.importado_em received a naive datetime (2026-02-01 00:00:00) while time zone support is active.
+    warnings.warn(
+
+caixa_nfse/caixa/tests/test_views_extra.py::TestListaMovimentosView::test_list_movimentos
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\django\views\generic\list.py:91: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'caixa_nfse.caixa.models.MovimentoCaixa'> QuerySet.
+    return self.paginator_class(
+
+caixa_nfse/tests/test_100_coverage.py::TestCaixaAdminBadges::test_diferenca_badge_zero
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\admin.py:135: RemovedInDjango60Warning: Calling format_html() without passing args or kwargs is deprecated.
+    return format_html('<span class="badge bg-success">OK</span>')
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+===================== 925 passed, 275 warnings in 16.45s ======================

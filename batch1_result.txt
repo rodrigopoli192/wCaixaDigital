@@ -1,0 +1,35 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 5.2.11, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, asyncio-1.3.0, cov-7.0.0, django-4.11.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 17 items / 2 errors
+
+=================================== ERRORS ====================================
+_____ ERROR collecting caixa_nfse/caixa/tests/test_views_editar_saldo.py ______
+ImportError while importing test module 'C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\caixa\tests\test_views_editar_saldo.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\AppData\Local\Programs\Python\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+caixa_nfse\caixa\tests\test_views_editar_saldo.py:13: in <module>
+    from caixa_nfse.core.tests.factories import TenantFactory, UserFactory
+E   ModuleNotFoundError: No module named 'caixa_nfse.core.tests.factories'
+_________ ERROR collecting caixa_nfse/nfse/tests/test_gateway_http.py _________
+ImportError while importing test module 'C:\Users\Rodrigo\Projetos\wCaixaDigital\caixa_nfse\nfse\tests\test_gateway_http.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\AppData\Local\Programs\Python\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+caixa_nfse\nfse\tests\test_gateway_http.py:10: in <module>
+    from caixa_nfse.core.tests.factories import TenantFactory
+E   ModuleNotFoundError: No module named 'caixa_nfse.core.tests.factories'
+=========================== short test summary info ===========================
+ERROR caixa_nfse/caixa/tests/test_views_editar_saldo.py
+ERROR caixa_nfse/nfse/tests/test_gateway_http.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!
+============================== 2 errors in 0.24s ==============================

@@ -1,0 +1,89 @@
+
+caixa_nfse\__init__.py                                                   3      0   100%
+caixa_nfse\api\__init__.py                                               1      0   100%
+caixa_nfse\api\serializers.py                                           20      0   100%
+caixa_nfse\api\views.py                                                 36      0   100%
+caixa_nfse\auditoria\__init__.py                                         1      0   100%
+caixa_nfse\auditoria\admin.py                                           24      0   100%
+caixa_nfse\auditoria\auth_signals.py                                    27      0   100%
+caixa_nfse\auditoria\decorators.py                                      15      1    93%   38
+caixa_nfse\auditoria\middleware.py                                      21      0   100%
+caixa_nfse\auditoria\models.py                                          83      0   100%
+caixa_nfse\auditoria\signals.py                                         66      0   100%
+caixa_nfse\auditoria\views.py                                           65      0   100%
+caixa_nfse\backoffice\__init__.py                                        0      0   100%
+caixa_nfse\backoffice\forms.py                                          57      0   100%
+caixa_nfse\backoffice\models.py                                         48      0   100%
+caixa_nfse\backoffice\views.py                                         232      2    99%   314, 354
+caixa_nfse\caixa\__init__.py                                             1      0   100%
+caixa_nfse\caixa\admin.py                                               66      0   100%
+caixa_nfse\caixa\filters.py                                             24      1    96%   43
+caixa_nfse\caixa\forms.py                                              124      0   100%
+caixa_nfse\caixa\models.py                                             371      3    99%   241, 243, 245
+caixa_nfse\caixa\services\__init__.py                                    0      0   100%
+caixa_nfse\caixa\services\importador.py                                251     14    94%   186, 359-362, 426, 433, 435, 497, 501, 556-559, 599
+caixa_nfse\caixa\tables.py                                              40      0   100%
+caixa_nfse\caixa\views.py                                              714     18    97%   41, 66, 194, 286-288, 742, 765, 834-836, 878, 1081-1084, 1262-1264
+caixa_nfse\caixa\views_editar_saldo.py                                  47      0   100%
+caixa_nfse\celery.py                                                    12      0   100%
+caixa_nfse\clientes\__init__.py                                          1      0   100%
+caixa_nfse\clientes\admin.py                                             8      0   100%
+caixa_nfse\clientes\filters.py                                          11      0   100%
+caixa_nfse\clientes\forms.py                                            28      0   100%
+caixa_nfse\clientes\models.py                                           82      0   100%
+caixa_nfse\clientes\tables.py                                            9      0   100%
+caixa_nfse\clientes\views.py                                            77      0   100%
+caixa_nfse\conftest.py                                                  33      0   100%
+caixa_nfse\contabil\__init__.py                                          1      0   100%
+caixa_nfse\contabil\admin.py                                            21      0   100%
+caixa_nfse\contabil\models.py                                           71      0   100%
+caixa_nfse\contabil\views.py                                            31      0   100%
+caixa_nfse\core\__init__.py                                              1      0   100%
+caixa_nfse\core\admin.py                                                25      0   100%
+caixa_nfse\core\context_processors.py                                    8      0   100%
+caixa_nfse\core\encrypted_fields.py                                     29      4    86%   42, 51, 55-56
+caixa_nfse\core\forms.py                                                17      1    94%   40
+caixa_nfse\core\logging_filters.py                                      18      0   100%
+caixa_nfse\core\logging_middleware.py                                   15      0   100%
+caixa_nfse\core\management\__init__.py                                   0      0   100%
+caixa_nfse\core\management\commands\__init__.py                          0      0   100%
+caixa_nfse\core\management\commands\verificar_prazos_protocolos.py      25      0   100%
+caixa_nfse\core\models.py                                              202      0   100%
+caixa_nfse\core\services\sql_executor.py                                73      0   100%
+caixa_nfse\core\views.py                                               608     41    93%   229, 373, 429, 436, 446, 448, 454-459, 462-467, 504, 546, 548, 623-624, 646, 1042, 1276-1286, 1293-1302, 1309-1319
+caixa_nfse\fiscal\__init__.py                                            1      0   100%
+caixa_nfse\fiscal\admin.py                                               7      0   100%
+caixa_nfse\fiscal\models.py                                             19      0   100%
+caixa_nfse\fiscal\views.py                                              22      1    95%   13
+caixa_nfse\nfse\__init__.py                                              1      0   100%
+caixa_nfse\nfse\admin.py                                                25      0   100%
+caixa_nfse\nfse\backends\__init__.py                                     2      0   100%
+caixa_nfse\nfse\backends\base.py                                        31      0   100%
+caixa_nfse\nfse\backends\focus_nfe.py                                   71      0   100%
+caixa_nfse\nfse\backends\gateway_http.py                                51      0   100%
+caixa_nfse\nfse\backends\mock.py                                        10      0   100%
+caixa_nfse\nfse\backends\portal_nacional\__init__.py                     2      0   100%
+caixa_nfse\nfse\backends\portal_nacional\api_client.py                 110     23    79%   68-101, 109-111
+caixa_nfse\nfse\backends\portal_nacional\backend.py                     74      2    97%   177, 186
+caixa_nfse\nfse\backends\portal_nacional\danfse.py                      17      0   100%
+caixa_nfse\nfse\backends\portal_nacional\xml_builder.py                105      3    97%   131, 198, 223
+caixa_nfse\nfse\backends\portal_nacional\xml_signer.py                  28      0   100%
+caixa_nfse\nfse\backends\registry.py                                    46      3    93%   87-94
+caixa_nfse\nfse\backends\tecnospeed.py                                  68      8    88%   32-33, 39-41, 149, 175, 210
+caixa_nfse\nfse\forms.py                                                23      0   100%
+caixa_nfse\nfse\models.py                                              140      0   100%
+caixa_nfse\nfse\models_api_log.py                                       42      0   100%
+caixa_nfse\nfse\reports.py                                              73      3    96%   203, 205, 207
+caixa_nfse\nfse\services.py                                             35      1    97%   69
+caixa_nfse\nfse\signals.py                                              26      0   100%
+caixa_nfse\nfse\tasks.py                                               114      2    98%   263-264
+caixa_nfse\nfse\views.py                                               253     63    75%   29, 52, 63, 110-116, 141, 279, 288, 298-299, 301-302, 304, 322-330, 376-381, 391, 394-420, 427, 430-440, 443-456
+caixa_nfse\nfse\webhook.py                                              65      0   100%
+caixa_nfse\relatorios\__init__.py                                        1      0   100%
+caixa_nfse\relatorios\services.py                                       88      0   100%
+caixa_nfse\relatorios\views.py                                         444    102    77%   406, 408, 822-852, 855-870, 873-877, 884-892, 895-919, 938-947, 950-963, 966-1053, 1056-1070, 1073-1076, 1083-1107
+caixa_nfse\settings\__init__.py                                          0      0   100%
+caixa_nfse\settings\base.py                                             52      0   100%
+caixa_nfse\settings\test.py                                             14      0   100%
+TOTAL                                                                 5803    296    95%
+

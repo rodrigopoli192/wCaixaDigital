@@ -1,0 +1,93 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 5.2.11, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, asyncio-1.3.0, cov-7.0.0, django-4.11.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 163 items
+
+caixa_nfse\clientes\tests\test_models.py ...FFFF......                   [  7%]
+caixa_nfse\caixa\tests\test_views.py ............                        [ 15%]
+caixa_nfse\caixa\tests\test_views_extra.py ...........................   [ 31%]
+caixa_nfse\backoffice\tests\test_views.py ..F...............             [ 42%]
+caixa_nfse\nfse\tests\test_backends.py ..........F                       [ 49%]
+caixa_nfse\caixa\tests\test_importador.py ....................           [ 61%]
+caixa_nfse\tests\test_access_control.py .....................            [ 74%]
+caixa_nfse\nfse\tests\test_backends.py ...                               [ 76%]
+caixa_nfse\nfse\tests\test_api_client.py .....................           [ 89%]
+caixa_nfse\caixa\tests\test_importador.py .................              [100%]
+
+================================== FAILURES ===================================
+______________________ TestClienteModel.test_invalid_cpf ______________________
+caixa_nfse\clientes\tests\test_models.py:52: in test_invalid_cpf
+    with pytest.raises(ValidationError) as exc:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE <class 'django.core.exceptions.ValidationError'>
+_____________________ TestClienteModel.test_invalid_cnpj ______________________
+caixa_nfse\clientes\tests\test_models.py:62: in test_invalid_cnpj
+    with pytest.raises(ValidationError) as exc:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE <class 'django.core.exceptions.ValidationError'>
+_________________ TestClienteModel.test_invalid_cpf_checksum __________________
+caixa_nfse\clientes\tests\test_models.py:72: in test_invalid_cpf_checksum
+    with pytest.raises(ValidationError) as exc:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE <class 'django.core.exceptions.ValidationError'>
+_________________ TestClienteModel.test_invalid_cnpj_checksum _________________
+caixa_nfse\clientes\tests\test_models.py:82: in test_invalid_cnpj_checksum
+    with pytest.raises(ValidationError) as exc:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE <class 'django.core.exceptions.ValidationError'>
+______________________ TestTenantCRUD.test_update_tenant ______________________
+caixa_nfse\backoffice\tests\test_views.py:58: in test_update_tenant
+    assert response.status_code == 302
+E   assert 200 == 302
+E    +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+______________ TestRegistry.test_get_backend_config_access_error ______________
+caixa_nfse\nfse\tests\test_backends.py:159: in test_get_backend_config_access_error
+    backend = get_backend(tenant)
+              ^^^^^^^^^^^^^^^^^^^
+caixa_nfse\nfse\backends\registry.py:59: in get_backend
+    config = _get_config(tenant)
+             ^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1175: in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1179: in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python314\Lib\unittest\mock.py:1234: in _execute_mock_call
+    raise effect
+E   Exception: DB error
+============================== warnings summary ===============================
+caixa_nfse/caixa/tests/test_views_extra.py::TestListaMovimentosView::test_list_movimentos
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\django\views\generic\list.py:91: UnorderedObjectListWarning: Pagination may yield inconsistent results with an unordered object_list: <class 'caixa_nfse.caixa.models.MovimentoCaixa'> QuerySet.
+    return self.paginator_class(
+
+caixa_nfse/backoffice/tests/test_views.py: 21 warnings
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+caixa_nfse/backoffice/tests/test_views.py::TestPlatformDashboardView::test_access_allowed_superuser
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_kpi_context_keys
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_search_by_name
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_search_by_cnpj
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_filter_by_status_ativo
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_filter_by_status_inativo
+caixa_nfse/backoffice/tests/test_views.py::TestDashboardKPIs::test_activity_log_populated
+caixa_nfse/tests/test_access_control.py::TestPlatformAdminAccess::test_backoffice_accessible_for_superuser
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\django\db\models\fields\__init__.py:1612: RuntimeWarning: DateTimeField MovimentoImportado.importado_em received a naive datetime (2026-02-01 00:00:00) while time zone support is active.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED caixa_nfse/clientes/tests/test_models.py::TestClienteModel::test_invalid_cpf
+FAILED caixa_nfse/clientes/tests/test_models.py::TestClienteModel::test_invalid_cnpj
+FAILED caixa_nfse/clientes/tests/test_models.py::TestClienteModel::test_invalid_cpf_checksum
+FAILED caixa_nfse/clientes/tests/test_models.py::TestClienteModel::test_invalid_cnpj_checksum
+FAILED caixa_nfse/backoffice/tests/test_views.py::TestTenantCRUD::test_update_tenant
+FAILED caixa_nfse/nfse/tests/test_backends.py::TestRegistry::test_get_backend_config_access_error
+================= 6 failed, 157 passed, 30 warnings in 4.78s ==================

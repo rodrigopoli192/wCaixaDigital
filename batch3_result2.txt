@@ -1,0 +1,26 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 5.2.11, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, asyncio-1.3.0, cov-7.0.0, django-4.11.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 32 items
+
+caixa_nfse\nfse\tests\test_focus_nfe.py ........................F..      [ 84%]
+caixa_nfse\nfse\tests\test_forms_extra.py .....                          [100%]
+
+================================== FAILURES ===================================
+_________ TestFocusNFeMapper.test_nota_to_focus_json_without_cliente __________
+caixa_nfse\nfse\tests\test_focus_nfe.py:333: in test_nota_to_focus_json_without_cliente
+    result = focus_backend._nota_to_focus_json(mock_nota, mock_tenant)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+caixa_nfse\nfse\backends\focus_nfe.py:53: in _nota_to_focus_json
+    if nota.cliente:
+       ^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\fields\related_descriptors.py:271: in __get__
+    raise self.RelatedObjectDoesNotExist(
+E   caixa_nfse.nfse.models.NotaFiscalServico.cliente.RelatedObjectDoesNotExist: NotaFiscalServico has no cliente.. Did you mean: 'ambiente'?
+=========================== short test summary info ===========================
+FAILED caixa_nfse/nfse/tests/test_focus_nfe.py::TestFocusNFeMapper::test_nota_to_focus_json_without_cliente
+======================== 1 failed, 31 passed in 2.08s =========================

@@ -1,0 +1,269 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 5.2.11, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, asyncio-1.3.0, cov-7.0.0, django-4.11.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 32 items
+
+caixa_nfse\caixa\tests\test_views_editar_saldo.py ........               [ 25%]
+caixa_nfse\nfse\tests\test_gateway_http.py FFFFFFF                       [ 46%]
+caixa_nfse\clientes\tests\test_validators.py .................           [100%]
+
+================================== FAILURES ===================================
+__________ TestGatewayHttpClientRequest.test_successful_json_request __________
+caixa_nfse\nfse\tests\test_gateway_http.py:53: in test_successful_json_request
+    result = gateway._request(
+caixa_nfse\nfse\backends\gateway_http.py:95: in _request
+    NfseApiLog.objects.create(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models_api_log.py:118: in save
+    super().save(*args, **kwargs)
+.venv\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+.venv\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+.venv\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+.venv\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1881: in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1806: in as_sql
+    self.prepare_value(field, self.pre_save_val(field, obj))
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1727: in prepare_value
+    raise ValueError(
+E   ValueError: Failed to insert expression "<MagicMock name='Client.request().status_code.resolve_expression()' id='2318856700992'>" on nfse.NfseApiLog.status_code. F() expressions can only be used to update, not to insert.
+___________ TestGatewayHttpClientRequest.test_timeout_returns_none ____________
+caixa_nfse\nfse\tests\test_gateway_http.py:72: in test_timeout_returns_none
+    result = gateway._request(
+caixa_nfse\nfse\backends\gateway_http.py:95: in _request
+    NfseApiLog.objects.create(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models_api_log.py:118: in save
+    super().save(*args, **kwargs)
+.venv\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+.venv\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+.venv\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+.venv\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1881: in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1806: in as_sql
+    self.prepare_value(field, self.pre_save_val(field, obj))
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1727: in prepare_value
+    raise ValueError(
+E   ValueError: Failed to insert expression "<MagicMock name='Client.request().status_code.resolve_expression()' id='2318856710736'>" on nfse.NfseApiLog.status_code. F() expressions can only be used to update, not to insert.
+__________ TestGatewayHttpClientRequest.test_http_error_returns_none __________
+caixa_nfse\nfse\tests\test_gateway_http.py:89: in test_http_error_returns_none
+    result = gateway._request(
+caixa_nfse\nfse\backends\gateway_http.py:95: in _request
+    NfseApiLog.objects.create(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models_api_log.py:118: in save
+    super().save(*args, **kwargs)
+.venv\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+.venv\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+.venv\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+.venv\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1881: in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1806: in as_sql
+    self.prepare_value(field, self.pre_save_val(field, obj))
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1727: in prepare_value
+    raise ValueError(
+E   ValueError: Failed to insert expression "<MagicMock name='Client.request().status_code.resolve_expression()' id='2318858259488'>" on nfse.NfseApiLog.status_code. F() expressions can only be used to update, not to insert.
+____________ TestGatewayHttpClientRequest.test_request_with_params ____________
+caixa_nfse\nfse\tests\test_gateway_http.py:111: in test_request_with_params
+    result = gateway._request(
+caixa_nfse\nfse\backends\gateway_http.py:95: in _request
+    NfseApiLog.objects.create(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models_api_log.py:118: in save
+    super().save(*args, **kwargs)
+.venv\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+.venv\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+.venv\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+.venv\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1881: in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1806: in as_sql
+    self.prepare_value(field, self.pre_save_val(field, obj))
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1727: in prepare_value
+    raise ValueError(
+E   ValueError: Failed to insert expression "<MagicMock name='Client.request().status_code.resolve_expression()' id='2318858267888'>" on nfse.NfseApiLog.status_code. F() expressions can only be used to update, not to insert.
+______ TestGatewayHttpClientRequestBytes.test_successful_binary_download ______
+caixa_nfse\nfse\tests\test_gateway_http.py:139: in test_successful_binary_download
+    result = gateway._request_bytes(
+caixa_nfse\nfse\backends\gateway_http.py:174: in _request_bytes
+    NfseApiLog.objects.create(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models_api_log.py:118: in save
+    super().save(*args, **kwargs)
+.venv\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+.venv\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+.venv\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+.venv\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1881: in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1806: in as_sql
+    self.prepare_value(field, self.pre_save_val(field, obj))
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1727: in prepare_value
+    raise ValueError(
+E   ValueError: Failed to insert expression "<MagicMock name='Client.request().status_code.resolve_expression()' id='2318862814912'>" on nfse.NfseApiLog.status_code. F() expressions can only be used to update, not to insert.
+_______ TestGatewayHttpClientRequestBytes.test_binary_download_failure ________
+caixa_nfse\nfse\tests\test_gateway_http.py:161: in test_binary_download_failure
+    result = gateway._request_bytes(
+caixa_nfse\nfse\backends\gateway_http.py:174: in _request_bytes
+    NfseApiLog.objects.create(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models_api_log.py:118: in save
+    super().save(*args, **kwargs)
+.venv\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+.venv\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+.venv\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+.venv\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1881: in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1806: in as_sql
+    self.prepare_value(field, self.pre_save_val(field, obj))
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1727: in prepare_value
+    raise ValueError(
+E   ValueError: Failed to insert expression "<MagicMock name='Client.request().status_code.resolve_expression()' id='2318858262848'>" on nfse.NfseApiLog.status_code. F() expressions can only be used to update, not to insert.
+______ TestGatewayHttpClientRequestBytes.test_binary_download_http_error ______
+caixa_nfse\nfse\tests\test_gateway_http.py:178: in test_binary_download_http_error
+    result = gateway._request_bytes(
+caixa_nfse\nfse\backends\gateway_http.py:174: in _request_bytes
+    NfseApiLog.objects.create(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:665: in create
+    obj.save(force_insert=True, using=self.db)
+caixa_nfse\nfse\models_api_log.py:118: in save
+    super().save(*args, **kwargs)
+.venv\Lib\site-packages\django\db\models\base.py:902: in save
+    self.save_base(
+.venv\Lib\site-packages\django\db\models\base.py:1008: in save_base
+    updated = self._save_table(
+.venv\Lib\site-packages\django\db\models\base.py:1169: in _save_table
+    results = self._do_insert(
+.venv\Lib\site-packages\django\db\models\base.py:1210: in _do_insert
+    return manager._insert(
+.venv\Lib\site-packages\django\db\models\manager.py:87: in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\query.py:1873: in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1881: in execute_sql
+    for sql, params in self.as_sql():
+                       ^^^^^^^^^^^^^
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1806: in as_sql
+    self.prepare_value(field, self.pre_save_val(field, obj))
+.venv\Lib\site-packages\django\db\models\sql\compiler.py:1727: in prepare_value
+    raise ValueError(
+E   ValueError: Failed to insert expression "<MagicMock name='Client.request().status_code.resolve_expression()' id='2318856714096'>" on nfse.NfseApiLog.status_code. F() expressions can only be used to update, not to insert.
+============================== warnings summary ===============================
+caixa_nfse/caixa/tests/test_views_editar_saldo.py: 10 warnings
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED caixa_nfse/nfse/tests/test_gateway_http.py::TestGatewayHttpClientRequest::test_successful_json_request
+FAILED caixa_nfse/nfse/tests/test_gateway_http.py::TestGatewayHttpClientRequest::test_timeout_returns_none
+FAILED caixa_nfse/nfse/tests/test_gateway_http.py::TestGatewayHttpClientRequest::test_http_error_returns_none
+FAILED caixa_nfse/nfse/tests/test_gateway_http.py::TestGatewayHttpClientRequest::test_request_with_params
+FAILED caixa_nfse/nfse/tests/test_gateway_http.py::TestGatewayHttpClientRequestBytes::test_successful_binary_download
+FAILED caixa_nfse/nfse/tests/test_gateway_http.py::TestGatewayHttpClientRequestBytes::test_binary_download_failure
+FAILED caixa_nfse/nfse/tests/test_gateway_http.py::TestGatewayHttpClientRequestBytes::test_binary_download_http_error
+================== 7 failed, 25 passed, 10 warnings in 3.40s ==================

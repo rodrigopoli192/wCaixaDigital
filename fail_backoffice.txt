@@ -1,0 +1,56 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+django: version: 5.2.11, settings: caixa_nfse.settings.test (from ini)
+rootdir: C:\Users\Rodrigo\Projetos\wCaixaDigital
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+plugins: anyio-4.12.1, Faker-40.1.2, asyncio-1.3.0, cov-7.0.0, django-4.11.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 1 item
+
+caixa_nfse\backoffice\tests\test_views.py F                              [100%]
+
+================================== FAILURES ===================================
+______________________ TestTenantCRUD.test_update_tenant ______________________
+
+self = <caixa_nfse.backoffice.tests.test_views.TestTenantCRUD object at 0x000001E2B4FDBB10>
+
+    def test_update_tenant(self):
+        tenant = TenantFactory()
+        url = reverse("backoffice:tenant_edit", kwargs={"pk": tenant.pk})
+        response = self.client.get(url)
+        assert response.status_code == 200
+        assert "usuarios" in response.context
+    
+        # Test post update
+        data = {
+            "razao_social": "Updated Corp",
+            "nome_fantasia": "UpCorp",
+            "cnpj": tenant.cnpj,
+            "inscricao_municipal": tenant.inscricao_municipal or "123456",
+            "cidade": "SP",
+            "uf": "SP",
+            "regime_tributario": "SIMPLES",
+            "logradouro": "Rua X",
+            "numero": "1",
+            "bairro": "Centro",
+            "cep": "00000-000",
+            "telefone": "11999999999",
+            "ativo": True,
+        }
+        response = self.client.post(url, data)
+>       assert response.status_code == 302
+E       assert 200 == 302
+E        +  where 200 = <TemplateResponse status_code=200, "text/html; charset=utf-8">.status_code
+
+caixa_nfse\backoffice\tests\test_views.py:58: AssertionError
+============================== warnings summary ===============================
+caixa_nfse/backoffice/tests/test_views.py::TestTenantCRUD::test_update_tenant
+  C:\Users\Rodrigo\Projetos\wCaixaDigital\.venv\Lib\site-packages\factory\django.py:182: DeprecationWarning: UserFactory._after_postgeneration will stop saving the instance after postgeneration hooks in the next major release.
+  If the save call is extraneous, set skip_postgeneration_save=True in the UserFactory.Meta.
+  To keep saving the instance, move the save call to your postgeneration hooks or override _after_postgeneration.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED caixa_nfse/backoffice/tests/test_views.py::TestTenantCRUD::test_update_tenant
+======================== 1 failed, 1 warning in 2.53s =========================
