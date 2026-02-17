@@ -253,3 +253,113 @@ class TestApiLogCreation:
         assert "focus_nfe" in str(log)
         assert "POST" in str(log)
         assert "200" in str(log)
+
+
+@pytest.mark.django_db
+class TestFocusNFeHelpers:
+    """Tests for _base_url, _auth_headers, _get_config."""
+
+    def test_base_url_homologacao(self, focus_backend, mock_config):
+        mock_config.ambiente = "HOMOLOGACAO"
+        url = focus_backend._base_url(mock_config)
+        assert "homologacao" in url
+
+    def test_base_url_producao(self, focus_backend, mock_config):
+        mock_config.ambiente = "PRODUCAO"
+        url = focus_backend._base_url(mock_config)
+        assert "api.focusnfe.com.br" in url
+
+    def test_base_url_unknown_fallback(self, focus_backend, mock_config):
+        mock_config.ambiente = "DESCONHECIDO"
+        url = focus_backend._base_url(mock_config)
+        assert "homologacao" in url
+
+    def test_auth_headers_basic(self, focus_backend, mock_config):
+        headers = focus_backend._auth_headers(mock_config)
+        assert "Authorization" in headers
+        assert headers["Authorization"].startswith("Basic ")
+
+    def test_auth_headers_empty_token(self, focus_backend, mock_config):
+        mock_config.api_token = ""
+        headers = focus_backend._auth_headers(mock_config)
+        assert "Authorization" in headers
+
+    def test_get_config_returns_config(self, focus_backend, mock_tenant):
+        # No config_nfse → returns None
+        result = focus_backend._get_config(mock_tenant)
+        assert result is None
+
+    def test_consultar_falha_comunicacao(self, focus_backend, mock_nota, mock_tenant, mock_config):
+        """Network failure on consultar returns failure."""
+        with patch.object(focus_backend, "_get_config", return_value=mock_config):
+            with patch.object(focus_backend, "_request", return_value=None):
+                resultado = focus_backend.consultar(mock_nota, mock_tenant)
+        assert resultado.sucesso is False
+        assert "Falha" in resultado.mensagem
+
+    def test_cancelar_sem_config(self, focus_backend, mock_nota, mock_tenant):
+        with patch.object(focus_backend, "_get_config", return_value=None):
+            resultado = focus_backend.cancelar(mock_nota, mock_tenant, "motivo")
+        assert resultado.sucesso is False
+
+    def test_cancelar_falha_comunicacao(self, focus_backend, mock_nota, mock_tenant, mock_config):
+        with patch.object(focus_backend, "_get_config", return_value=mock_config):
+            with patch.object(focus_backend, "_request", return_value=None):
+                resultado = focus_backend.cancelar(mock_nota, mock_tenant, "motivo")
+        assert resultado.sucesso is False
+
+
+@pytest.mark.django_db
+class TestFocusNFeMapper:
+    """Tests for _nota_to_focus_json mapper."""
+
+    def test_nota_to_focus_json_basic(self, focus_backend, mock_nota, mock_tenant):
+        result = focus_backend._nota_to_focus_json(mock_nota, mock_tenant)
+        assert "prestador" in result
+        assert "servico" in result
+        assert "data_emissao" in result
+
+    def test_nota_to_focus_json_with_cliente(self, focus_backend, mock_nota, mock_tenant):
+        from caixa_nfse.tests.factories import ClienteFactory
+
+        cliente = ClienteFactory(tenant=mock_tenant)
+        mock_nota.cliente = cliente
+        result = focus_backend._nota_to_focus_json(mock_nota, mock_tenant)
+        assert "tomador" in result
+        assert result["tomador"]["cpf_cnpj"] == cliente.cpf_cnpj
+
+    def test_nota_to_focus_json_without_cliente(self, focus_backend, mock_tenant):
+        nota = MagicMock()
+        nota.cliente = None
+        nota.data_emissao = None
+        nota.discriminacao = "Serviço"
+        nota.aliquota_iss = 5
+        nota.valor_servicos = 100
+        nota.iss_retido = False
+        nota.servico = None
+        result = focus_backend._nota_to_focus_json(nota, mock_tenant)
+        assert result["tomador"] == {}
+
+    def test_nota_to_focus_json_error_messages_list(
+        self, focus_backend, mock_nota, mock_tenant, mock_config
+    ):
+        """Error response with erros list as strings (not dicts)."""
+        response_data = {"erros": ["Erro genérico 1", "Erro genérico 2"]}
+        with patch.object(focus_backend, "_get_config", return_value=mock_config):
+            with patch.object(
+                focus_backend, "_request", return_value=_mock_response(400, response_data)
+            ):
+                resultado = focus_backend.emitir(mock_nota, mock_tenant)
+        assert resultado.sucesso is False
+        assert "Erro genérico 1" in resultado.mensagem
+
+    def test_emitir_error_no_erros_field(self, focus_backend, mock_nota, mock_tenant, mock_config):
+        """HTTP error without erros field falls back to mensagem or status code."""
+        response_data = {"mensagem": "Serviço indisponível"}
+        with patch.object(focus_backend, "_get_config", return_value=mock_config):
+            with patch.object(
+                focus_backend, "_request", return_value=_mock_response(500, response_data)
+            ):
+                resultado = focus_backend.emitir(mock_nota, mock_tenant)
+        assert resultado.sucesso is False
+        assert "Serviço indisponível" in resultado.mensagem
